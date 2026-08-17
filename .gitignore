@@ -1,0 +1,43 @@
+# Gradle and Android build output
+.gradle/
+**/build/
+local.properties
+
+# Android Studio and IntelliJ
+.idea/
+*.iml
+
+# Kotlin and native build caches
+.kotlin/
+.cxx/
+.externalNativeBuild/
+
+# Generated packages and local validation artifacts
+*.apk
+*.aab
+*.ap_
+*.apks
+*.aar
+*.idsig
+/artifacts/
+/captures/
+
+# Local environment, logs, and diagnostics
+.env
+.env.*
+!.env.example
+*.log
+*.hprof
+
+# Signing material must never be committed
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+key.properties
+keystore.properties
+
+# Local platform files
+.DS_Store
+Thumbs.db

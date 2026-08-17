@@ -1,0 +1,346 @@
+# Wear OS Watch Face — Project Context
+
+OnePlus Watch 3 watch-face development workspace. The first deliverable is a
+declarative Watch Face Format (WFF) watch face, not a general Wear OS app.
+
+## Product and format decisions
+
+- Start with **Watch Face Format v2** for Wear OS 5 / API 34 compatibility.
+- Keep the watch-face bundle resource-only: `android:hasCode="false"` and
+  `com.google.wear.watchface.format.version=2` in the manifest.
+- Use the lowest WFF version that supports the design. WFF v3 requires Wear OS
+  5.1 / API 35; WFF v4 requires Wear OS 6 / API 36.
+- Do not use the legacy `androidx.wear.watchface` renderer unless a requirement
+  cannot be expressed in WFF and the user explicitly changes direction.
+- A WFF watch face and any future Wear/phone application logic must be separate
+  app bundles. Do not add Kotlin/Java code to the watch-face bundle.
+- Initial build targets: `compileSdk=35`, `targetSdk=35`, `minSdk=34`.
+- Typography starts from the CC0 Pixel Operator family. Calibrate its
+  monospaced, half-bold, and 8-series variants before deciding between direct
+  TTF rendering and deterministic derived bitmap glyphs.
+- The provisional raster hierarchy uses one shared 5-unit lattice with two
+  exact integer tiers: 5×5 pitch / 4×4 lit pixels for compact information and
+  10×10 pitch / 8×8 lit pixels for time. Do not introduce an independently
+  aligned grid or third pixel scale. The mathematical fit uses a conservative
+  210-unit circular safe radius but still requires renderer and physical-watch
+  calibration.
+- The first interactive composition omits seconds and uses a static colon. Its
+  fixed information set is time, date, current weather, step count, and battery;
+  weather sits above the date and uses the only persistent indexed-color sprite
+  plane, with at most four flat visible palette entries. All other information
+  remains white; ambient mode reduces this to monochrome time and an optional
+  compact date.
+- Power Saver Mode support is not required for the custom face. On the physical
+  watch, entering Power Saver with an unsupported third-party face displays a
+  warning and substitutes a basic OnePlus face; that fallback is acceptable.
+
+## Devices and API targets
+
+| Device | Intended target | API | Status |
+|---|---|---:|---|
+| OnePlus Watch 3 (`OPWWE251`) | Wear OS 5 / Android 14 | 34 | Paired over Wi-Fi ADB; live-verified 2026-08-15 |
+| OnePlus 13 (`CPH2655`) | Android 16 | 36 | Pairing verified 2026-08-15; Wireless debugging currently off; optional target |
+
+Wear OS 5 maps to API 34, not API 35. The physical watch confirms Android 14 /
+API 34. The physical OnePlus 13 confirms Android 16 / API 36. See
+`docs/device-setup.md` for both devices' build identities, pairing state, and
+reconnection procedures.
+
+## Environment (EndeavourOS / Arch)
+
+Live-checked 2026-08-15:
+
+- Android Studio: `/opt/android-studio` (2026.1.3 build, bundled JBR 25).
+  Android Studio is useful for WFF-aware XML validation and its watch-face run
+  configuration, but ordinary builds should also work from the CLI.
+- Shell Java is OpenJDK 26. Prefer Android Studio's JBR 25 for Gradle builds
+  until the generated Gradle/AGP combination is proven compatible with Java 26.
+- SDK root: `~/Android/Sdk` (`ANDROID_HOME`, added to `PATH` by `~/.zshenv`).
+  - cmdline-tools 19.0
+  - platform-tools 37.0.1
+  - build-tools 35.0.0 and 36.0.0
+  - emulator 37.1.11
+  - platforms android-35 and android-36
+  - Wear image `system-images;android-34;android-wear;x86_64` (Wear OS 5)
+  - Phone image `system-images;android-36;google_apis_playstore;x86_64`
+  - Retired generic image `system-images;android-35;google_apis;x86_64`
+- There is no global Gradle installation. Commit and use the project's Gradle
+  wrapper.
+- `/dev/kvm` is available for accelerated emulation.
+
+`~/.zshenv` is chezmoi-managed. Edit
+`~/.local/share/chezmoi/dot_zshenv`, then run `rtk chezmoi apply`; never append
+directly to `~/.zshenv`.
+
+## Emulator
+
+The primary pixel-fidelity AVD is `wear5-opw3`:
+
+- Wear OS 5 / Android 14 / API 34
+- `system-images;android-34;android-wear;x86_64`
+- Official `wearos_large_round` hardware profile
+- 466×466, 320 dpi, circular runtime display
+
+It was created as a separate AVD without replacing any existing target. Its
+generated profile defaults are preserved; only `hw.lcd.width` and
+`hw.lcd.height` in `~/.android/avd/wear5-opw3.avd/config.ini` are set to `466`.
+Use a centered 450×450 active WFF grid on a 466×466 canvas when needed, subject
+to renderer calibration. Always perform final edge-placement and complication
+checks on the physical watch.
+
+Cold-boot it headlessly with SwiftShader:
+
+```sh
+rtk emulator -avd wear5-opw3 -no-window -no-audio -no-boot-anim \
+  -gpu swiftshader_indirect -no-metrics -no-snapshot
+```
+
+Resolve the dynamic runtime serial and continue only after proving that it is
+`wear5-opw3`; serial assignment can change whenever another AVD is attached:
+
+```sh
+rtk adb devices -l
+rtk adb -s <wear-opw3-serial> shell getprop ro.boot.qemu.avd_name
+```
+
+Sanity-check the same explicitly targeted device before relying on it:
+
+```sh
+rtk adb -s <wear-opw3-serial> shell getprop ro.boot.qemu.avd_name
+rtk adb -s <wear-opw3-serial> shell getprop ro.build.version.release
+rtk adb -s <wear-opw3-serial> shell getprop ro.build.version.sdk
+rtk adb -s <wear-opw3-serial> shell getprop ro.product.model
+rtk adb -s <wear-opw3-serial> shell getprop ro.boot.emulator.circular
+rtk adb -s <wear-opw3-serial> shell wm size
+rtk adb -s <wear-opw3-serial> shell wm density
+rtk adb -s <wear-opw3-serial> shell pm list features
+```
+
+Expected evidence is model `sdk_gwear_x86_64`, Android `14`, SDK `34`, circular
+value `1`, physical size `466x466`, density `320`, and features
+`android.hardware.type.watch` and `com.google.clockwork.watchface.runtime`.
+The corresponding runtime package is `com.google.wear.watchface.runtime`.
+Before stopping, prove the identity again and stop only that verified target:
+
+```sh
+rtk adb -s <wear-opw3-serial> shell getprop ro.boot.qemu.avd_name
+rtk adb -s <wear-opw3-serial> emu kill
+```
+
+The official `wear5` AVD remains unchanged as the secondary portability and
+scaling reference:
+
+- Wear OS 5 / Android 14 / API 34
+- `system-images;android-34;android-wear;x86_64`
+- `wearos_large_round` hardware profile
+- 454×454, 320 dpi, circular runtime display
+
+Use `wear5` for the official 454×454 WFF scaling reference; use
+`wear5-opw3` for pixel-fidelity checks against the physical 466×466 watch.
+Resolve and prove its dynamic serial before any targeted command:
+
+```sh
+rtk emulator -avd wear5 -no-window -no-audio -no-boot-anim \
+  -gpu swiftshader_indirect -no-metrics -no-snapshot
+rtk adb devices -l
+rtk adb -s <wear-emulator-serial> shell getprop ro.boot.qemu.avd_name
+rtk adb -s <wear-emulator-serial> shell wm size
+rtk adb -s <wear-emulator-serial> shell wm density
+rtk adb -s <wear-emulator-serial> shell getprop ro.boot.emulator.circular
+rtk adb -s <wear-emulator-serial> shell pm list features
+rtk adb -s <wear-emulator-serial> shell getprop ro.boot.qemu.avd_name
+rtk adb -s <wear-emulator-serial> emu kill
+```
+
+The expected secondary evidence is model `sdk_gwear_x86_64`, SDK `34`, circular
+value `1`, physical size `454x454`, density `320`, and the same watch/WFF
+runtime features. Do not change the official `wear5` dimensions.
+
+The validated phone AVD is `phone16`:
+
+- Android 16 / API 36, Google Play x86_64 system image
+- Official `pixel_9_pro_xl` hardware profile
+- Runtime display aligned to 1440×3168 at 640 dpi to match the physical phone
+
+Launch it headlessly from a cold boot:
+
+```sh
+rtk emulator -avd phone16 -no-window -no-audio -no-boot-anim \
+  -gpu swiftshader_indirect -no-metrics -no-snapshot
+```
+
+Resolve the runtime serial and prove that it is `phone16` before stopping or
+sanity-checking it:
+
+```sh
+rtk adb devices -l
+rtk adb -s <phone-emulator-serial> shell getprop ro.boot.qemu.avd_name
+rtk adb -s <phone-emulator-serial> shell getprop ro.build.version.sdk
+rtk adb -s <phone-emulator-serial> shell wm size
+rtk adb -s <phone-emulator-serial> shell wm density
+rtk adb -s <phone-emulator-serial> shell pm list features
+rtk adb -s <phone-emulator-serial> emu kill
+```
+
+Expected phone evidence is AVD `phone16`, SDK `36`, 1440×3168 at 640 dpi,
+`android.hardware.type.watch` absent, and Google Play services plus Play Store
+packages present. With either emulator and either physical device attached,
+always target every ADB command explicitly with `rtk adb -s <serial> ...`.
+
+`wear5-generic-android15-backup-20260814` is a retired backup of the original
+misconfigured AVD. It uses a generic Android 15 Google APIs image, is not a Wear
+OS target, and must not be used for watch-face deployment or validation.
+
+## Watch-face structure and workflow
+
+The scaffold should follow the official WFF sample structure:
+
+- `AndroidManifest.xml` declares a resource-only WFF v2 application.
+- `res/raw/watchface.xml` contains the face definition.
+- `res/xml/watch_face_info.xml` declares preview/editability metadata.
+- Fonts, images, strings, and previews live in their normal `res/` directories.
+- Start with a 450×450 active WFF grid; a 466×466 canvas with that grid centered
+  is also supported on the primary emulator, subject to renderer calibration.
+
+Build with the wrapper and JBR 25:
+
+```sh
+JAVA_HOME=/opt/android-studio/jbr rtk proxy ./gradlew assembleDebug
+```
+
+For a Wear emulator deployment, resolve the runtime serial and prove the exact
+chosen AVD name (`wear5-opw3` for pixel fidelity or the secondary `wear5`)
+before installing. Installation alone does not guarantee that the face becomes
+active; Android Studio's WFF run configuration deploys and selects it.
+For local debug builds, the official codelab's debug surface also works:
+
+```sh
+rtk adb devices -l
+rtk adb -s <wear-emulator-serial> shell getprop ro.boot.qemu.avd_name
+rtk adb -s <wear-emulator-serial> install -r <apk>
+rtk adb -s <wear-emulator-serial> shell am broadcast \
+  -a com.google.android.wearable.app.DEBUG_SURFACE \
+  --es operation set-watchface --es watchFaceId <application-id>
+```
+
+Confirm the selected face visually after every deploy.
+
+Use both textual and visual checks:
+
+```sh
+rtk adb -s <wear-emulator-serial> shell uiautomator dump /sdcard/window.xml
+rtk adb -s <wear-emulator-serial> exec-out cat /sdcard/window.xml
+rtk adb -s <wear-emulator-serial> exec-out screencap -p > watchface.png
+```
+
+For renderer failures, first obtain the runtime PID with
+`rtk adb -s <serial> shell pidof -s com.google.wear.watchface.runtime`, then
+inspect that PID with `rtk adb -s <serial> logcat --pid <PID>`.
+
+Before publishing, run the WFF XML validator and memory-footprint checks in
+addition to the normal Gradle build and lint gates. Test interactive, ambient,
+12/24-hour, complication, and round-edge behavior on the emulator, then repeat
+on the physical watch.
+
+## Physical watch
+
+The OnePlus Watch 3 was paired successfully on 2026-08-15. Live identity:
+
+- Product/model/device: `OPWWE251`
+- Android 14 / API 34
+- Display: 466×466, 320 dpi, circular, 60 Hz
+- Userspace ABI: `armeabi-v7a,armeabi`
+- Build: `AW2A.240903.001.A3.OPWWE251_11_A.162.260526`
+- Security patch: 2026-05-01
+- Features: `android.hardware.type.watch` and
+  `com.google.clockwork.watchface.runtime`
+
+Wireless ADB ports are ephemeral. With Wireless debugging enabled and both
+machines on the same LAN, the paired watch normally reconnects through mDNS.
+Discover it with:
+
+```sh
+rtk adb mdns services
+rtk adb devices -l
+```
+
+If automatic reconnection fails, use the current `_adb-tls-connect._tcp`
+endpoint from mDNS with `rtk adb connect <ip>:<debug-port>`. Pair again only if
+the stored trust has been removed. Never record a pairing code.
+
+When any emulator and either physical device are attached, always target commands
+explicitly with `rtk adb -s <serial> ...`.
+
+### Pairing a new or reset watch
+
+On the watch: enable Developer Options by tapping Build Number seven times,
+then enable ADB debugging and Wireless debugging. Pair and connect with:
+
+```sh
+rtk adb pair <ip>:<pairing-port>
+rtk adb connect <ip>:<debug-port>
+```
+
+After connecting, verify the serial and API level before installing anything:
+
+```sh
+rtk adb devices -l
+rtk adb -s <serial> shell getprop ro.build.version.release
+rtk adb -s <serial> shell getprop ro.build.version.sdk
+```
+
+## Physical OnePlus 13
+
+The OnePlus 13 was paired and verified successfully on 2026-08-15. It is an
+optional future companion target and is not required for watch-face work. Live
+identity from that verification:
+
+- Product/model/device: `CPH2655` / `CPH2655` / `OP5D55L1`
+- Android 16 / API 36
+- Display: 1440×3168, 640 dpi
+- Userspace ABI: `arm64-v8a`
+- Build ID: `BP2A.250605.015`
+- Security patch: 2026-07-01
+- Companion feature: `android.software.companion_device_setup`
+
+Wireless debugging turned itself off after the initial validation and is
+currently intentionally left off. Its absence is not a project blocker.
+Wireless ADB ports are ephemeral; when phone work is required, re-enable
+Wireless debugging and discover the phone through mDNS:
+
+```sh
+rtk adb mdns services
+rtk adb devices -l
+```
+
+If automatic reconnection fails, use the current `_adb-tls-connect._tcp`
+endpoint from mDNS with `rtk adb connect <ip>:<debug-port>`. Pair again only if
+the stored trust was removed; never record a pairing code or transient endpoint.
+Before any install or other state-changing command, verify the current phone
+serial and target it explicitly:
+
+```sh
+rtk adb devices -l
+rtk adb -s <phone-serial> shell getprop ro.product.model
+rtk adb -s <phone-serial> shell getprop ro.build.version.sdk
+rtk adb -s <phone-serial> shell wm size
+rtk adb -s <phone-serial> shell wm density
+```
+
+## Next steps
+
+- [x] Initialize the Git monorepo and record module/package boundaries.
+- [ ] Choose the permanent watch-face application ID and display name.
+- [ ] Scaffold the standalone WFF v2 watch-face project.
+- [x] Draft the initial visual direction and fictional-hardware constraints.
+- [x] Select Pixel Operator as the starting typography family.
+- [x] Define the baseline information set without seconds.
+- [x] Record the provisional two-tier raster and conservative circular fit
+  budget.
+- [ ] Validate both raster tiers and the circular safe area with a calibration
+  face on the primary emulator and physical watch.
+- [ ] Review and approve the indexed-color interactive, localized-event, and
+  ambient direction.
+- [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.
+- [x] Pair the physical OnePlus 13 over Wi-Fi and validate the `phone16` API 36
+  Google Play emulator target.
