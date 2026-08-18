@@ -5,9 +5,10 @@
   <Metadata key="PREVIEW_TIME" value="10:08:00"/>
 
   <BitmapFonts>
-    <!-- 5x7 fine glyphs: 5-unit pitch, 4-unit lit square, 6-cell advance. -->
+    <!-- 5x7 fine glyphs: 5-unit pitch, 4-unit lit square, 30-unit ordinary
+         advance; the literal space is the shared 10-unit separator. -->
     <BitmapFont name="raster_fine">
-      <Character name=" " resource="raster_fine_space" width="30" height="35"/>
+      <Character name=" " resource="raster_fine_space" width="10" height="35"/>
       <Character name="+" resource="raster_fine_plus" width="30" height="35"/>
       <Character name="-" resource="raster_fine_minus" width="30" height="35"/>
       <Character name="%" resource="raster_fine_percent" width="30" height="35"/>
@@ -51,7 +52,7 @@
       <Character name="Z" resource="raster_fine_z" width="30" height="35"/>
     </BitmapFont>
 
-    <!-- 7x9 coarse digits plus a centered three-cell colon separator. -->
+    <!-- 7x9 coarse digits plus a three-cell colon separator with two-cell dots. -->
     <BitmapFont name="raster_coarse">
       <Character name="0" resource="raster_coarse_0" width="80" height="90"/>
       <Character name="1" resource="raster_coarse_1" width="80" height="90"/>
@@ -198,10 +199,10 @@
               <Expression name="steps_six_digits">[STEP_COUNT] &gt; 99999</Expression>
             </Expressions>
             <Compare expression="steps_six_digits">
-              <PartText x="90" y="0" width="270" height="35" name="steps_six_digit_value">
+              <PartText x="85" y="0" width="280" height="35" name="steps_six_digit_value">
                 <Text align="CENTER">
                   <BitmapFont family="raster_fine" size="35" color="#ffffffff">
-                    <Template><![CDATA[STP%d]]>
+                    <Template><![CDATA[STP %d]]>
                       <Parameter expression="clamp([STEP_COUNT], 0, 999999)"/>
                     </Template>
                   </BitmapFont>

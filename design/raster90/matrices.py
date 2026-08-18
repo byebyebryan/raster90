@@ -6,18 +6,20 @@ place.  Keeping these definitions as plain strings makes a glyph or sprite
 reviewable without an image editor.
 """
 
-# Fine information plane: five columns by seven rows.  Each source cell is a
-# 5x5 pitch with a 4x4 illuminated square.  The generator gives every glyph a
-# six-cell (30-unit) advance by adding one empty column to the image width.
+# Fine information plane: five columns by seven rows for ordinary glyphs.
+# Each source cell is a 5x5 pitch with a 4x4 illuminated square.  The generator
+# gives every ordinary glyph a six-cell (30-unit) advance by adding one empty
+# column to the image width.  The literal space is deliberately only two
+# source cells wide, making its shared separator token a 10-unit advance.
 FINE_GLYPHS = {
     " ": (
-        "00000",
-        "00000",
-        "00000",
-        "00000",
-        "00000",
-        "00000",
-        "00000",
+        "00",
+        "00",
+        "00",
+        "00",
+        "00",
+        "00",
+        "00",
     ),
     "+": (
         "00100",
@@ -393,7 +395,7 @@ FINE_GLYPHS = {
 # Coarse time plane: seven columns by nine rows.  Each source cell is a
 # 10x10 pitch with an 8x8 illuminated square.  Digits use one trailing blank
 # cell for a 10-unit inter-digit gap.  The colon owns a three-cell separator bay
-# with its dots centered between blank cells, so it cannot fuse with minutes.
+# with two-cell dots followed by one blank cell, so it cannot fuse with minutes.
 COARSE_DIGITS = {
     "0": (
         "0111110",
@@ -510,12 +512,12 @@ COARSE_DIGITS = {
 COARSE_COLON = (
     "000",
     "000",
-    "010",
-    "010",
+    "110",
+    "110",
     "000",
     "000",
-    "010",
-    "010",
+    "110",
+    "110",
     "000",
 )
 

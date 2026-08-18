@@ -47,8 +47,14 @@ ACTIVE_SIZE = 450
 
 FINE_PITCH = 5
 FINE_LIT = 4
+# Ordinary fine glyph matrices use five source cells and receive one trailing
+# blank cell for their 30-unit advance.  The literal space is authored as two
+# blank source cells and intentionally keeps that 10-unit width.
+FINE_GLYPH_CELLS = 5
 FINE_ADVANCE_CELLS = 6
+FINE_SPACE_ADVANCE_CELLS = 2
 FINE_WIDTH = FINE_ADVANCE_CELLS * FINE_PITCH
+FINE_SPACE_WIDTH = FINE_SPACE_ADVANCE_CELLS * FINE_PITCH
 FINE_HEIGHT = 7 * FINE_PITCH
 
 COARSE_PITCH = 10
@@ -238,12 +244,22 @@ def _paint_cells(
 
 
 def _fine_pixels(rows: Sequence[str]) -> PixelGrid:
-    _validate_rows("fine glyph", rows, 5, {"0", "1"})
+    source_width = len(rows[0]) if rows else 0
+    if source_width == FINE_GLYPH_CELLS:
+        output_width = FINE_ADVANCE_CELLS
+    elif source_width == FINE_SPACE_ADVANCE_CELLS:
+        output_width = FINE_SPACE_ADVANCE_CELLS
+    else:
+        raise ValueError(
+            "fine glyph: expected five source cells or the two-cell literal space, "
+            f"got {source_width}"
+        )
+    _validate_rows("fine glyph", rows, source_width, {"0", "1"}, expected_height=7)
     return _paint_cells(
         rows,
         pitch=FINE_PITCH,
         lit=FINE_LIT,
-        width_cells=FINE_ADVANCE_CELLS,
+        width_cells=output_width,
         color_for=lambda symbol: OPAQUE_WHITE,
     )
 
@@ -299,6 +315,24 @@ def _fine_name(character: str) -> str:
     return f"raster_fine_{names.get(character, character.lower())}"
 
 
+def _fine_advance(character: str) -> int:
+    """Return the authored fine-tier advance for one character."""
+
+    return FINE_SPACE_WIDTH if character == " " else FINE_WIDTH
+
+
+def _fine_string_width(text: str) -> int:
+    """Return a fine string's rendered width from its variable advances."""
+
+    return sum(_fine_advance(character) for character in text)
+
+
+def _centered_fine_x(text: str) -> int:
+    """Return the active-frame x offset for a centered fine string."""
+
+    return (ACTIVE_SIZE - _fine_string_width(text)) // 2
+
+
 def _coarse_name(character: str) -> str:
     return "raster_coarse_colon" if character == ":" else f"raster_coarse_{character}"
 
@@ -352,7 +386,8 @@ def _draw_matrix(
 
 
 def _draw_fine_string(pixels: PixelGrid, text: str, x: int, y: int) -> None:
-    for index, character in enumerate(text):
+    cursor = x
+    for character in text:
         try:
             rows = FINE_GLYPHS[character]
         except KeyError as error:
@@ -360,12 +395,13 @@ def _draw_fine_string(pixels: PixelGrid, text: str, x: int, y: int) -> None:
         _draw_matrix(
             pixels,
             rows,
-            x=x + index * FINE_WIDTH,
+            x=cursor,
             y=y,
             pitch=FINE_PITCH,
             lit=FINE_LIT,
             color_for=lambda symbol: OPAQUE_WHITE,
         )
+        cursor += _fine_advance(character)
 
 
 def _draw_coarse_time(pixels: PixelGrid, text: str, x: int, y: int) -> None:
@@ -415,12 +451,28 @@ def _preview_pixels() -> PixelGrid:
     _draw_fine_string(pixels, "21°C", active_x + 195, active_y + 65)
 
     # Date, time, steps, and battery bands follow the settled active-frame
-    # coordinates.  Fixed-width centering keeps the preview representative of
-    # the live face's alignment rather than of a one-off screenshot crop.
-    _draw_fine_string(pixels, "SAT 15 AUG", active_x + 75, active_y + 125)
+    # coordinates.  Centering from the authored advances keeps the preview
+    # representative of the live face's alignment rather than of a one-off
+    # screenshot crop.
+    _draw_fine_string(
+        pixels,
+        "SAT 15 AUG",
+        active_x + _centered_fine_x("SAT 15 AUG"),
+        active_y + 125,
+    )
     _draw_coarse_time(pixels, "10:08", active_x + 50, active_y + 180)
-    _draw_fine_string(pixels, "STP 03642", active_x + 90, active_y + 290)
-    _draw_fine_string(pixels, "BAT 82%", active_x + 120, active_y + 345)
+    _draw_fine_string(
+        pixels,
+        "STP 03642",
+        active_x + _centered_fine_x("STP 03642"),
+        active_y + 290,
+    )
+    _draw_fine_string(
+        pixels,
+        "BAT 82%",
+        active_x + _centered_fine_x("BAT 82%"),
+        active_y + 345,
+    )
     return pixels
 
 
@@ -459,7 +511,10 @@ def _check_palette(name: str, width: int, height: int, pixels: PixelGrid) -> Non
 
     expected_size = {
         "preview": (CANVAS, CANVAS),
-        "fine": (FINE_WIDTH, FINE_HEIGHT),
+        "fine": (
+            FINE_SPACE_WIDTH if name.endswith("space.png") else FINE_WIDTH,
+            FINE_HEIGHT,
+        ),
         "coarse": (COARSE_COLON_WIDTH if name.endswith("colon.png") else COARSE_DIGIT_WIDTH, COARSE_HEIGHT),
         "weather": (WEATHER_SIZE, WEATHER_SIZE),
         "stale": (2 * FINE_PITCH, 2 * FINE_PITCH),

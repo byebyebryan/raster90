@@ -32,6 +32,19 @@ general Wear OS app.
   aligned grid or third pixel scale. The mathematical fit uses a conservative
   210-unit circular safe radius but still requires renderer and physical-watch
   calibration.
+- Ordinary fine glyphs retain 30-unit advances; the literal space is a shared
+  10-unit fine-tier separator used by weather fallback, date, steps, and
+  battery formatting.
+- Pixelarticons is visual research only for the current design pass. Do not add
+  it as a dependency, vendor its SVGs, or mechanically trace/downsample them.
+  Raster 90 icons remain independently authored, project-owned matrices unless
+  a later explicit decision pins and licenses selected upstream assets.
+- Icon canvas size does not introduce another pixel tier: 8×8 utility icons,
+  12×12 feature sprites, and any exceptional 16×16 scene all retain the shared
+  5-unit fine pitch. Use 8×8 for persistent calendar/steps/battery semantics;
+  prefer one 12×12 weather/event feature when revised geometry permits; reserve
+  16×16 for a transient scene that replaces content. The indexed-color plane
+  remains capped at 12×12.
 - The V1 interactive composition omits seconds and uses a static colon. Its
   fixed information set is time, date, current weather, step count, and battery;
   weather sits above the date and uses the only persistent indexed-color sprite
@@ -39,8 +52,10 @@ general Wear OS app.
   remains white; ambient mode reduces this to monochrome time only.
 - V1 row boxes use a fixed 20-unit vertical gap at active-frame bands 65–105,
   125–160, 180–270, 290–325, and 345–380. The time is vertically centered and
-  uses one 350-unit `TimeText`; its 30-unit colon resource centers the dots
-  between blank coarse cells. Keep preview and runtime coordinates identical.
+  uses one 350-unit `TimeText`; its 30-unit colon resource uses two lit coarse
+  cells followed by a blank; the preceding digit's trailing blank supplies the
+  leading separation and the colon's trailing blank supplies the following
+  separation. Keep preview and runtime coordinates identical.
 - Power Saver Mode support is not required for the custom face. On the physical
   watch, entering Power Saver with an unsupported third-party face displays a
   warning and substitutes a basic OnePlus face; that fallback is acceptable.
@@ -381,6 +396,10 @@ rtk adb -s <phone-serial> shell wm density
   authoritative for AMOLED appearance, bezel, AOD, wrist-distance, and battery.
 - [ ] Live-test available and stale weather states with real location/weather
   data; emulator testing currently proves the truthful `WX --` fallback.
+- [ ] Produce actual-size icon studies comparing an all-8×8 treatment with one
+  12×12 weather/event feature plus 8×8 calendar, steps, and battery utilities.
+- [ ] Recalculate the row bands and circular fit for the selected icon-led
+  composition before replacing the text-heavy V1 runtime assets.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.

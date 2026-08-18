@@ -2,7 +2,7 @@
 
 Live verification record for the physical OnePlus 13, physical OnePlus Watch 3,
 and local phone and Wear OS emulators. Physical devices were last checked
-2026-08-15; Raster 90 V1 emulator rendering was checked 2026-08-17.
+2026-08-15; Raster 90 typography rendering was checked 2026-08-18.
 
 ## Physical OnePlus 13
 
@@ -403,6 +403,53 @@ Power Saver fallback, or OEM watch-face picker. Those require the physical
 watch.
 
 ### End-to-end WFF v2 validation
+
+#### Raster 90 typography refinement — 2026-08-18
+
+Freshly validated the consistent-separator and coarse-colon refinement on both
+Wear OS 5 targets:
+
+- Ordinary fine glyphs retain 30-unit advances while the literal space is now
+  one shared 10-unit separator. Runtime and generated preview use it for
+  `WX --`, `MON 17 AUG`, `STP 00000`, `STP 123456`, and `BAT 100%`; their exact
+  row widths are 130, 260, 250, 280, and 220 units respectively.
+- The 30-unit colon keeps the complete time at 350 units but now renders each
+  dot as a 2×2 coarse-cell block. The preceding digit's trailing blank supplies
+  leading separation and the colon's trailing blank supplies following
+  separation, so its weight matches the digits without touching the minutes.
+- Deterministic regeneration changed only the preview, colon, and space images;
+  `--check` verified the complete 87-PNG surface. `xmllint` passed, and WFF
+  validator 1.7.0 accepted the face as format version 2.
+- A full rerun of `assembleDebug`, `assembleRelease`, and `lintDebug` passed
+  under JBR 25. Lint retained zero errors and the same 16 non-fatal warnings:
+  three documented version notices and 13 intentional duplicate bitmap aliases.
+- The official memory-footprint evaluator passed and reported 677,600 maximum
+  active bytes and 149,400 maximum ambient bytes.
+- `wear5-opw3` was identity-proven as Android 14 / API 34, circular 466×466 at
+  320 dpi. Its interactive render kept all compact rows centered and unclipped;
+  the colon had digit-consistent weight and balanced separation. Confirmed
+  Dozing state reduced the face to corrected coarse time only.
+- `wear5` was independently identity-proven as Android 14 / API 34, circular
+  454×454 at 320 dpi. Interactive and ambient renders preserved the same
+  hierarchy, spacing, colon separation, centering, and edge clearance after WFF
+  scaling.
+- Runtime logs contained no WFF parse, resource, expression, or fatal failure.
+  Both emulators reported weather-provider error code 4 because no usable
+  weather source was available; the face truthfully selected `WX --`.
+- Both emulators were stopped only after re-proving their AVD names. No physical
+  device was connected or modified.
+
+Local review artifacts are retained under the Git-ignored `outputs/` directory:
+
+- `raster90-typography-wear5-opw3-interactive-466.png`
+- `raster90-typography-wear5-opw3-ambient-466.png`
+- `raster90-typography-wear5-interactive-454.png`
+- `raster90-typography-wear5-ambient-454.png`
+- matching `raster90-typography-*-logcat.txt` files
+
+This checkpoint supersedes the V1 record below for current spacing, colon
+weight, memory, and emulator appearance. Live available/stale weather and the
+physical OnePlus Watch 3 remain separate open gates.
 
 #### Raster 90 V1 — 2026-08-17
 

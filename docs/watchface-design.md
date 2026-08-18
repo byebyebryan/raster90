@@ -221,6 +221,8 @@ Provisional glyph families:
 - 7×9 or similarly compact matrix on the coarse tier for the primary time.
 - Uppercase Latin letters, digits, colon, percent, degree and temperature-unit
   marks, basic punctuation, and a deliberately small set of symbols.
+- Ordinary fine glyphs advance 30 units; the literal space is a shared two-cell
+  (10-unit) separator used by every compact textual field.
 - One-pixel minimum spacing between glyphs within the selected tier.
 - Weather icons constrained to 8×8 or 12×12 fine pixels, covering every WFF
   weather condition, and judged at actual wrist distance.
@@ -229,6 +231,44 @@ Each glyph pixel resolves to exactly one pixel in its selected tier; it must
 not be smoothed into a conventional typeface. The source glyph matrices should
 be kept in a human-reviewable form so bitmap resources can be regenerated
 deterministically.
+
+### Icon source and canvas roles
+
+[Pixelarticons](https://github.com/halfmage/pixelarticons) is a visual-research
+reference, not a Raster 90 dependency or asset source. Its public/free subset
+and paid catalog have different distribution boundaries, and its nominal
+24×24 SVG canvas generally produces a much smaller, roughly 12×12 visual
+density through two-unit marks. For the current design pass:
+
+- do not add its package, vendor its SVGs, or mechanically trace or downsample
+  them;
+- use it to study how recognizable symbols are reduced to a sparse pixel
+  vocabulary; and
+- continue authoring Raster 90 icons independently as project-owned,
+  human-reviewable matrices. If direct reuse is proposed later, pin the exact
+  upstream revision and review the license of every selected asset first.
+
+Icon dimensions describe canvas extent on the existing fine lattice, not new
+pixel pitches:
+
+| Role | Matrix | WFF extent | Intended use |
+|---|---:|---:|---|
+| Utility icon | 8×8 | 40×40 units | Persistent calendar, steps, battery, and compact status semantics |
+| Feature sprite | 12×12 | 60×60 units | Expressive weather, a character, or the single indexed-color/event bay |
+| Scene graphic | 16×16 | 80×80 units | Exceptional transient scene that replaces other content rather than joining the resting stack |
+
+All three use the 5-unit fine pitch and 4×4 lit cell. More cells therefore make
+the artwork physically larger; do not squeeze a 12×12 or 16×16 matrix into a
+40×40 box by introducing a smaller pitch. The current fictional controller's
+indexed-color plane remains capped at 12×12, so a 16×16 scene is monochrome
+unless that contract is deliberately revised.
+
+Eight cells are enough for a semantic silhouette, while twelve allow weather
+and character art to show that the display is programmable. Sixteen cells are
+nearly as tall as the 90-unit time band and must not become a persistent peer
+of the clock. The implemented V1 weather row remains 8×8 because of its current
+height and extreme-temperature fit; adopting a persistent 12×12 feature sprite
+requires a new row layout and circular-safe-area calculation.
 
 ### Alternatives reviewed
 
@@ -282,11 +322,38 @@ V1 uses a centered stack rather than a simulated rectangular device casing:
   temperature remains white.
 - Temperature follows the user's unit and includes the degree mark.
 - Step counts through 99,999 use the fixed-width `STP 03642` treatment. Six
-  digits compact to `STP123456`; values above 999,999 clamp instead of clipping.
+  digits use the same narrow separator as `STP 123456`; values above 999,999
+  clamp instead of clipping.
 - The weather-icon region doubles as the visual event bay, but any transient
   sprite or color must return to the truthful current condition.
 - Top and bottom rows narrow as they approach the circular bezel.
 - Nothing important enters the eight-unit overscan region.
+
+### Icon-led revision direction
+
+V1 proves the bitmap typography, live data bindings, and ambient reduction, but
+its unavailable-weather state and `STP` / `BAT` labels leave the resting face
+too close to a text-only segmented watch. That composition is an implementation
+baseline, not the final visual-density target.
+
+The next interactive design pass should:
+
+- keep the large time as the dominant and most immediately legible element;
+- replace `WX`, `STP`, and `BAT` as far as practical with truthful semantic
+  sprites or state graphics rather than decorative symbols;
+- compare an all-8×8 treatment with the preferred mixed treatment of one 12×12
+  weather/event sprite plus 8×8 utility icons;
+- give unavailable weather a neutral unavailable/unknown graphic so the top
+  band does not collapse to plain `WX --` text;
+- consider a calendar page, walking figure or shoe, battery fill, and compact
+  progress cells, all independently authored in the Raster 90 vocabulary; and
+- reserve 16×16 work for a later transient scene that temporarily replaces a
+  region and never competes continuously with the time.
+
+Review both treatments at native 466×466 and scaled 454×454 size before
+changing runtime assets. Any selected 12×12 layout must replace the following
+V1 band measurements and fit table with newly calculated geometry rather than
+being inserted into the current row unchanged.
 
 ### V1 fit budget
 
@@ -299,24 +366,26 @@ is:
 usable width = 2 × sqrt(r² - (y - 225)²)
 ```
 
-The estimate assumes a six-fine-pixel fixed advance for 5×7 status glyphs and
-a 7×9 coarse time matrix. The chord is evaluated at the edge of each band
-farthest from the center.
+The estimate assumes a 30-unit ordinary fine-glyph advance (with the shared
+10-unit literal-space separator) for 5×7 status glyphs and a 7×9 coarse time
+matrix. The chord is evaluated at the edge of each band farthest from the
+center.
 
 | Region | V1 y band | Conservative content | Needed width | Safe chord | Spare |
 |---|---:|---|---:|---:|---:|
 | Weather | 65–105 | 8×8 icon + `-100°F` | 230 | 272.0 | 42.0 |
-| Date | 125–160 | `SAT 15 AUG` | 300 | 369.3 | 69.3 |
+| Date | 125–160 | `SAT 15 AUG` | 260 | 369.3 | 109.3 |
 | Time | 180–270 | `23:59` | 350 | 410.2 | 60.2 |
-| Steps | 290–325 | `STP123456` | 270 | 369.3 | 99.3 |
-| Battery | 345–380 | `BAT 100%` | 240 | 283.4 | 43.4 |
+| Steps | 290–325 | `STP 123456` | 280 | 369.3 | 89.3 |
+| Battery | 345–380 | `BAT 100%` | 220 | 283.4 | 63.4 |
 
 Every adjacent row box has an explicit 20-unit gap. The visible stack leaves
 65 units above weather and 70 below battery, while the 90-unit time box is
 centered exactly at active-frame `y=225`. The time width is four 80-unit digit
-advances plus a 30-unit colon separator. The separator resource centers its
-dots between one blank coarse cell on each side, preventing the colon from
-fusing with minute digits while retaining a single low-cost `TimeText`.
+advances plus a 30-unit colon separator. Its two lit coarse cells are followed
+by one blank cell; the preceding digit's trailing blank supplies the matching
+leading separation, preventing the colon from fusing with minute digits while
+retaining a single low-cost `TimeText`.
 
 This calculation exposes real constraints:
 
@@ -374,11 +443,13 @@ Ambient mode exposes the machine's base hardware:
 The result must remain below the Wear OS 15% illuminated-pixel limit throughout
 a full day and within the WFF ambient memory budget.
 
-As an intentionally pessimistic sanity check, fully illuminating all cells in
-four 7×9 coarse digit boxes plus the four-cell colon consumes 16,384 square
-units, about 10.3% of the centered 225-radius active circle's 159,043 square
-units. Real outlined glyphs are substantially lower. The official evaluator
-reports 120,608 maximum ambient bytes for V1.
+As an intentionally pessimistic full-digit-cell bound, four fully lit 7×9
+coarse digit matrices contribute `4 × 7 × 9 × 64 = 16,128` square units. The
+colon's two 2×2 dots contribute eight lit coarse cells, or `8 × 64 = 512`
+square units; together they consume 16,640 square units, about 10.5% of the
+centered 225-radius active circle's 159,043 square units. Real outlined glyphs
+are substantially lower. The official evaluator reports 149,400 maximum
+ambient bytes for the current typography revision.
 
 ## WFF v2 feasibility boundaries
 
