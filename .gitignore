@@ -19,8 +19,7 @@ local.properties
 *.apks
 *.aar
 *.idsig
-/artifacts/
-/captures/
+/outputs/
 
 # Local environment, logs, and diagnostics
 .env

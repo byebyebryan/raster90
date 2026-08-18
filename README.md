@@ -1,11 +1,20 @@
 # Wear OS
 
-Android monorepo for the OnePlus Watch 3 watch-face project and any directly
-related Wear OS or phone components.
+Android monorepo for watch faces, Wear OS applications, and directly related
+Android components. The first product is the **Raster 90** watch face for the
+OnePlus Watch 3.
 
-The first deliverable is a standalone, resource-only Watch Face Format v2
-watch face for Wear OS 5. The repository does not currently contain an Android
-project; environment and device validation were completed before scaffolding.
+Raster 90 is a standalone, resource-only Watch Face Format v2 watch face for
+Wear OS 5. V1 is a functional two-tier bitmap face with live time, date,
+weather, steps, and battery; ambient mode reduces it to time only. Its exact
+glyph and sprite resources are generated deterministically from reviewable
+cell matrices rather than rendered from a runtime TTF.
+
+The resting face is intentionally monochrome except for the small weather
+sprite. When emulator weather is unavailable it reports `WX --` without moving
+the time. The generated preview records the available-state composition with
+representative values; physical-device weather and wrist-distance validation
+remain separate gates.
 
 ## Current targets
 
@@ -19,16 +28,41 @@ project; environment and device validation were completed before scaffolding.
 
 This is one Git repository with separate Android application modules. Each
 application module must produce its own APK/AAB and use its own application ID.
-The planned `watchface` module must remain resource-only and cannot contain or
-depend on Kotlin/Java application logic.
+The existing `:watchfaces:raster90` module uses
+`io.github.byebyebryan.raster90.watchface`; it must remain resource-only and
+cannot contain or depend on Kotlin/Java application logic.
 
 Only modules with a concrete requirement will be created. See
-[Repository Layout](docs/repository-layout.md) for the planned structure and
+[Repository Layout](docs/repository-layout.md) for the repository structure and
 [Device Setup](docs/device-setup.md) for verified local targets. The
-pre-implementation visual and fictional-hardware contract is captured in
+  visual and fictional-hardware contract is captured in
 [Watch Face Design Direction](docs/watchface-design.md).
 Generated mood and hierarchy studies are catalogued separately under
 [Concept Artwork](design/concepts/README.md); they are not production WFF
 resources or geometry references.
 
 Operational instructions for coding agents are in [AGENTS.md](AGENTS.md).
+
+## Build
+
+Use Android Studio's bundled JBR with the committed Gradle wrapper:
+
+```sh
+JAVA_HOME=/opt/android-studio/jbr rtk proxy ./gradlew \
+  :watchfaces:raster90:assembleDebug \
+  :watchfaces:raster90:lintDebug
+```
+
+The debug APK is written to
+`watchfaces/raster90/build/outputs/apk/debug/raster90-debug.apk`. See
+[Device Setup](docs/device-setup.md) for explicit-target emulator deployment
+and the current validation record. Local screenshots, reports, and other
+reviewable generated artifacts belong in the Git-ignored root `outputs/`
+directory.
+
+Regenerate or verify the bitmap resources with:
+
+```sh
+rtk python3 -B tools/generate_raster90_assets.py
+rtk python3 -B tools/generate_raster90_assets.py --check
+```

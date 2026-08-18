@@ -1,7 +1,8 @@
-# Wear OS Watch Face — Project Context
+# Wear OS Monorepo — Project Context
 
-OnePlus Watch 3 watch-face development workspace. The first deliverable is a
-declarative Watch Face Format (WFF) watch face, not a general Wear OS app.
+Wear OS development workspace. The first deliverable is **Raster 90**, a
+declarative Watch Face Format (WFF) watch face for the OnePlus Watch 3, not a
+general Wear OS app.
 
 ## Product and format decisions
 
@@ -15,21 +16,31 @@ declarative Watch Face Format (WFF) watch face, not a general Wear OS app.
 - A WFF watch face and any future Wear/phone application logic must be separate
   app bundles. Do not add Kotlin/Java code to the watch-face bundle.
 - Initial build targets: `compileSdk=35`, `targetSdk=35`, `minSdk=34`.
-- Typography starts from the CC0 Pixel Operator family. Calibrate its
-  monospaced, half-bold, and 8-series variants before deciding between direct
-  TTF rendering and deterministic derived bitmap glyphs.
+- The public watch-face name is **Raster 90**. `RASTER/90` is an optional visual
+  treatment, not a different product name. The model number references the
+  provisional 90×90 fine raster but remains a product designation if physical
+  calibration changes the exact geometry.
+- The permanent watch-face application ID is
+  `io.github.byebyebryan.raster90.watchface`.
+- Typography starts from the CC0 Pixel Operator family, but V1 packages only
+  deterministic bitmap-font glyphs generated from project-owned matrices. The
+  four approved source TTFs and their license remain under `third_party/` as
+  design provenance, never under the module's `res/font`.
 - The provisional raster hierarchy uses one shared 5-unit lattice with two
   exact integer tiers: 5×5 pitch / 4×4 lit pixels for compact information and
   10×10 pitch / 8×8 lit pixels for time. Do not introduce an independently
   aligned grid or third pixel scale. The mathematical fit uses a conservative
   210-unit circular safe radius but still requires renderer and physical-watch
   calibration.
-- The first interactive composition omits seconds and uses a static colon. Its
+- The V1 interactive composition omits seconds and uses a static colon. Its
   fixed information set is time, date, current weather, step count, and battery;
   weather sits above the date and uses the only persistent indexed-color sprite
   plane, with at most four flat visible palette entries. All other information
-  remains white; ambient mode reduces this to monochrome time and an optional
-  compact date.
+  remains white; ambient mode reduces this to monochrome time only.
+- V1 row boxes use a fixed 20-unit vertical gap at active-frame bands 65–105,
+  125–160, 180–270, 290–325, and 345–380. The time is vertically centered and
+  uses one 350-unit `TimeText`; its 30-unit colon resource centers the dots
+  between blank coarse cells. Keep preview and runtime coordinates identical.
 - Power Saver Mode support is not required for the custom face. On the physical
   watch, entering Power Saver with an unsupported third-party face displays a
   warning and substitutes a basic OnePlus face; that fallback is acceptable.
@@ -193,19 +204,32 @@ OS target, and must not be used for watch-face deployment or validation.
 
 ## Watch-face structure and workflow
 
-The scaffold should follow the official WFF sample structure:
+The `:watchfaces:raster90` scaffold follows the official WFF sample structure:
 
 - `AndroidManifest.xml` declares a resource-only WFF v2 application.
 - `res/raw/watchface.xml` contains the face definition.
 - `res/xml/watch_face_info.xml` declares preview/editability metadata.
-- Fonts, images, strings, and previews live in their normal `res/` directories.
-- Start with a 450×450 active WFF grid; a 466×466 canvas with that grid centered
-  is also supported on the primary emulator, subject to renderer calibration.
+- Generated bitmap fonts, weather sprites, strings, and the picker preview live
+  in their normal `res/` directories. Source matrices live in
+  `design/raster90/`, outside the application module.
+- V1 uses a 466×466 WFF canvas with a centered 450×450 active grid. The official
+  454×454 target scales that coordinate space cleanly; the physical watch
+  remains authoritative.
 
 Build with the wrapper and JBR 25:
 
 ```sh
-JAVA_HOME=/opt/android-studio/jbr rtk proxy ./gradlew assembleDebug
+JAVA_HOME=/opt/android-studio/jbr rtk proxy ./gradlew \
+  :watchfaces:raster90:assembleDebug \
+  :watchfaces:raster90:lintDebug
+```
+
+Before building after any matrix or generator change, regenerate and verify the
+exact asset surface:
+
+```sh
+rtk python3 -B tools/generate_raster90_assets.py
+rtk python3 -B tools/generate_raster90_assets.py --check
 ```
 
 For a Wear emulator deployment, resolve the runtime serial and prove the exact
@@ -217,10 +241,12 @@ For local debug builds, the official codelab's debug surface also works:
 ```sh
 rtk adb devices -l
 rtk adb -s <wear-emulator-serial> shell getprop ro.boot.qemu.avd_name
-rtk adb -s <wear-emulator-serial> install -r <apk>
+rtk adb -s <wear-emulator-serial> install -r \
+  watchfaces/raster90/build/outputs/apk/debug/raster90-debug.apk
 rtk adb -s <wear-emulator-serial> shell am broadcast \
   -a com.google.android.wearable.app.DEBUG_SURFACE \
-  --es operation set-watchface --es watchFaceId <application-id>
+  --es operation set-watchface \
+  --es watchFaceId io.github.byebyebryan.raster90.watchface
 ```
 
 Confirm the selected face visually after every deploy.
@@ -228,10 +254,15 @@ Confirm the selected face visually after every deploy.
 Use both textual and visual checks:
 
 ```sh
+rtk mkdir -p outputs
 rtk adb -s <wear-emulator-serial> shell uiautomator dump /sdcard/window.xml
 rtk adb -s <wear-emulator-serial> exec-out cat /sdcard/window.xml
-rtk adb -s <wear-emulator-serial> exec-out screencap -p > watchface.png
+rtk adb -s <wear-emulator-serial> exec-out screencap -p > outputs/watchface.png
 ```
+
+Keep disposable but reviewable local artifacts under the Git-ignored root
+`outputs/` directory rather than `/tmp`. Use descriptive target-and-mode names
+when retaining multiple captures.
 
 For renderer failures, first obtain the runtime PID with
 `rtk adb -s <serial> shell pidof -s com.google.wear.watchface.runtime`, then
@@ -330,17 +361,28 @@ rtk adb -s <phone-serial> shell wm density
 ## Next steps
 
 - [x] Initialize the Git monorepo and record module/package boundaries.
-- [ ] Choose the permanent watch-face application ID and display name.
-- [ ] Scaffold the standalone WFF v2 watch-face project.
+- [x] Choose Raster 90 as the public watch-face name.
+- [x] Choose `io.github.byebyebryan.raster90.watchface` as the permanent
+  application ID.
+- [x] Scaffold and validate the standalone resource-only WFF v2 project.
 - [x] Draft the initial visual direction and fictional-hardware constraints.
 - [x] Select Pixel Operator as the starting typography family.
 - [x] Define the baseline information set without seconds.
 - [x] Record the provisional two-tier raster and conservative circular fit
   budget.
-- [ ] Validate both raster tiers and the circular safe area with a calibration
-  face on the primary emulator and physical watch.
-- [ ] Review and approve the indexed-color interactive, localized-event, and
-  ambient direction.
+- [x] Validate both raster tiers, Pixel Operator specimens, the circular safe
+  area, and ambient reduction on the primary 466×466 emulator.
+- [x] Generate exact bitmap-font/weather assets from reviewable matrices and
+  implement the functional V1 time, date, weather, steps, battery, and
+  time-only ambient composition.
+- [x] Validate V1 interactive and ambient rendering on both the native 466×466
+  and scaled 454×454 Wear OS 5 emulators.
+- [ ] Validate V1 on the physical watch; the physical watch remains
+  authoritative for AMOLED appearance, bezel, AOD, wrist-distance, and battery.
+- [ ] Live-test available and stale weather states with real location/weather
+  data; emulator testing currently proves the truthful `WX --` fallback.
+- [ ] Design post-V1 animation and rare color events separately from the stable
+  resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.
 - [x] Pair the physical OnePlus 13 over Wi-Fi and validate the `phone16` API 36
   Google Play emulator target.

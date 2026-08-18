@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+  <!-- WFF discovers these convention-named resources outside Android's normal
+       resource-reference graph. Keep the suppression limited to that surface. -->
+  <issue id="UnusedResources">
+    <ignore path="src/main/res/drawable-nodpi"/>
+    <ignore path="src/main/res/drawable-nodpi/preview.png"/>
+    <ignore path="src/main/res/raw/watchface.xml"/>
+    <ignore path="src/main/res/xml/watch_face_info.xml"/>
+  </issue>
+  <!-- This resource-only bundle has no launcher activity or application icon. -->
+  <issue id="MissingApplicationIcon">
+    <ignore path="src/main/AndroidManifest.xml"/>
+  </issue>
+</lint>

@@ -1,7 +1,8 @@
 # Device Setup and Verification
 
 Live verification record for the physical OnePlus 13, physical OnePlus Watch 3,
-and local phone and Wear OS emulators. Last checked 2026-08-15.
+and local phone and Wear OS emulators. Physical devices were last checked
+2026-08-15; Raster 90 V1 emulator rendering was checked 2026-08-17.
 
 ## Physical OnePlus 13
 
@@ -402,6 +403,89 @@ Power Saver fallback, or OEM watch-face picker. Those require the physical
 watch.
 
 ### End-to-end WFF v2 validation
+
+#### Raster 90 V1 — 2026-08-17
+
+Freshly validated the functional resource-only V1 on both Wear OS 5 targets:
+
+- `tools/generate_raster90_assets.py --check` verified the exact deterministic
+  surface of 87 PNGs. The generated picker preview shows partly-cloudy daylight,
+  `21°C`, `SAT 15 AUG`, `10:08`, `STP 03642`, and `BAT 82%` from the same source
+  matrices as the runtime bitmap fonts and weather sprites.
+- `xmllint` passed and WFF validator 1.7.0 accepted `watchface.xml` as format
+  version 2.
+- A clean `assembleDebug`, `assembleRelease`, and `lintDebug` passed under JBR
+  25. Lint reported zero errors and 16 non-fatal warnings: three documented
+  tool/SDK version-availability notices and 13 intentional duplicate glyph or
+  weather aliases in the generated asset set.
+- The official memory-footprint evaluator passed the 10 MB ambient / 100 MB
+  active gates. Its report measured 512,972 maximum active bytes and 120,608
+  maximum ambient bytes.
+- The primary runtime was identity-proven as `wear5-opw3`, Android 14 / API 34,
+  circular 466×466 at 320 dpi with the watch and WFF runtime features. The APK
+  installed and the Wear debug surface selected it successfully.
+- The 466×466 interactive capture showed live date/time, `STP 00000`,
+  `BAT 100%`, and the truthful `WX --` fallback with crisp square cells and no
+  clipping. A post-review spacing pass centered the time vertically, normalized
+  every adjacent row-box gap to 20 active-frame units, and widened the colon to
+  a centered three-cell separator so it does not fuse with minute digits. The
+  ambient capture showed only the corrected coarse time on black.
+- The secondary runtime was independently identity-proven as `wear5`, Android
+  14 / API 34, circular 454×454 at 320 dpi with the same features. Its
+  interactive and ambient captures remained crisp, centered, and unclipped
+  after WFF scaling; the colon and row rhythm remained visibly distinct.
+- Runtime logs contained no WFF parse, resource, expression, or fatal runtime
+  failure. Both emulators reported weather-provider error code 6 because they
+  had no usable weather source; that correctly selected `WX --`.
+- Both emulators were stopped only after re-proving their AVD names. No physical
+  device was connected or modified.
+
+Local review artifacts are retained under the Git-ignored `outputs/` directory:
+
+- `raster90-v1-wear5-opw3-interactive-466.png`
+- `raster90-v1-wear5-opw3-ambient-466.png`
+- `raster90-v1-wear5-interactive-454.png`
+- `raster90-v1-wear5-ambient-454.png`
+- matching `raster90-v1-*-logcat.txt` files
+
+This proves V1's live time/date/step/battery bindings, unavailable-weather
+branch, time-only ambient mode, and both emulator geometries. The generated
+preview plus validator prove the available-state resource composition, but live
+available/stale weather, Celsius/Fahrenheit switching, and all condition sprites
+still require a target with real location/weather data. The physical OnePlus
+Watch 3 remains authoritative for the final display and power judgment.
+
+#### Raster 90 calibration scaffold — 2026-08-17
+
+Freshly validated `:watchfaces:raster90` on the primary `wear5-opw3` target:
+
+- Live target identity: AVD `wear5-opw3`, Android 14 / API 34,
+  `sdk_gwear_x86_64`, circular display, 466×466 at 320 dpi, with
+  `com.google.clockwork.watchface.runtime` present.
+- Application ID `io.github.byebyebryan.raster90.watchface`; resource-only WFF
+  v2 APK with `minSdk=34`, `targetSdk=35`, and `compileSdk=35`.
+- `assembleDebug`, `assembleRelease`, and `lintDebug` passed. Lint reported zero
+  errors and three intentional version-availability warnings for the documented
+  Gradle, AGP, and compile-SDK compatibility pins.
+- Watch Face Format validator 1.7.0 accepted `watchface.xml` as valid WFF v2.
+- The official memory-footprint evaluator reported 72,984 maximum active bytes
+  and 19,020 maximum ambient bytes.
+- The APK installed and the Wear debug surface selected it successfully. A
+  native 466×466 capture showed crisp fine/coarse cell edges, live Pixel
+  Operator time, four font specimens, and the indexed palette. Doze mode hid
+  all diagnostics and retained only the monochrome time.
+- The system charging indicator occupied bottom-center bounds
+  `[215,422][251,464]`; final layouts must reserve or deliberately tolerate
+  that overlay region.
+- Runtime inspection found no WFF parsing, resource, or expression failures.
+  Package-replacement and emulator graphics warnings occurred during repeated
+  debug reinstalls but did not prevent rendering.
+
+This section records the historical calibration gate that preceded V1. The
+functional V1 record above supersedes it for current emulator rendering; only
+physical OnePlus Watch 3 validation remains open.
+
+#### Official sample baseline — 2026-08-15
 
 Validated 2026-08-15 using the official Android `wear-os-samples` `Flavors`
 watch face, which exercises WFF v2 and requires API 34:
