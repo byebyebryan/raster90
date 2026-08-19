@@ -5,7 +5,7 @@
   <Metadata key="PREVIEW_TIME" value="10:08:00"/>
 
   <BitmapFonts>
-    <!-- 5x7 compact glyphs on the one 3/2 source grid.  Ordinary glyphs use
+    <!-- 5x7 compact glyphs on the one solid 3x3 source grid.  Ordinary glyphs use
          six-cell (18-unit) advances; the literal space is two cells (6). -->
     <BitmapFont name="raster_fine">
       <Character name=" " resource="raster_fine_space" width="6" height="21"/>
@@ -52,7 +52,7 @@
       <Character name="Z" resource="raster_fine_z" width="18" height="21"/>
     </BitmapFont>
 
-    <!-- Expanded V1 silhouettes used only as a 3/2 calibration candidate:
+    <!-- Expanded V1 silhouettes used only as a solid-grid calibration candidate:
          four 26-cell digit boxes and a 10-cell colon make 342 units. -->
     <BitmapFont name="raster_time">
       <Character name="0" resource="raster_time_0" width="78" height="96"/>
@@ -115,7 +115,7 @@
       <Group x="0" y="0" width="450" height="450" name="interactive_information">
         <Variant mode="AMBIENT" target="alpha" value="0"/>
 
-        <!-- 45..93 active-frame band: 16x16 weather tile and two text lines. -->
+        <!-- 45..93 active-frame band: true16 weather tile and one centered value. -->
         <Group x="162" y="45" width="162" height="48" name="weather_region">
           <Condition>
             <Expressions>
@@ -150,12 +150,7 @@
                     </PartText>
                   </Default>
                 </Condition>
-                <PartText x="54" y="0" width="108" height="24" name="weather_label">
-                  <Text align="START">
-                    <BitmapFont family="raster_fine" size="21" color="#ffffffff">WX</BitmapFont>
-                  </Text>
-                </PartText>
-                <PartText x="54" y="24" width="108" height="24" name="weather_temperature">
+                <PartText x="54" y="13" width="108" height="21" name="weather_temperature">
                   <Text align="START">
                     <BitmapFont family="raster_fine" size="21" color="#ffffffff">
                       <Template><![CDATA[%d°%s]]>
@@ -182,12 +177,7 @@
                 <PartImage x="0" y="0" width="48" height="48" name="weather_unknown_icon">
                   <Image resource="raster_weather_day_00"/>
                 </PartImage>
-                <PartText x="54" y="0" width="36" height="24" name="weather_unavailable_label">
-                  <Text align="START">
-                    <BitmapFont family="raster_fine" size="21" color="#ffffffff">WX</BitmapFont>
-                  </Text>
-                </PartText>
-                <PartText x="54" y="24" width="36" height="24" name="weather_unavailable_value">
+                <PartText x="54" y="13" width="36" height="21" name="weather_unavailable_value">
                   <Text align="START">
                     <BitmapFont family="raster_fine" size="21" color="#ffffffff">--</BitmapFont>
                   </Text>
@@ -197,26 +187,14 @@
           </Condition>
         </Group>
 
-        <!-- 111..159 active-frame band: calendar tile and weekday/date lines. -->
-        <Group x="150" y="111" width="150" height="48" name="date_region">
-          <PartImage x="0" y="0" width="48" height="48" name="calendar_icon">
-            <Image resource="raster_icon_calendar"/>
-          </PartImage>
-          <PartText x="54" y="0" width="96" height="24" name="weekday">
+        <!-- 111..159 active-frame band: centered one-line date text. -->
+        <Group x="147" y="111" width="156" height="48" name="date_region">
+          <PartText x="0" y="13" width="156" height="21" name="date_value">
             <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE"/>
-            <Text align="START">
+            <Text align="CENTER">
               <BitmapFont family="raster_fine" size="21" color="#ffffffff">
-                <Template><![CDATA[%s]]>
+                <Template><![CDATA[%s %d %s]]>
                   <Parameter expression="[DAY_OF_WEEK] == 1 ? &quot;SUN&quot; : [DAY_OF_WEEK] == 2 ? &quot;MON&quot; : [DAY_OF_WEEK] == 3 ? &quot;TUE&quot; : [DAY_OF_WEEK] == 4 ? &quot;WED&quot; : [DAY_OF_WEEK] == 5 ? &quot;THU&quot; : [DAY_OF_WEEK] == 6 ? &quot;FRI&quot; : &quot;SAT&quot;"/>
-                </Template>
-              </BitmapFont>
-            </Text>
-          </PartText>
-          <PartText x="54" y="24" width="96" height="24" name="date_value">
-            <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE"/>
-            <Text align="START">
-              <BitmapFont family="raster_fine" size="21" color="#ffffffff">
-                <Template><![CDATA[%d %s]]>
                   <Parameter expression="[DAY]"/>
                   <Parameter expression="[MONTH_0_11] == 0 ? &quot;JAN&quot; : [MONTH_0_11] == 1 ? &quot;FEB&quot; : [MONTH_0_11] == 2 ? &quot;MAR&quot; : [MONTH_0_11] == 3 ? &quot;APR&quot; : [MONTH_0_11] == 4 ? &quot;MAY&quot; : [MONTH_0_11] == 5 ? &quot;JUN&quot; : [MONTH_0_11] == 6 ? &quot;JUL&quot; : [MONTH_0_11] == 7 ? &quot;AUG&quot; : [MONTH_0_11] == 8 ? &quot;SEP&quot; : [MONTH_0_11] == 9 ? &quot;OCT&quot; : [MONTH_0_11] == 10 ? &quot;NOV&quot; : &quot;DEC&quot;"/>
                 </Template>
@@ -225,22 +203,17 @@
           </PartText>
         </Group>
 
-        <!-- 291..339 active-frame band: walker tile and truthful step value. -->
+        <!-- 291..339 active-frame band: walker tile and centered step value. -->
         <Group x="153" y="291" width="162" height="48" name="steps_region">
           <PartImage x="0" y="0" width="48" height="48" name="steps_icon">
             <Image resource="raster_icon_steps"/>
           </PartImage>
-          <PartText x="54" y="0" width="108" height="24" name="steps_label">
-            <Text align="START">
-              <BitmapFont family="raster_fine" size="21" color="#ffffffff">STP</BitmapFont>
-            </Text>
-          </PartText>
           <Condition>
             <Expressions>
               <Expression name="steps_six_digits">[STEP_COUNT] &gt; 99999</Expression>
             </Expressions>
             <Compare expression="steps_six_digits">
-              <PartText x="54" y="24" width="108" height="24" name="steps_six_digit_value">
+              <PartText x="54" y="13" width="108" height="21" name="steps_six_digit_value">
                 <Text align="START">
                   <BitmapFont family="raster_fine" size="21" color="#ffffffff">
                     <Template><![CDATA[%d]]>
@@ -251,7 +224,7 @@
               </PartText>
             </Compare>
             <Default>
-              <PartText x="54" y="24" width="108" height="24" name="steps_padded_value">
+              <PartText x="54" y="13" width="108" height="21" name="steps_padded_value">
                 <Text align="START">
                   <BitmapFont family="raster_fine" size="21" color="#ffffffff">
                     <Template><![CDATA[%05d]]>
@@ -264,17 +237,12 @@
           </Condition>
         </Group>
 
-        <!-- 357..405 active-frame band: battery tile and bounded percentage. -->
+        <!-- 357..405 active-frame band: battery tile and centered percentage. -->
         <Group x="171" y="357" width="126" height="48" name="battery_region">
           <PartImage x="0" y="0" width="48" height="48" name="battery_icon">
             <Image resource="raster_icon_battery"/>
           </PartImage>
-          <PartText x="54" y="0" width="72" height="24" name="battery_label">
-            <Text align="START">
-              <BitmapFont family="raster_fine" size="21" color="#ffffffff">BAT</BitmapFont>
-            </Text>
-          </PartText>
-          <PartText x="54" y="24" width="72" height="24" name="battery_value">
+          <PartText x="54" y="13" width="72" height="21" name="battery_value">
             <Text align="START">
               <BitmapFont family="raster_fine" size="21" color="#ffffffff">
                 <Template><![CDATA[%d%%]]>

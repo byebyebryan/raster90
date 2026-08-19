@@ -42,7 +42,7 @@ from render_raster90_single_grid_study import (  # noqa: E402
     _text_width,
     encode_png,
 )
-from single_grid_study import ROW_BANDS as FACE_ROW_BANDS, STUDY_TEXT  # noqa: E402
+from single_grid_study import ROW_BANDS as FACE_ROW_BANDS  # noqa: E402
 
 
 OUTPUT_DIR_REL = Path("outputs/raster90/studies/icon-resolution")
@@ -68,6 +68,12 @@ ICON_LED_TEXT = {
     "date": "SAT 15 AUG",
     "steps": "03642",
     "battery": "82%",
+}
+TWO_LINE_STUDY_TEXT = {
+    "weather": ("WX", "21°C"),
+    "date": ("SAT", "15 AUG"),
+    "steps": ("STP", "03642"),
+    "battery": ("BAT", "82%"),
 }
 
 
@@ -265,7 +271,7 @@ def _draw_solid_information_row(
     source_size: int,
     row_bands: Mapping[str, tuple[int, int]],
 ) -> None:
-    first_line, second_line = STUDY_TEXT[name]
+    first_line, second_line = TWO_LINE_STUDY_TEXT[name]
     icon = (
         SIXTEEN_WEATHER_DAY[14]
         if name == "weather"

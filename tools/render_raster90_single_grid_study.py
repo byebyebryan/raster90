@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the deterministic Raster 90 3/2 single-grid design study.
+"""Render the deterministic Raster 90 solid single-grid design study.
 
 The study is intentionally separate from packaged WFF resources.  It renders
 the proposed 150x150 fictional framebuffer at native 466x466 and as a
@@ -23,14 +23,14 @@ from typing import Mapping, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "design" / "raster90"))
 
-from matrices import (  # noqa: E402
-    FINE_GLYPHS,
-    SINGLE_GRID_UTILITY_ICONS,
-    SINGLE_GRID_WEATHER_DAY,
-    SINGLE_GRID_WEATHER_NIGHT,
+from icon_resolution_studies import (  # noqa: E402
+    SIXTEEN_UTILITY_ICONS,
+    SIXTEEN_WEATHER_DAY,
+    SIXTEEN_WEATHER_NIGHT,
     WEATHER_CONDITIONS,
-    WEATHER_STALE,
+    STALE_MARKER,
 )
+from matrices import FINE_GLYPHS  # noqa: E402
 from single_grid_study import (  # noqa: E402
     ACTIVE_ORIGIN,
     ACTIVE_SIZE,
@@ -55,6 +55,9 @@ from single_grid_study import (  # noqa: E402
     validate_single_grid_study,
 )
 
+SINGLE_GRID_WEATHER_DAY = SIXTEEN_WEATHER_DAY
+SINGLE_GRID_WEATHER_NIGHT = SIXTEEN_WEATHER_NIGHT
+
 
 RGBA = tuple[int, int, int, int]
 PixelGrid = list[list[RGBA]]
@@ -66,6 +69,9 @@ ICON_SHEET_WIDTH = 1248
 ICON_SHEET_HEIGHT = 950
 ICON_SHEET_PITCH = PIXEL_PITCH * 2
 ICON_SHEET_LIT = PIXEL_LIT * 2
+# Keep the deterministic study at the same local compact-text coordinate as
+# the packaged WFF rows.
+COMPACT_ROW_TEXT_Y = 13
 
 
 def _png_chunk(kind: bytes, payload: bytes) -> bytes:
@@ -158,13 +164,23 @@ def _icon_color(name: str, symbol: str) -> RGBA:
 
 
 def _draw_information_row(pixels: PixelGrid, name: str) -> None:
-    first_line, second_line = STUDY_TEXT[name]
+    row_y = ACTIVE_ORIGIN[1] + ROW_BANDS[name][0] * PIXEL_PITCH
+    text = STUDY_TEXT[name]
+    text_width = _text_width(text)
+    if name == "date":
+        x = ACTIVE_ORIGIN[0] + (ACTIVE_SIZE - text_width) // 2
+        _draw_text(
+            pixels,
+            text,
+            x=x,
+            line_y=row_y + COMPACT_ROW_TEXT_Y - 1,
+        )
+        return
+
     icon_width = ICON_CELLS * PIXEL_PITCH
     gap = ICON_TEXT_GAP_CELLS * PIXEL_PITCH
-    text_width = max(_text_width(first_line), _text_width(second_line))
     total_width = icon_width + gap + text_width
     x = ACTIVE_ORIGIN[0] + (ACTIVE_SIZE - total_width) // 2
-    row_y = ACTIVE_ORIGIN[1] + ROW_BANDS[name][0] * PIXEL_PITCH
     _draw_matrix(
         pixels,
         ICONS[name],
@@ -173,12 +189,11 @@ def _draw_information_row(pixels: PixelGrid, name: str) -> None:
         color_for=lambda symbol: _icon_color(name, symbol),
     )
     text_x = x + icon_width + gap
-    _draw_text(pixels, first_line, x=text_x, line_y=row_y)
     _draw_text(
         pixels,
-        second_line,
+        text,
         x=text_x,
-        line_y=row_y + TEXT_LINE_CELLS * PIXEL_PITCH,
+        line_y=row_y + COMPACT_ROW_TEXT_Y - 1,
     )
 
 
@@ -244,12 +259,12 @@ def build_comparison_sheet() -> PixelGrid:
 
 
 def build_calibration_sheet() -> PixelGrid:
-    """Show representative 3/2 cells and content at actual physical size."""
+    """Show representative solid cells and content at actual physical size."""
 
     pixels = _blank(900, 350)
-    _draw_text(pixels, "3X2 PIXEL", x=24, line_y=18)
+    _draw_text(pixels, "3X3 PIXEL", x=24, line_y=18)
 
-    # Isolated cells, adjacent cells, and a checker expose the one-unit gutter.
+    # Isolated cells, adjacent cells, and a checker expose solid cell edges.
     calibration = (
         "1000100010001000",
         "0000000000000000",
@@ -267,10 +282,10 @@ def build_calibration_sheet() -> PixelGrid:
         color_for=lambda _symbol: WHITE,
     )
     _draw_text(pixels, "21°C SAT 15 AUG", x=180, line_y=48)
-    _draw_text(pixels, "STP 03642 BAT 82%", x=180, line_y=75)
+    _draw_text(pixels, "03642 82%", x=180, line_y=75)
 
     icon_x = 24
-    for name in ("weather", "date", "steps", "battery"):
+    for name in ("weather", "steps", "battery"):
         _draw_matrix(
             pixels,
             ICONS[name],
@@ -280,7 +295,7 @@ def build_calibration_sheet() -> PixelGrid:
         )
         icon_x += 72
 
-    # The time uses the exact proposed 3/2 source pixel, not a magnified tier.
+    # The time uses the exact proposed solid source pixel, not a magnified tier.
     time_x = 24
     time_y = 210
     for character in "10:08":
@@ -300,13 +315,15 @@ def build_current_icon_sheet() -> PixelGrid:
     """Render every icon matrix currently consumed by the packaged face."""
 
     pixels = _blank(ICON_SHEET_WIDTH, ICON_SHEET_HEIGHT)
-    _draw_text(pixels, "RASTER 90 CURRENT ICONS", x=24, line_y=18)
+    _draw_text(pixels, "RASTER 90 SELECTED ICONS", x=24, line_y=18)
     _draw_text(pixels, "EXACT MATRICES  2X REVIEW SCALE", x=24, line_y=48)
     _draw_text(pixels, "UTILITY", x=24, line_y=82)
 
     column_width = 300
     utility_y = 138
-    for column, (label, rows) in enumerate(SINGLE_GRID_UTILITY_ICONS.items()):
+    for column, (label, rows) in enumerate(
+        (name, SIXTEEN_UTILITY_ICONS[name]) for name in ("steps", "battery")
+    ):
         card_x = 24 + column * column_width
         _draw_text(pixels, label.upper(), x=card_x, line_y=108)
         _draw_matrix(
@@ -319,13 +336,13 @@ def build_current_icon_sheet() -> PixelGrid:
             color_for=lambda _symbol: WHITE,
         )
 
-    stale_x = 24 + 3 * column_width
-    _draw_text(pixels, "STALE 2X2", x=stale_x, line_y=108)
+    stale_x = 24 + 2 * column_width
+    _draw_text(pixels, "STALE MARKER", x=stale_x, line_y=108)
     # Preserve the marker's true size relative to a 16x16 icon tile.
-    stale_offset = (16 - len(WEATHER_STALE)) * ICON_SHEET_PITCH // 2
+    stale_offset = (16 - len(STALE_MARKER)) * ICON_SHEET_PITCH // 2
     _draw_matrix(
         pixels,
-        WEATHER_STALE,
+        STALE_MARKER,
         x=stale_x + stale_offset,
         y=utility_y + stale_offset,
         pitch=ICON_SHEET_PITCH,
@@ -347,8 +364,8 @@ def build_current_icon_sheet() -> PixelGrid:
         night_x = card_x + 164
         icon_y = card_y + 30
         for rows, x in (
-            (SINGLE_GRID_WEATHER_DAY[condition], day_x),
-            (SINGLE_GRID_WEATHER_NIGHT[condition], night_x),
+            (SIXTEEN_WEATHER_DAY[condition], day_x),
+            (SIXTEEN_WEATHER_NIGHT[condition], night_x),
         ):
             _draw_matrix(
                 pixels,
@@ -384,12 +401,15 @@ def _chord_at(active_y: int) -> float:
 
 def geometry_report() -> dict[str, object]:
     widths: dict[str, int] = {}
-    for name, lines in STUDY_TEXT.items():
-        widths[name] = (
-            ICON_CELLS * PIXEL_PITCH
-            + ICON_TEXT_GAP_CELLS * PIXEL_PITCH
-            + max(_text_width(line) for line in lines)
-        )
+    for name, text in STUDY_TEXT.items():
+        if name == "date":
+            widths[name] = _text_width(text)
+        else:
+            widths[name] = (
+                ICON_CELLS * PIXEL_PITCH
+                + ICON_TEXT_GAP_CELLS * PIXEL_PITCH
+                + _text_width(text)
+            )
     widths["time"] = (
         4 * TIME_DIGIT_CELLS + TIME_COLON_CELLS
     ) * PIXEL_PITCH
@@ -413,7 +433,7 @@ def geometry_report() -> dict[str, object]:
             "valid": margin >= 0,
         }
     return {
-        "study": "Raster 90 3/2 single-grid calibration",
+        "study": "Raster 90 solid single-grid runtime",
         "design_only": True,
         "canvas": [CANVAS, CANVAS],
         "active_origin": list(ACTIVE_ORIGIN),
@@ -421,6 +441,7 @@ def geometry_report() -> dict[str, object]:
         "source_framebuffer": [SOURCE_SIZE, SOURCE_SIZE],
         "pixel_pitch": PIXEL_PITCH,
         "pixel_lit": PIXEL_LIT,
+        "cell_fill": "solid",
         "icon_canvas": [ICON_CELLS, ICON_CELLS],
         "text_line_cells": TEXT_LINE_CELLS,
         "time_line_cells": TIME_LINE_CELLS,
@@ -434,11 +455,11 @@ def geometry_report() -> dict[str, object]:
 
 def geometry_text(report: Mapping[str, object]) -> str:
     lines = [
-        "Raster 90 3/2 single-grid calibration",
+        "Raster 90 solid single-grid runtime",
         "======================================",
-        "Design-only geometry; packaged V1 layout is unchanged.",
+        "Deterministic runtime geometry mirrored by this study renderer.",
         "466x466 canvas; 450x450 active frame at (8,8); 150x150 source cells.",
-        "Every source pixel has 3-unit pitch, 2x2 light, and a one-unit gutter.",
+        "Every source pixel has 3-unit pitch and solid 3x3 light with no gutter.",
         "Fixtures default to Celsius and use a closed degree ring.",
         "",
     ]
@@ -456,7 +477,7 @@ def geometry_text(report: Mapping[str, object]) -> str:
             "",
             f"All rows fit the conservative circle: {report['all_safe']}",
             "The time silhouette is an expanded V1 placeholder for pitch review, not final numeral art.",
-            "Utility strokes are native 16x16; utility shapes and integer-normalized weather remain provisional art.",
+            "Weather, steps, and battery are direct-authored true16 matrices; the calendar icon is not packaged.",
         ]
     )
     return "\n".join(lines) + "\n"

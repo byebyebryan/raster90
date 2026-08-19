@@ -1,10 +1,10 @@
-"""Raster 90 icon-resolution evidence and selected solid-grid candidates.
+"""Raster 90 icon-resolution evidence and selected solid-grid matrices.
 
 Direction A keeps genuinely 8x8 artwork and assumes solid contiguous pixels.
-Direction B is authored directly at 16x16 for the existing 3-pitch/2-lit
-fictional display. The approved next design uses Direction B's true 16x16
-matrices with solid 3x3 cells; none of these families is consumed by the
-packaged watch face yet.
+Direction B is authored directly at 16x16 for the earlier 3-pitch/2-lit
+fictional display. The selected runtime promotes the same true 16x16 matrices
+with solid 3x3 cells; this module remains their authoritative, reviewable
+source so the generator and design studies cannot drift.
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ from matrices import (
     WEATHER_DAY_RESOLUTION,
     WEATHER_NIGHT_RESOLUTION,
     WEATHER_SPRITES,
+    WEATHER_STALE,
 )
 
 
@@ -441,7 +442,7 @@ SIXTEEN_WEATHER_NIGHT: Final[Mapping[int, Matrix]] = {
     for condition, sprite_name in enumerate(WEATHER_NIGHT_RESOLUTION)
 }
 
-STALE_MARKER: Final[Matrix] = ("10", "01")
+STALE_MARKER: Final[Matrix] = WEATHER_STALE
 
 
 def _validate_matrix(name: str, rows: Sequence[str], size: int, symbols: set[str]) -> None:

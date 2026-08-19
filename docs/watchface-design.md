@@ -1,13 +1,12 @@
 # Raster 90 — Watch Face Design Direction
 
-Status: the packaged 3/2 single-grid runtime is implemented and live-validated
-on the 466×466 and 454×454 Wear OS 5 emulators. The approved next design keeps
-its 150×150 geometry but uses solid 3×3 cells, true 16×16 icons, icon-led
-single-row values, and centered date text without a calendar icon. That solid
-design is captured in deterministic mocks but is not packaged or
-emulator-validated yet. Its time numerals, physical-watch rendering, live
-available/stale weather, and any animation or transient color event remain
-open work.
+Status: the solid single-grid runtime is implemented and live-validated on the
+466×466 and 454×454 Wear OS 5 emulators. It uses one 150×150 framebuffer, solid
+3×3 cells, true 16×16 icons, icon-led single-row values, and centered date text
+without a calendar icon. Its unavailable-weather branch uses a neutral icon
+plus `--` on the same single-row baseline. Direct-authored time numerals,
+physical-watch rendering, live available/stale weather, and any animation or
+transient color event remain open work.
 
 ## Product identity
 
@@ -63,23 +62,11 @@ The packaged runtime places a centered 450×450 fictional framebuffer at `(8,
 physical / WFF canvas: 466×466
 active framebuffer:   450×450 at x=8, y=8
 source framebuffer:      150×150 pixels
-source pixel pitch:          3×3 units
-lit square:                  2×2 units
-gutter:                      1 unit right and below each lit square
-```
-
-The approved redesign preserves the canvas, active frame, source framebuffer,
-and 3-unit pitch while filling each source cell completely:
-
-```text
-physical / WFF canvas: 466×466
-active framebuffer:   450×450 at x=8, y=8
-source framebuffer:      150×150 pixels
 source pixel:                 3×3 solid units
 gutter:                       none
 ```
 
-Every element still uses that one physical source pixel. Hierarchy comes from
+Every element uses that one physical source pixel. Hierarchy comes from
 logical artwork size rather than another pixel tier: 5×7 compact text, true
 16×16 icons, and a 32-cell time box. The packaged high-resolution time expands
 the proven V1 silhouettes to validate pitch and fit; its final solid-grid
@@ -92,22 +79,24 @@ active-framebuffer coordinates, supplies a further 15-unit inset from the
 active circle. This is a conservative design margin, not a platform guarantee;
 the bezel and physical watch remain authoritative.
 
-### Runtime evidence and redesign gate
+### Runtime evidence and remaining gate
 
-The 2026-08-18 runtime pass proved crisp 2×2 lit squares and one-unit gutters at
-native 466×466, acceptable WFF scaling at 454×454, legible 5×7 compact text,
-uniform 16×16 tile geometry, and a detailed time treatment using the same
-physical pixels. The remaining gate is physical-watch wrist-distance, AMOLED,
-bezel, AOD, and low-brightness behavior. Icon recognizability and final time
-art remain design judgments rather than geometry blockers.
+The 2026-08-18 solid-grid runtime pass proved crisp solid 3×3 cells at native
+466×466, acceptable WFF scaling at 454×454, legible 5×7 compact text, direct
+true 16×16 tile geometry, centered/unclipped interactive rows, 12/24-hour time,
+and time-only ambient reduction. The remaining geometry gate is physical-watch
+wrist-distance, AMOLED, bezel, AOD, and low-brightness behavior. Icon
+recognizability and final time art remain design judgments rather than runtime
+geometry blockers.
 
-The subsequent deterministic comparisons selected solid 3×3 cells over both
+The preceding deterministic comparisons selected solid 3×3 cells over both
 2×2 solid cells and 3-pitch/2-lit dot-matrix cells. At native mock size, 2×2
 cells reduced a 16×16 icon to 32×32 and made the information stack too quiet;
 solid 3×3 cells retained the approved 48×48 icon scale while removing the
-dither-like one-third gutter. This is design evidence, not runtime evidence.
+dither-like one-third gutter. The new emulator captures promote that decision
+from design evidence to runtime evidence.
 
-Regenerate or byte-check the design-only specimens with:
+Regenerate or byte-check the runtime mirror and comparison specimens with:
 
 ```sh
 rtk python3 -B tools/render_raster90_single_grid_study.py
@@ -122,12 +111,13 @@ rtk python3 -B -m unittest \
 Runtime review PNGs and geometry reports remain under the ignored
 `outputs/raster90/studies/single-grid/` directory. Solid-grid icon sheets and
 full-face decision mocks remain under
-`outputs/raster90/studies/icon-resolution/`. Only the first directory currently
-corresponds to packaged WFF assets.
+`outputs/raster90/studies/icon-resolution/`. The single-grid runtime mirror and
+selected true 16×16 matrices correspond to packaged WFF assets; rejected icon
+comparisons remain design evidence only.
 
 The earlier two-tier V1 used a 90×90 5/4 fine raster and aligned 45×45 10/8
 coarse time tier. It is now historical implementation evidence; the packaged
-runtime uses the single 3/2 grid.
+runtime uses the single solid 3×3 grid.
 
 The historical calibration face established the raster before V1. It contained:
 
@@ -153,8 +143,8 @@ validation remains open.
 
 ## Fictional hardware contract
 
-Treat the selected design as though it runs on the following imaginary display
-controller. The packaged 3/2 runtime is an earlier implementation of this
+Treat the packaged design as though it runs on the following imaginary display
+controller. The historical 3/2 runtime was an earlier implementation of this
 fiction rather than the current visual target:
 
 - One 150×150 source framebuffer; every visible cell is one solid 3×3 square
@@ -319,8 +309,8 @@ small marker beside a dominant weather illustration. Transparent edge cells
 remain available for centering, animation registration, and condition-to-
 condition stability.
 
-The packaged runtime still exposes why this redesign is required: its weather
-art is integer-expanded from 8×8 and much of its utility geometry follows
+The historical 3/2 runtime exposed why this redesign was required: its weather
+art was integer-expanded from 8×8 and much of its utility geometry followed
 paired cells, so a nominal 16×16 canvas still carries roughly 8×8 effective
 detail. Fractional nearest-neighbour scaling is also forbidden because it gives
 opposing strokes different thicknesses. Canvas dimensions and effective art
@@ -334,11 +324,12 @@ walking figure, a flat battery terminal, and a weather stale marker shown in
 context. Subsequent full-face mocks selected 3×3 over 2×2 cells, one text row
 over two, removal of `WX`/`STP`/`BAT`, and finally removal of the calendar icon.
 
-The selected project-owned matrices remain in
-`design/raster90/icon_resolution_studies.py` until implementation deliberately
-promotes them into the packaged generator. A validator rejects 16×16 candidates
-that are merely duplicated 8×8 blocks. Opposing structural edges must retain
-balanced source-cell weight before whole-face WFF scaling is considered.
+The selected project-owned matrices in
+`design/raster90/icon_resolution_studies.py` are now consumed directly by the
+packaged generator so study, preview, and runtime art cannot drift. A validator
+rejects 16×16 candidates that are merely duplicated 8×8 blocks. Opposing
+structural edges must retain balanced source-cell weight before whole-face WFF
+scaling is considered.
 
 The implemented V1 8×8 weather sprites and the subsequent 8×8/12×12 studies are
 retained as evidence: they showed that the smaller grid could not express
@@ -378,9 +369,9 @@ information-dense in small regions, but black space is part of the design.
 
 ## Resting composition
 
-### Selected next composition
+### Packaged solid-grid composition
 
-The approved available-weather mock uses the following centered stack:
+The packaged available-weather layout uses the following centered stack:
 
 ```text
               [weather] 21°C
@@ -398,17 +389,17 @@ The approved available-weather mock uses the following centered stack:
   day-of-week data, not a field header.
 - Each ordinary value uses one 5×7 line vertically centered inside its existing
   16-cell band.
-- The selected mock retains the established row bands and time position to
+- The runtime retains the established row bands and time position to
   isolate the approved content changes. Weather/date spacing may receive a
   later explicit optical pass.
-- The available-state layout is selected. Header-free unavailable and stale
-  weather presentation must be resolved without hiding uncertainty or moving
-  the time.
+- The available-state layout is implemented. The unavailable branch keeps the
+  same row and time position while showing a neutral icon plus `--` on one
+  line. The stale marker is implemented but still lacks live-data validation.
 
-### Packaged runtime baseline
+### Historical 3/2 runtime baseline
 
-The current runtime uses a centered stack rather than a simulated rectangular
-device casing:
+The preceding 3/2 runtime used this centered stack rather than a simulated
+rectangular device casing:
 
 ```text
              [weather] WX
@@ -439,15 +430,14 @@ device casing:
 - Top and bottom rows narrow as they approach the circular bezel.
 - Nothing important enters the eight-unit overscan region.
 
-### Packaged single-grid composition
+### Historical 3/2 single-grid composition
 
 V1 proves the bitmap typography, live data bindings, and ambient reduction, but
 its unavailable-weather state and `STP` / `BAT` labels leave the resting face
 too close to a text-only segmented watch. That composition is an implementation
 baseline, not the final visual-density target.
 
-The implemented candidate uses an exact 1:2:4 logical rhythm on the single 3/2
-pixel grid:
+That candidate used an exact 1:2:4 logical rhythm on the single 3/2 pixel grid:
 
 ```text
 15 cells  top margin
@@ -465,16 +455,15 @@ pixel grid:
 150 cells
 ```
 
-Each 16-cell information row contains one icon and two 8-cell text lines. The
-layout is one centered vertical stack, not a two-column face. These are the
-packaged baseline matrices, including integer-normalized weather art; the
-degree mark is closed and preview fixtures default to Celsius.
+Each 16-cell information row contained one icon and two 8-cell text lines. The
+layout was one centered vertical stack, not a two-column face. Those baseline
+matrices and integer-normalized weather art are retained as comparison evidence.
 
-### Selected solid-grid fit budget
+### Packaged solid-grid fit budget
 
-The selected mock initially reuses the following implemented bands relative to
-the 450×450 active framebuffer. They remain subject to runtime and
-physical-watch optical adjustment. For the provisional
+The packaged solid-grid runtime uses the following bands relative to the
+450×450 active framebuffer. They remain subject to physical-watch optical
+adjustment. For the provisional
 safe circle with radius `r = 210`, the usable chord at vertical coordinate `y`
 is:
 
@@ -504,7 +493,8 @@ This calculation exposes real constraints:
 - Weather, steps, and battery use the same true 16×16 tile; date is text-only.
 - Integrate stale/error state into the weather sprite instead of appending a
   new field.
-- Define compact formatting for extreme temperatures before implementation.
+- The current `%d°%s` formatter fits the documented `-100°F` width budget;
+  broader out-of-contract extremes require a deliberate compact policy.
 - Do not add another top or bottom information field without recalculating the
   circular fit.
 - Do not append an `AM`/`PM` suffix to the time without budgeting it.
@@ -516,14 +506,14 @@ Current weather has explicit states:
 - available and fresh: show the condition icon and temperature;
 - available but refresh failed: retain the last value with a small monochrome
   stale marker integrated into the weather-sprite region;
-- unavailable: the current runtime shows `WX --` without moving the time; the
-  selected header-free presentation is still unresolved; and
+- unavailable: show the neutral icon plus `--` on one line without moving the
+  row or time; and
 - unknown condition: show a neutral, truthful icon rather than guessing.
 
 The available-state generated preview is deterministic. Live emulator testing
-proved the unavailable `WX --` branch; available and stale live data still need
-a connected/location-capable target. A future event or storyboard must preserve
-this resting layout.
+proves the unavailable branch at 466×466 and 454×454; available and stale live
+data still need a connected/location-capable target. A future event or
+storyboard must preserve this resting layout.
 
 ## Exploratory concept mockups
 
@@ -555,17 +545,16 @@ Ambient mode exposes the machine's base hardware:
 The result must remain below the Wear OS 15% illuminated-pixel limit throughout
 a full day and within the WFF ambient memory budget.
 
-For the packaged 3/2 runtime, an intentionally pessimistic full-box bound is
-`114 × 32 × 4 = 14,592` lit units. For the selected solid grid that same bound
-would be too pessimistic at `114 × 32 × 9 = 32,832`, so ambient review must use
-actual glyph occupancy. Across every 24-hour `HH:MM` value, the current
+For the historical 3/2 runtime, an intentionally pessimistic full-box bound was
+`114 × 32 × 4 = 14,592` lit units. For the packaged solid grid that same bound
+is too pessimistic at `114 × 32 × 9 = 32,832`, so ambient review uses actual
+glyph occupancy. Across every 24-hour `HH:MM` value, the current
 provisional matrices peak at `08:08`: 1,458 live source cells, or 13,122 solid
 units, about 8.25% of the centered 225-radius active circle's 159,043 units.
-That is below the 15% design limit, but the evaluator must be rerun after the
-solid resources and final numerals are packaged. For the current 3/2 runtime,
-the official evaluator reports 155,520 maximum ambient bytes conservatively;
-its optional optimization estimate reports 101,002 bytes. Neither result
-applies to the unimplemented solid-grid assets.
+That is below the 15% design limit. For the packaged solid runtime, the official
+evaluator reports 155,520 maximum ambient bytes conservatively; its optional
+optimization estimate reports 104,004 bytes. Final authored numerals require
+the same occupancy and evaluator checks again.
 
 ## WFF v2 feasibility boundaries
 
@@ -617,13 +606,14 @@ The implementation has reached these emulator-proven slices:
    weather fallback states.
 7. Time-only ambient composition, 12/24-hour sync, dual-size renderer checks,
    validator, and memory-footprint gates.
+8. Packaged solid 3×3 cells, direct true 16×16 icons, icon-led one-line values,
+   text-only date, deterministic preview parity, and live 466×466 / 454×454
+   interactive and ambient validation.
 
 Later slices remain separately gated:
 
-8. Promote the selected solid 3×3 grid, true 16×16 icons, icon-led values, and
-   text-only date into generated assets, preview, and WFF.
-9. Resolve truthful header-free unavailable/stale weather states and validate
-   the redesign on both Wear emulators.
+9. Live-test available/stale weather after implementing the truthful,
+   header-free unavailable state.
 10. Physical-watch validation and adjustment.
 11. Final time-numeral authorship and icon-family optical polish.
 12. One on-visible low-frame-rate animation.
@@ -632,10 +622,9 @@ Later slices remain separately gated:
 
 ## Open decisions
 
-- Runtime and physical-watch confirmation of the selected solid 3×3 cells.
+- Physical-watch confirmation of the packaged solid 3×3 cells.
 - Whether weather/date spacing needs an explicit optical adjustment after the
   calendar icon is removed.
-- Truthful header-free unavailable/stale weather presentation.
 - Physical-watch adjustment of the single-grid bands, optical time position,
   safe radius, solid cells, and indexed weather palette.
 - Final authored time numerals and optical refinement of the selected true

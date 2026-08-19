@@ -404,6 +404,69 @@ watch.
 
 ### End-to-end WFF v2 validation
 
+#### Raster 90 solid-grid runtime — 2026-08-18
+
+Implemented and freshly validated the selected solid single-grid composition on
+both Wear OS 5 targets:
+
+- The packaged 450×450 active frame remains one 150×150 source framebuffer,
+  now using solid 3×3 cells without gutters. Compact text, provisional expanded
+  time, and every icon use that one physical cell scale.
+- The exact generated surface contains 89 PNGs. Direct-authored true 16×16
+  weather, walker, and battery matrices produce 48×48 tiles; the calendar asset
+  is removed, and the generated preview shares source art and coordinates with
+  the runtime.
+- Available weather, steps, and battery use one vertically centered value
+  without `WX`, `STP`, or `BAT`; `SAT 15 AUG` is centered as one text row without
+  a calendar icon. The unavailable branch initially retained the neutral icon
+  with `WX` over `--`; the follow-up header-free pass replaced it with the same
+  icon plus `--` on one vertically centered line.
+- All four deterministic asset/study checks, 28 unit tests, XML parsing,
+  debug/release builds, lint, and WFF validator 1.7.0 passed. Regression tests
+  cover solid-cell fill, the exact asset surface, direct true 16×16 condition
+  coverage, preview/WFF row parity, centered date geometry, data bindings, and
+  ambient isolation.
+- The official memory-footprint evaluator passed the 10 MB ambient / 100 MB
+  active limits. Its conservative report measured 687,024 maximum active bytes
+  and 155,520 maximum ambient bytes; `--estimate-optimization` measured 493,732
+  and 104,004 bytes respectively.
+- `wear5-opw3` was identity-proven as Android 14 / API 34, circular 466×466 at
+  320 dpi with the watch and WFF runtime features. Its unobscured interactive
+  capture showed the truthful unavailable-weather branch, centered one-line
+  date, `00000` steps, and `100%` battery with solid cells and no clipping. A
+  fresh follow-up deploy proved the header-free neutral icon plus `--` on one
+  vertically centered line. Device-synchronized 12-hour time and forced
+  24-hour time both fit; the automatic setting was restored. Confirmed Dozing
+  reduced the face to dimmed monochrome time only.
+- `wear5` was independently identity-proven as Android 14 / API 34, circular
+  454×454 at 320 dpi with the same runtime features. Interactive and confirmed
+  Dozing ambient captures remained centered and unclipped after WFF scaling. A
+  fresh follow-up deploy proved the same header-free fallback remained centered
+  and legible at 454×454.
+- Runtime logs contained no WFF parse, resource, expression, or fatal failure.
+  Both emulators emitted a startup complication-cache `ClassCastException`
+  warning and weather-provider error code 5; neither had usable weather data,
+  so both selected the neutral icon-plus-`--` fallback. Each AVD name was
+  re-proven before shutdown; no physical device was connected or modified.
+
+Local review artifacts are retained under the Git-ignored
+`outputs/raster90/captures/solid-grid-runtime/` directory:
+
+- `raster90-solid-grid-wear5-opw3-interactive-466.png`
+- `raster90-solid-grid-wear5-opw3-ambient-466.png`
+- `raster90-solid-grid-wear5-opw3-24h-466.png`
+- `raster90-solid-grid-wear5-interactive-454.png`
+- `raster90-solid-grid-wear5-ambient-454.png`
+- matching `*-window.xml`, `*-ambient-power.txt`, and `*-logcat.txt` evidence
+
+The header-free follow-up captures and matching window/log evidence are under
+`outputs/raster90/captures/header-free-weather/`.
+
+This checkpoint supersedes the icon-weight and 3/2 single-grid runtime records
+below for current packaged geometry, resource count, memory, and emulator
+appearance. Physical-watch rendering, live available/stale weather, and final
+time-numeral authorship remain open.
+
 #### Raster 90 icon stroke-weight correction — 2026-08-18
 
 Corrected and freshly validated the single-grid icon rasterization on both Wear

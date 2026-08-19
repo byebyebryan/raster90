@@ -27,15 +27,11 @@ general Wear OS app.
   four approved source TTFs and their license remain under `third_party/` as
   design provenance, never under the module's `res/font`.
 - The packaged single-grid runtime treats the centered 450×450 active frame as
-  one fictional 150×150 framebuffer. It currently uses a 3-unit pitch with a
-  2×2 lit square and one-unit gutter. That implementation is live-validated at
-  native 466×466 and scaled 454×454, but it is now an implementation baseline,
-  not the selected next visual design.
-- The approved next design keeps the same 150×150 framebuffer and 3-unit pitch
-  but fills every source cell as a solid 3×3 square with no gutter. All elements
-  continue to use one physical pixel scale. This direction is captured in
-  deterministic mocks only; do not claim it is packaged or emulator-validated
-  until the assets and WFF composition are deliberately updated and retested.
+  one fictional 150×150 framebuffer. Every source cell is a solid 3×3 square
+  with no gutter, and all elements use that one physical pixel scale. This
+  implementation is live-validated at native 466×466 and scaled 454×454. The
+  earlier 3-unit-pitch / 2×2-lit runtime remains historical comparison evidence,
+  not the current visual design.
 - Compact text remains based on the project-owned 5×7 glyphs. In the selected
   interactive composition, each 16-cell information band contains one
   vertically centered text line rather than two stacked 8-cell lines. The
@@ -46,7 +42,7 @@ general Wear OS app.
   it as a dependency, vendor its SVGs, or mechanically trace/downsample them.
   Raster 90 icons remain independently authored, project-owned matrices unless
   a later explicit decision pins and licenses selected upstream assets.
-- The selected icon family is authored directly at true 16×16 resolution and
+- The packaged icon family is authored directly at true 16×16 resolution and
   rendered with solid 3×3 cells into 48×48 WFF tiles. The persistent resting
   icons are weather, steps, and battery. The calendar icon is intentionally
   removed; `SAT 15 AUG` is centered as text because it is already unambiguous.
@@ -56,21 +52,22 @@ general Wear OS app.
   optical weight.
 - The interactive composition omits seconds and uses a static colon. Its
   fixed information set is time, date, current weather, step count, and battery.
-  The selected resting rows are `[weather] 21°C`, centered `SAT 15 AUG`,
+  The available-weather resting rows are `[weather] 21°C`, centered `SAT 15 AUG`,
   `[steps] 03642`, and `[battery] 82%`; do not restore the redundant `WX`,
   `STP`, or `BAT` headers. Weather uses at most four flat visible palette
   entries; all other information remains white. Ambient mode reduces this to
   monochrome time only.
-- The selected mock preserves the current active-frame bands 45–93, 111–159,
-  177–273, 291–339, and 357–405 as the first implementation target. The solid
+- The packaged face uses active-frame bands 45–93, 111–159, 177–273, 291–339,
+  and 357–405. The solid
   3×3 time remains vertically centered in one 342×96 `TimeText`, but its
   mechanically expanded numeral silhouettes are still provisional. Keep
   preview and runtime coordinates identical when implementing. Weather/date
   spacing may receive a later optical pass; do not change it implicitly.
-- Current runtime fallback behavior remains authoritative until the redesign is
-  implemented. Available/stale/unavailable weather must remain truthful, but
-  the header-free unavailable presentation still needs an explicit design and
-  live-data validation.
+- Available/stale/unavailable weather must remain truthful. The packaged
+  unavailable branch uses the neutral weather icon with `--` on the same
+  single-line baseline as available weather; do not restore a `WX` header or
+  imply a condition or temperature. Available and stale data still require
+  live physical-device validation.
 - Power Saver Mode support is not required for the custom face. On the physical
   watch, entering Power Saver with an unsupported third-party face displays a
   warning and substitutes a basic OnePlus face; that fallback is acceptable.
@@ -423,10 +420,10 @@ rtk adb -s <phone-serial> shell wm density
   and scaled 454×454 Wear OS 5 emulators.
 - [ ] Validate the selected solid-grid redesign on the physical watch after its
   emulator gate; the watch remains authoritative for AMOLED appearance, bezel,
-  AOD, wrist-distance, and battery. The current 3/2 runtime remains reference
-  evidence until then.
+  AOD, wrist-distance, and battery. The earlier 3/2 runtime remains comparison
+  evidence only.
 - [ ] Live-test available and stale weather states with real location/weather
-  data; emulator testing currently proves the truthful `WX --` fallback.
+  data; emulator testing currently proves the truthful icon-plus-`--` fallback.
 - [x] Produce actual-size icon studies exposing the optical-weight and
   recognizability problems in the earlier 8×8/12×12 split.
 - [x] Package and validate the 150×150 single-grid system at native 466×466 and
@@ -437,12 +434,13 @@ rtk adb -s <phone-serial> shell wm density
 - [x] Select the next visual direction from deterministic mocks: solid 3×3 base
   cells, true 16×16 weather/steps/battery icons, one icon-led value per row,
   centered date text, and no calendar or redundant field headers.
-- [ ] Implement the selected solid-grid design in generated assets, preview, and
+- [x] Implement the selected solid-grid design in generated assets, preview, and
   WFF without weakening truthful weather fallbacks.
-- [ ] Validate the selected redesign at native 466×466 and scaled 454×454 before
+- [x] Validate the selected redesign at native 466×466 and scaled 454×454 before
   treating the mocks as runtime evidence.
-- [ ] Resolve the header-free unavailable/stale weather presentation and test it
-  with real location/weather data.
+- [x] Implement the header-free unavailable-weather presentation as a neutral
+  icon plus `--` on one centered row.
+- [ ] Live-test fresh and stale states with real location/weather data.
 - [ ] Refine the provisional expanded time numerals; the solid 16×16 icon family
   is selected but remains open to optical polish during implementation.
 - [ ] Design post-V1 animation and rare color events separately from the stable

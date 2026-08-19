@@ -34,11 +34,13 @@ from matrices import (  # noqa: E402  (path is intentionally set above)
     SINGLE_GRID_TIME_COLON_CELLS,
     SINGLE_GRID_TIME_DIGIT_CELLS,
     SINGLE_GRID_TIME_LINE_CELLS,
-    SINGLE_GRID_WEATHER_DAY,
-    SINGLE_GRID_WEATHER_NIGHT,
     TIME_COLON,
     TIME_DIGITS,
     WEATHER_STALE,
+)
+from icon_resolution_studies import (  # noqa: E402  (selected runtime matrices)
+    SIXTEEN_WEATHER_DAY,
+    SIXTEEN_WEATHER_NIGHT,
 )
 from single_grid_study import (  # noqa: E402  (selected study inputs)
     ICONS,
@@ -65,6 +67,9 @@ FINE_SPACE_ADVANCE_CELLS = 2
 FINE_WIDTH = FINE_ADVANCE_CELLS * FINE_PITCH
 FINE_SPACE_WIDTH = FINE_SPACE_ADVANCE_CELLS * FINE_PITCH
 FINE_HEIGHT = 7 * FINE_PITCH
+# WFF places each available compact value at this local offset within its
+# 48-unit information band. The preview uses the same physical coordinate.
+COMPACT_ROW_TEXT_Y = 13
 
 TIME_PITCH = SINGLE_GRID_PITCH
 TIME_LIT = SINGLE_GRID_LIT
@@ -87,7 +92,7 @@ ROW_BANDS = {
 }
 ROW_X = {
     "weather": 162,
-    "date": 150,
+    "date": 147,
     "steps": 153,
     "battery": 171,
 }
@@ -95,13 +100,12 @@ ROW_WIDTHS = {
     # Widths reserve the verified dynamic extremes: -100°F weather,
     # 31 DEC, six-digit steps, and 100% battery.
     "weather": 162,
-    "date": 150,
+    "date": 156,
     "steps": 162,
     "battery": 126,
 }
 
 UTILITY_ASSETS = {
-    "date": "raster_icon_calendar",
     "steps": "raster_icon_steps",
     "battery": "raster_icon_battery",
 }
@@ -339,7 +343,7 @@ def _utility_pixels(rows: Sequence[str]) -> PixelGrid:
         "utility icon",
         rows,
         ICON_CELLS,
-        {"0", "1"},
+        {".", "0", "1"},
         expected_height=ICON_CELLS,
     )
     return _paint_cells(
@@ -412,11 +416,11 @@ def _expected_pngs() -> dict[str, bytes]:
         _time_pixels(TIME_COLON, TIME_COLON_CELLS)
     )
 
-    for condition, rows in SINGLE_GRID_WEATHER_DAY.items():
+    for condition, rows in SIXTEEN_WEATHER_DAY.items():
         assets[f"{_weather_name('day', condition)}.png"] = encode_png(
             _weather_pixels(rows)
         )
-    for condition, rows in SINGLE_GRID_WEATHER_NIGHT.items():
+    for condition, rows in SIXTEEN_WEATHER_NIGHT.items():
         assets[f"{_weather_name('night', condition)}.png"] = encode_png(
             _weather_pixels(rows)
         )
@@ -459,7 +463,7 @@ def _draw_fine_string(pixels: PixelGrid, text: str, x: int, y: int) -> None:
             pixels,
             rows,
             x=cursor,
-            y=y + 1,
+            y=y,
             pitch=FINE_PITCH,
             lit=FINE_LIT,
             color_for=lambda symbol: OPAQUE_WHITE,
@@ -502,13 +506,20 @@ def _icon_color(name: str, symbol: str) -> RGBA:
     return OPAQUE_WHITE
 
 
-def _draw_information_row(
-    pixels: PixelGrid, name: str, first_line: str, second_line: str
-) -> None:
+def _draw_information_row(pixels: PixelGrid, name: str, text: str) -> None:
     icon_width = ICON_SIZE
-    total_width = ROW_WIDTHS[name]
     row_y = ACTIVE_ORIGIN[1] + ROW_BANDS[name][0]
     x = ACTIVE_ORIGIN[0] + ROW_X[name]
+    if name == "date":
+        text_x = x
+        _draw_fine_string(
+            pixels,
+            text,
+            text_x,
+            row_y + COMPACT_ROW_TEXT_Y,
+        )
+        return
+
     _draw_matrix(
         pixels,
         ICONS[name],
@@ -519,24 +530,28 @@ def _draw_information_row(
         color_for=lambda symbol: _icon_color(name, symbol),
     )
     text_x = x + icon_width + 2 * FINE_PITCH
-    _draw_fine_string(pixels, first_line, text_x, row_y)
-    _draw_fine_string(pixels, second_line, text_x, row_y + 8 * FINE_PITCH)
+    _draw_fine_string(
+        pixels,
+        text,
+        text_x,
+        row_y + COMPACT_ROW_TEXT_Y,
+    )
 
 
 def _preview_pixels() -> PixelGrid:
     """Render the fixed review preview from the same source matrices."""
 
     pixels = _blank(CANVAS, CANVAS, OPAQUE_BLACK)
-    _draw_information_row(pixels, "weather", "WX", "21°C")
-    _draw_information_row(pixels, "date", "SAT", "15 AUG")
+    _draw_information_row(pixels, "weather", "21°C")
+    _draw_information_row(pixels, "date", "SAT 15 AUG")
     _draw_time(
         pixels,
         "10:08",
         ACTIVE_ORIGIN[0] + (ACTIVE_SIZE - TIME_WIDTH) // 2,
         ACTIVE_ORIGIN[1] + ROW_BANDS["time"][0],
     )
-    _draw_information_row(pixels, "steps", "STP", "03642")
-    _draw_information_row(pixels, "battery", "BAT", "82%")
+    _draw_information_row(pixels, "steps", "03642")
+    _draw_information_row(pixels, "battery", "82%")
     return pixels
 
 

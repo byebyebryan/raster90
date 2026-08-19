@@ -5,27 +5,22 @@ Android components. The first product is the **Raster 90** watch face for the
 OnePlus Watch 3.
 
 Raster 90 is a standalone, resource-only Watch Face Format v2 watch face for
-Wear OS 5. Its packaged runtime uses one fictional 150×150 framebuffer with a
-3-unit source-pixel pitch and 2×2 lit squares. The approved next design keeps
-that geometry but switches to solid 3×3 cells, true 16×16 icons, and one
-icon-led value per information row. Weather, steps, and battery keep icons;
+Wear OS 5. Its packaged runtime uses one fictional 150×150 framebuffer with
+solid 3×3 source pixels, true 16×16 icons, and one icon-led value per
+information row. Weather, steps, and battery keep icons;
 `SAT 15 AUG` is centered without a calendar icon, and the redundant `WX`,
 `STP`, and `BAT` headers are removed. Ambient mode remains time-only.
 
-The solid-grid direction is currently design-only and must not be confused with
-the packaged 3/2 runtime. Exact glyph and sprite resources are generated
-deterministically from reviewable cell matrices rather than rendered from a
-runtime TTF.
-
-The current 3/2 single-grid runtime is live-validated at native 466×466 and
-scaled 454×454. The selected solid-grid redesign and its provisional expanded
-time numerals still require implementation and the same validation sequence.
+The solid-grid runtime is live-validated at native 466×466 and scaled 454×454.
+Exact glyph and sprite resources are generated deterministically from
+reviewable cell matrices rather than rendered from a runtime TTF. Its expanded
+time numerals remain provisional pending direct authorship and physical-watch
+review.
 
 The resting face is intentionally monochrome except for the small weather
-sprite. The current runtime reports `WX --` without moving the time when
-emulator weather is unavailable. A truthful header-free fallback must be chosen
-when the solid redesign is implemented. Physical-device weather and
-wrist-distance validation remain separate gates.
+sprite. When weather is unavailable, the runtime keeps the row and time fixed
+while showing a neutral weather icon plus `--` on one line. Physical-device
+weather and wrist-distance validation remain separate gates.
 
 ## Current targets
 

@@ -1,29 +1,31 @@
-"""Reviewable source matrices for the Raster 90 3/2 single-grid study.
+"""Reviewable source matrices for the Raster 90 solid single-grid runtime.
 
 This is the reviewable source for the 450-unit active frame treated as one
-150x150 source framebuffer.  A source pixel has a 3-unit pitch, a 2x2 lit
-square, and a one-unit gutter.  Native 16x16 utility tiles, integer-normalized
-weather tiles, and expanded time boxes are shared with the packaged resource
-generator.
+150x150 source framebuffer. A source pixel has a 3-unit pitch and a solid 3x3
+lit square. The selected true16 utility and weather tiles, plus expanded time
+boxes, are shared with the packaged resource generator.
 
-The utility matrices now enforce consistent structural stroke weights.  Their
-exact shapes and the integer-normalized weather family remain provisional art.
-Likewise, the time expands the proven V1 silhouettes onto the finer source grid
-so pitch can be judged before new high-resolution numerals are authored.
+The utility and weather matrices are authored directly at true 16x16. The time
+expands the proven V1 silhouettes onto the finer source grid so pitch can be
+judged before new high-resolution numerals are authored.
 """
 
 from __future__ import annotations
 
 from typing import Final, Mapping
 
+from icon_resolution_studies import (
+    SIXTEEN_UTILITY_ICONS,
+    SIXTEEN_WEATHER_DAY,
+    SIXTEEN_WEATHER_NIGHT,
+)
 from matrices import (
     FINE_GLYPHS,
     PALETTE,
-    SINGLE_GRID_UTILITY_ICONS,
     SINGLE_GRID_TIME_COLON_CELLS,
     SINGLE_GRID_TIME_DIGIT_CELLS,
     SINGLE_GRID_TIME_LINE_CELLS,
-    SINGLE_GRID_WEATHER_DAY,
+    SINGLE_GRID_LIT,
     TIME_COLON,
     TIME_DIGITS,
 )
@@ -36,7 +38,7 @@ ACTIVE_ORIGIN: Final = (8, 8)
 ACTIVE_SIZE: Final = 450
 SOURCE_SIZE: Final = 150
 PIXEL_PITCH: Final = 3
-PIXEL_LIT: Final = 2
+PIXEL_LIT: Final = SINGLE_GRID_LIT
 SAFE_CENTER: Final = (225, 225)
 SAFE_RADIUS: Final = 210
 
@@ -57,11 +59,11 @@ ROW_BANDS: Final[Mapping[str, tuple[int, int]]] = {
     "battery": (119, 135),
 }
 
-STUDY_TEXT: Final[Mapping[str, tuple[str, str]]] = {
-    "weather": ("WX", "21°C"),
-    "date": ("SAT", "15 AUG"),
-    "steps": ("STP", "03642"),
-    "battery": ("BAT", "82%"),
+STUDY_TEXT: Final[Mapping[str, str]] = {
+    "weather": "21°C",
+    "date": "SAT 15 AUG",
+    "steps": "03642",
+    "battery": "82%",
 }
 
 WEATHER_PALETTE = PALETTE
@@ -69,12 +71,14 @@ WEATHER_PALETTE = PALETTE
 
 ICONS: Final[Mapping[str, Matrix]] = {
     # Condition 14 is the documented representative partly-cloudy day state;
-    # its normalized tile is also used by the packaged preview.
-    "weather": SINGLE_GRID_WEATHER_DAY[14],
-    "date": SINGLE_GRID_UTILITY_ICONS["date"],
-    "steps": SINGLE_GRID_UTILITY_ICONS["steps"],
-    "battery": SINGLE_GRID_UTILITY_ICONS["battery"],
+    # its direct-authored tile is also used by the packaged preview.
+    "weather": SIXTEEN_WEATHER_DAY[14],
+    "steps": SIXTEEN_UTILITY_ICONS["steps"],
+    "battery": SIXTEEN_UTILITY_ICONS["battery"],
 }
+
+SINGLE_GRID_WEATHER_DAY = SIXTEEN_WEATHER_DAY
+SINGLE_GRID_WEATHER_NIGHT = SIXTEEN_WEATHER_NIGHT
 
 
 TIME_DIGIT_CELLS: Final = SINGLE_GRID_TIME_DIGIT_CELLS
@@ -84,8 +88,8 @@ TIME_COLON_CELLS: Final = SINGLE_GRID_TIME_COLON_CELLS
 def validate_single_grid_study() -> None:
     if ACTIVE_SIZE != SOURCE_SIZE * PIXEL_PITCH:
         raise ValueError("active frame is not an exact 150-cell source grid")
-    if PIXEL_LIT >= PIXEL_PITCH:
-        raise ValueError("source pixels need a visible gutter")
+    if PIXEL_LIT != PIXEL_PITCH:
+        raise ValueError("selected solid source pixels must fill their pitch")
 
     ordered = ("weather", "date", "time", "steps", "battery")
     if ROW_BANDS[ordered[0]][0] != EDGE_MARGIN_CELLS:
@@ -109,10 +113,12 @@ def validate_single_grid_study() -> None:
         if end - start != expected_height:
             raise ValueError(f"{name}: expected a {expected_height}-cell row")
 
+    if set(ICONS) != {"weather", "steps", "battery"}:
+        raise ValueError("selected runtime icon set must omit the calendar icon")
     for name, rows in ICONS.items():
         if len(rows) != ICON_CELLS or any(len(row) != ICON_CELLS for row in rows):
             raise ValueError(f"{name}: expected a 16x16 icon canvas")
-        vocabulary = {".", "Y", "C", "B", "W"} if name == "weather" else {"0", "1"}
+        vocabulary = {".", "Y", "C", "B", "W"} if name == "weather" else {".", "0", "1"}
         if set("".join(rows)) - vocabulary:
             raise ValueError(f"{name}: unknown icon cell")
 
