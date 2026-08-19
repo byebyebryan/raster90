@@ -418,12 +418,15 @@ rtk adb -s <phone-serial> shell wm density
   time-only ambient composition.
 - [x] Validate V1 interactive and ambient rendering on both the native 466×466
   and scaled 454×454 Wear OS 5 emulators.
-- [ ] Validate the selected solid-grid redesign on the physical watch after its
-  emulator gate; the watch remains authoritative for AMOLED appearance, bezel,
-  AOD, wrist-distance, and battery. The earlier 3/2 runtime remains comparison
-  evidence only.
-- [ ] Live-test available and stale weather states with real location/weather
-  data; emulator testing currently proves the truthful icon-plus-`--` fallback.
+- [ ] Complete physical-watch validation of the selected solid-grid redesign.
+  Native interactive rendering and live available weather are proven; wearer
+  judgment of AMOLED appearance, bezel, wrist distance, sustained AOD, and
+  battery remains open. The earlier 3/2 runtime remains comparison evidence
+  only.
+- [x] Live-test available weather with real physical-watch data, including a
+  night-family condition icon and the WFF provider's Fahrenheit unit.
+- [ ] Live-test stale weather with real data; emulator testing proves the
+  truthful icon-plus-`--` unavailable fallback.
 - [x] Produce actual-size icon studies exposing the optical-weight and
   recognizability problems in the earlier 8×8/12×12 split.
 - [x] Package and validate the 150×150 single-grid system at native 466×466 and
@@ -441,7 +444,8 @@ rtk adb -s <phone-serial> shell wm density
   treating the mocks as runtime evidence.
 - [x] Implement the header-free unavailable-weather presentation as a neutral
   icon plus `--` on one centered row.
-- [ ] Live-test fresh and stale states with real location/weather data.
+- [x] Live-test a fresh available state with real physical-watch weather data.
+- [ ] Live-test a stale state with real location/weather data.
 - [ ] Refine the provisional expanded time numerals; the solid 16×16 icon family
   is selected but remains open to optical polish during implementation.
 - [ ] Design post-V1 animation and rare color events separately from the stable

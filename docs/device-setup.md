@@ -404,6 +404,49 @@ watch.
 
 ### End-to-end WFF v2 validation
 
+#### Raster 90 physical-watch interactive checkpoint — 2026-08-19
+
+Deployed the committed solid-grid runtime to the paired OnePlus Watch 3 and
+validated the physical WFF renderer without changing the watch's time, weather,
+or always-on-display preferences:
+
+- The sole ADB target was identity-proven before installation as `OPWWE251`,
+  Android 14 / API 34, 466×466 at 320 dpi, with `armeabi-v7a,armeabi` and the
+  watch/WFF runtime features.
+- Fresh asset verification, WFF validator 1.7.0, debug/release builds, lint, and
+  the official memory-footprint limit check passed before deployment.
+- The APK installed successfully and the WFF debug surface selected
+  `io.github.byebyebryan.raster90.watchface` using runtime version 2.
+- The native interactive capture showed a live clear-night-family icon and
+  `63°F`, centered `WED 19 AUG`, live 12-hour time, `00000` steps, and `76%`
+  battery. The 3×3 cells, 16×16 icon tiles, colon separation, row centering, and
+  circular edge clearance all rendered without clipping.
+- The fresh physical runtime log contained no weather, WFF parse, resource,
+  expression, exception, or fatal error. No stale marker was visible, so this
+  proves an available/fresh night-weather state in addition to the emulator-
+  proven unavailable fallback. A real stale state remains untested.
+- Official WFF documentation defines temperature-unit value `1` as Celsius and
+  `2` as Fahrenheit. Raster 90 correctly rendered the WFF provider's Fahrenheit
+  value under the watch's `en-US` locale. The separate OnePlus Weather tile
+  displayed `20°` using its own Celsius preference, exposing a future product
+  choice between following WFF or offering a Celsius override.
+- The watch had sustained AOD disabled (`ambient_enabled=0`, `doze_enabled=0`).
+  Interactive information disappeared during the sleep transition as designed,
+  but the display then slept fully; no AOD preference was changed, so sustained
+  physical ambient rendering remains unproven.
+- Forcing sleep caused the watch's Wi-Fi debugging advertisement to disappear.
+  This is recoverable by waking the watch physically and allowing the stored
+  trusted mDNS connection to return; no transient endpoint is recorded here.
+- Screenshots can prove native renderer output but not perceived AMOLED quality,
+  bezel appearance, wrist-distance legibility, or battery drain. Those remain
+  wearer-observation gates.
+
+Ignored evidence is retained under
+`outputs/raster90/captures/physical-watch/2026-08-19-solid-grid/`, including the
+interactive screenshot, power/battery state, window dump, and clean runtime
+log. The watch was left with Raster 90 selected; its Wi-Fi debugging transport
+requires a physical wake before final reconnection verification.
+
 #### Raster 90 solid-grid runtime — 2026-08-18
 
 Implemented and freshly validated the selected solid single-grid composition on

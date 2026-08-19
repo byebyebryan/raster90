@@ -1,12 +1,13 @@
 # Raster 90 — Watch Face Design Direction
 
 Status: the solid single-grid runtime is implemented and live-validated on the
-466×466 and 454×454 Wear OS 5 emulators. It uses one 150×150 framebuffer, solid
-3×3 cells, true 16×16 icons, icon-led single-row values, and centered date text
-without a calendar icon. Its unavailable-weather branch uses a neutral icon
-plus `--` on the same single-row baseline. Direct-authored time numerals,
-physical-watch rendering, live available/stale weather, and any animation or
-transient color event remain open work.
+physical 466×466 OnePlus Watch 3 and the 466×466 / 454×454 Wear OS 5 emulators.
+It uses one 150×150 framebuffer, solid 3×3 cells, true 16×16 icons, icon-led
+single-row values, and centered date text without a calendar icon. Its
+unavailable-weather branch uses a neutral icon plus `--` on the same single-row
+baseline, while the physical watch proves a fresh available night-weather row.
+Direct-authored time numerals, wearer optical judgment, sustained AOD, stale
+weather, and any animation or transient color event remain open work.
 
 ## Product identity
 
@@ -612,9 +613,10 @@ The implementation has reached these emulator-proven slices:
 
 Later slices remain separately gated:
 
-9. Live-test available/stale weather after implementing the truthful,
-   header-free unavailable state.
-10. Physical-watch validation and adjustment.
+9. Live-test stale weather after proving fresh available and truthful,
+   header-free unavailable states.
+10. Complete physical-watch wearer, sustained-AOD, and battery validation and
+    adjustment.
 11. Final time-numeral authorship and icon-family optical polish.
 12. One on-visible low-frame-rate animation.
 13. One rare color event.
@@ -622,15 +624,20 @@ Later slices remain separately gated:
 
 ## Open decisions
 
-- Physical-watch confirmation of the packaged solid 3×3 cells.
+- Wearer confirmation of the packaged solid 3×3 cells, AMOLED appearance, and
+  wrist-distance legibility; native physical-device rendering is proven.
 - Whether weather/date spacing needs an explicit optical adjustment after the
   calendar icon is removed.
 - Physical-watch adjustment of the single-grid bands, optical time position,
   safe radius, solid cells, and indexed weather palette.
 - Final authored time numerals and optical refinement of the selected true
   16×16 icon family.
-- Live verification of available, stale, day/night, Celsius/Fahrenheit, and
-  extreme-value weather branches.
+- Live verification of stale, day-family, Celsius, and extreme-value weather
+  branches; fresh available, night-family, and Fahrenheit are proven.
+- Whether Raster 90 should continue following the WFF provider unit or offer a
+  Celsius override. On the first physical run, WFF returned `63°F` under the
+  watch's `en-US` locale while the separate OnePlus Weather tile displayed
+  `20°` using its own app preference.
 - Which single animation best introduces the face's personality.
 
 ## References

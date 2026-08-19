@@ -11,16 +11,17 @@ information row. Weather, steps, and battery keep icons;
 `SAT 15 AUG` is centered without a calendar icon, and the redundant `WX`,
 `STP`, and `BAT` headers are removed. Ambient mode remains time-only.
 
-The solid-grid runtime is live-validated at native 466×466 and scaled 454×454.
+The solid-grid runtime is live-validated at native 466×466 on the physical
+OnePlus Watch 3 and at native 466×466 / scaled 454×454 on Wear OS emulators.
 Exact glyph and sprite resources are generated deterministically from
 reviewable cell matrices rather than rendered from a runtime TTF. Its expanded
-time numerals remain provisional pending direct authorship and physical-watch
-review.
+time numerals remain provisional pending direct authorship and wearer review.
 
 The resting face is intentionally monochrome except for the small weather
 sprite. When weather is unavailable, the runtime keeps the row and time fixed
-while showing a neutral weather icon plus `--` on one line. Physical-device
-weather and wrist-distance validation remain separate gates.
+while showing a neutral weather icon plus `--` on one line. The physical watch
+has also proven a live available night-weather row. Sustained AOD, stale
+weather, wrist-distance, and battery validation remain separate gates.
 
 ## Current targets
 
