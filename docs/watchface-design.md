@@ -308,9 +308,9 @@ icon is intentionally absent because `SAT 15 AUG` is already semantically
 complete.
 
 The art should occupy broadly comparable optical bounds instead of forcing
-every shape into an identical square silhouette. A wide battery and a tall
-walker may have different bounding rectangles, but neither should read as a
-small marker beside a dominant weather illustration. Transparent edge cells
+every shape into an identical square silhouette. A wide battery and the paired
+footprints may have different bounding rectangles, but neither should read as
+a small marker beside a dominant weather illustration. Transparent edge cells
 remain available for centering, animation registration, and condition-to-
 condition stability.
 
@@ -328,6 +328,13 @@ solid 16×16 family was then polished for centered calendar geometry, a readable
 walking figure, a flat battery terminal, and a weather stale marker shown in
 context. Subsequent full-face mocks selected 3×3 over 2×2 cells, one text row
 over two, removal of `WX`/`STP`/`BAT`, and finally removal of the calendar icon.
+After wearer review of the physical-watch runtime rejected the walking figure,
+a focused native-size study selected direct-authored paired footprints. Their
+separated toe pads and vertically offset, tapered soles remain recognizable
+beside the count at the native 3×3-cell scale.
+The generated footprint asset was then live-validated in the packaged WFF on
+the native 466×466 `wear5-opw3` emulator; physical-watch appearance remains a
+separate wearer-review gate.
 
 The selected project-owned matrices in
 `design/raster90/icon_resolution_studies.py` are now consumed directly by the
@@ -384,7 +391,7 @@ The packaged available-weather layout uses the following centered stack:
 
                     10:08
 
-               [walker] 03642
+           [footprints] 03642
               [battery] 82%
 ```
 

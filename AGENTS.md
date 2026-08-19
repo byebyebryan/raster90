@@ -48,6 +48,9 @@ general Wear OS app.
   rendered with solid 3×3 cells into 48×48 WFF tiles. The persistent resting
   icons are weather, steps, and battery. The calendar icon is intentionally
   removed; `SAT 15 AUG` is centered as text because it is already unambiguous.
+  The selected step icon is a direct-authored pair of footprints with
+  separated toe pads and vertically offset, tapered soles; do not restore the
+  walking-person silhouette.
   The weather tile remains the only persistent indexed-color plane. Do not
   integer-expand 8×8 art or use fractional nearest-neighbour resampling in the
   selected family; structural lines must be authored cell-by-cell with balanced

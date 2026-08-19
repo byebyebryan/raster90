@@ -99,8 +99,27 @@ class SingleGridStudyTests(unittest.TestCase):
         self.assertTrue(all(row[15] == "." for row in battery))
 
         steps = study.ICONS["steps"]
-        self.assertTrue(any("1111" in row for row in steps))
-        self.assertTrue(any(row.count("1") >= 4 for row in steps))
+        self.assertEqual(
+            steps,
+            (
+                ".........11.1...",
+                ".........11...1.",
+                "...1.11.........",
+                ".1...11..11111..",
+                ".........111111.",
+                "..11111..111111.",
+                ".111111..11111..",
+                ".111111..11111..",
+                ".11111....1111..",
+                "..1111....111...",
+                "..1111....111...",
+                "...111....111...",
+                "...111..........",
+                "...111..........",
+                "................",
+                "................",
+            ),
+        )
 
     def test_current_icon_sheet_covers_exact_runtime_icon_surface(self) -> None:
         sheet = study.build_current_icon_sheet()

@@ -220,7 +220,7 @@
           </PartText>
         </Group>
 
-        <!-- 291..339 active-frame band: walker tile and centered step value. -->
+        <!-- 291..339 active-frame band: footprint tile and centered step value. -->
         <Group x="153" y="291" width="162" height="48" name="steps_region">
           <PartImage x="0" y="0" width="48" height="48" name="steps_icon">
             <Image resource="raster_icon_steps"/>
