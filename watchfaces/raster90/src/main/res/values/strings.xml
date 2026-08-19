@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="watch_face_name">Raster 90</string>
+  <string name="temperature_unit_label">Temperature unit</string>
+  <string name="temperature_unit_celsius">Celsius</string>
+  <string name="temperature_unit_fahrenheit">Fahrenheit</string>
 </resources>

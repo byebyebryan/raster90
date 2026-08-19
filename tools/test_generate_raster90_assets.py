@@ -237,6 +237,131 @@ class Raster90AssetGeneratorTests(unittest.TestCase):
             if group is not interactive:
                 self.assertIsNone(group.find("Variant"), group.attrib.get("name"))
 
+    def test_temperature_unit_configuration_is_celsius_default_and_editable(
+        self,
+    ) -> None:
+        watchface_path = ROOT / "watchfaces/raster90/src/main/res/raw/watchface.xml"
+        info_path = ROOT / "watchfaces/raster90/src/main/res/xml/watch_face_info.xml"
+        strings_path = ROOT / "watchfaces/raster90/src/main/res/values/strings.xml"
+
+        watchface = ET.parse(watchface_path).getroot()
+        configurations = watchface.find("UserConfigurations")
+        self.assertIsNotNone(configurations)
+        self.assertEqual(len(configurations), 1)
+
+        configuration = configurations.find("ListConfiguration")
+        self.assertIsNotNone(configuration)
+        self.assertEqual(
+            {
+                "id": "temperatureUnit",
+                "displayName": "temperature_unit_label",
+                "screenReaderText": "temperature_unit_label",
+                "defaultValue": "CELSIUS",
+            },
+            configuration.attrib,
+        )
+        options = configuration.findall("ListOption")
+        self.assertEqual(len(options), 2)
+        self.assertEqual(
+            [option.attrib for option in options],
+            [
+                {
+                    "id": "CELSIUS",
+                    "displayName": "temperature_unit_celsius",
+                    "screenReaderText": "temperature_unit_celsius",
+                },
+                {
+                    "id": "FAHRENHEIT",
+                    "displayName": "temperature_unit_fahrenheit",
+                    "screenReaderText": "temperature_unit_fahrenheit",
+                },
+            ],
+        )
+
+        info = ET.parse(info_path).getroot()
+        editable = info.find("Editable")
+        self.assertIsNotNone(editable)
+        self.assertEqual(editable.attrib, {"value": "true"})
+
+        strings = {
+            string.attrib["name"]: "".join(string.itertext())
+            for string in ET.parse(strings_path).getroot().findall("string")
+        }
+        self.assertEqual(
+            {
+                "temperature_unit_label": "Temperature unit",
+                "temperature_unit_celsius": "Celsius",
+                "temperature_unit_fahrenheit": "Fahrenheit",
+            },
+            {
+                name: strings[name]
+                for name in strings
+                if name.startswith("temperature_unit")
+            },
+        )
+
+    def test_temperature_value_converts_provider_units_and_labels_selection(
+        self,
+    ) -> None:
+        path = ROOT / "watchfaces/raster90/src/main/res/raw/watchface.xml"
+        root = ET.parse(path).getroot()
+        temperature = root.find(".//PartText[@name='weather_temperature']")
+        self.assertIsNotNone(temperature)
+        parameters = temperature.findall("./Text/BitmapFont/Template/Parameter")
+        self.assertEqual(len(parameters), 2)
+        value_expression, unit_expression = [
+            parameter.attrib["expression"] for parameter in parameters
+        ]
+
+        celsius_value = (
+            '[CONFIGURATION.temperatureUnit] == "CELSIUS" ? '
+            '([WEATHER.TEMPERATURE_UNIT] == 1 ? [WEATHER.TEMPERATURE] : '
+            'round(([WEATHER.TEMPERATURE] - 32) * 5 / 9)) : '
+            '([WEATHER.TEMPERATURE_UNIT] == 2 ? [WEATHER.TEMPERATURE] : '
+            'round([WEATHER.TEMPERATURE] * 9 / 5 + 32))'
+        )
+        self.assertEqual(value_expression, celsius_value)
+        self.assertEqual(
+            unit_expression,
+            '[CONFIGURATION.temperatureUnit] == "CELSIUS" ? "C" : "F"',
+        )
+        self.assertIn("[WEATHER.TEMPERATURE_UNIT] == 1", value_expression)
+        self.assertIn("[WEATHER.TEMPERATURE_UNIT] == 2", value_expression)
+        self.assertIn(
+            "round(([WEATHER.TEMPERATURE] - 32) * 5 / 9)", value_expression
+        )
+        self.assertIn("round([WEATHER.TEMPERATURE] * 9 / 5 + 32)", value_expression)
+
+        def output_temperature(
+            provider_value: int, provider_unit: int, selected: str
+        ) -> int:
+            if selected == "CELSIUS":
+                return (
+                    provider_value
+                    if provider_unit == 1
+                    else round((provider_value - 32) * 5 / 9)
+                )
+            return (
+                provider_value
+                if provider_unit == 2
+                else round(provider_value * 9 / 5 + 32)
+            )
+
+        self.assertEqual(output_temperature(21, 1, "CELSIUS"), 21)
+        self.assertEqual(output_temperature(63, 2, "CELSIUS"), 17)
+        self.assertEqual(output_temperature(68, 2, "FAHRENHEIT"), 68)
+        self.assertEqual(output_temperature(20, 1, "FAHRENHEIT"), 68)
+
+        # The same available weather row remains the only source of the
+        # formatted value; unavailable weather still renders its neutral --
+        # fallback and never reaches these conversion expressions.
+        self.assertIsNotNone(root.find(".//Group[@name='weather_unavailable_view']"))
+        unavailable_value = root.find(
+            ".//PartText[@name='weather_unavailable_value']/Text/BitmapFont"
+        )
+        self.assertIsNotNone(unavailable_value)
+        self.assertEqual("".join(unavailable_value.itertext()).strip(), "--")
+
     def test_dimensions_and_palette_are_binary_for_every_generated_png(self) -> None:
         expected = generator._expected_pngs()
         for name, data in expected.items():

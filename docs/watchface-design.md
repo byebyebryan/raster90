@@ -7,7 +7,8 @@ single-row values, and centered date text without a calendar icon. Its
 unavailable-weather branch uses a neutral icon plus `--` on the same single-row
 baseline, while the physical watch proves a fresh available night-weather row.
 Direct-authored time numerals, wearer optical judgment, sustained AOD, stale
-weather, and any animation or transient color event remain open work.
+weather, selected-unit physical rendering, and any animation or transient color
+event remain open work.
 
 ## Product identity
 
@@ -270,8 +271,11 @@ Selected compact-glyph contract:
   units); the literal space is two source pixels (6 units).
 - The degree mark is a closed ring or box. The earlier open upper semicircle is
   a corrected V1 glyph defect, not part of the visual language.
-- Design fixtures use Celsius. Live weather remains synchronized to the user's
-  preferred unit unless a future explicit Raster 90 unit setting is approved.
+- Design fixtures and the watch-face setting default use Celsius. The editor
+  offers exactly one explicit override, Fahrenheit. Runtime weather converts
+  the provider's integer when its preferred unit differs from the selected
+  output (using rounded `F -> C` or `C -> F` arithmetic) and always labels the
+  selected output unit.
 - One-source-pixel minimum spacing between glyphs.
 - Weather icons must cover every WFF condition on uniform 16×16 tiles and be
   judged at actual wrist distance.
@@ -388,6 +392,10 @@ The packaged available-weather layout uses the following centered stack:
   `STP`, and `BAT` are intentionally absent.
 - `SAT 15 AUG` is centered without a calendar icon. `SAT` remains because it is
   day-of-week data, not a field header.
+- Weather temperature is Celsius by default with an explicit Fahrenheit choice
+  in the editable watch-face configuration. The WFF provider's preferred unit
+  is a data source, not the user's selected display unit: a mismatched provider
+  value is converted with integer rounding before formatting.
 - Each ordinary value uses one 5×7 line vertically centered inside its existing
   16-cell band.
 - The runtime retains the established row bands and time position to
@@ -566,7 +574,8 @@ The current implementation uses:
 - direct `WEATHER.*`, `STEP_COUNT`, and `BATTERY_PERCENT` data sources
   rather than application code or a required phone companion;
 - conditions for truthful weather availability, stale state, day/night and all
-  condition enum values, using the user's temperature unit; and
+  condition enum values, using the selected temperature unit (Celsius by
+  default, with an explicit Fahrenheit override); and
 - an ambient variant that hides every non-time field.
 
 WFF v2 event controllers and `SequenceImages` remain feasible post-V1 tools,
@@ -632,12 +641,17 @@ Later slices remain separately gated:
   safe radius, solid cells, and indexed weather palette.
 - Final authored time numerals and optical refinement of the selected true
   16×16 icon family.
-- Live verification of stale, day-family, Celsius, and extreme-value weather
-  branches; fresh available, night-family, and Fahrenheit are proven.
-- Whether Raster 90 should continue following the WFF provider unit or offer a
-  Celsius override. On the first physical run, WFF returned `63°F` under the
-  watch's `en-US` locale while the separate OnePlus Weather tile displayed
-  `20°` using its own app preference.
+- Live verification of stale, day-family, selected-unit, and extreme-value
+  weather branches; fresh available, night-family, and the provider's
+  Fahrenheit surface are proven. The emulator editor proves the Celsius
+  default and both choices are reachable; resource tests cover both conversion
+  directions, and the physical watch proves a live converted `17°C` default.
+  Physical Fahrenheit selection is not required for the Celsius-default gate.
+- The physical WFF provider returned `63°F` under the watch's `en-US` locale
+  while the separate OnePlus Weather tile displayed `20°` under its own
+  Celsius preference/setting; the capture did not literally show `20°C`. These
+  are separate provider/cache surfaces; the Raster 90 setting converts and
+  labels its own WFF value but does not synchronize those readings.
 - Which single animation best introduces the face's personality.
 
 ## References

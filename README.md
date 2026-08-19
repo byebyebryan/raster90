@@ -18,10 +18,13 @@ reviewable cell matrices rather than rendered from a runtime TTF. Its expanded
 time numerals remain provisional pending direct authorship and wearer review.
 
 The resting face is intentionally monochrome except for the small weather
-sprite. When weather is unavailable, the runtime keeps the row and time fixed
-while showing a neutral weather icon plus `--` on one line. The physical watch
-has also proven a live available night-weather row. Sustained AOD, stale
-weather, wrist-distance, and battery validation remain separate gates.
+sprite. Weather is Celsius by default with an explicit Fahrenheit override in
+the watch-face editor; mismatched WFF provider units are converted before the
+selected unit is shown. When weather is unavailable, the runtime keeps the row
+and time fixed while showing a neutral weather icon plus `--` on one line. The
+physical watch has also proven a live available night-weather row. Sustained
+AOD, stale weather, wrist-distance, and battery validation remain separate
+gates.
 
 ## Current targets
 

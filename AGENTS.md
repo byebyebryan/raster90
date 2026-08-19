@@ -36,8 +36,10 @@ general Wear OS app.
   interactive composition, each 16-cell information band contains one
   vertically centered text line rather than two stacked 8-cell lines. The
   degree mark is a closed ring or box, never an open upper semicircle. Preview
-  fixtures default to Celsius; live WFF weather follows the device's preferred
-  unit unless an explicit product setting is added later.
+  fixtures and the editable default use Celsius; users may explicitly choose
+  Fahrenheit in the watch-face editor. The selected output converts the WFF
+  provider value when its preferred unit differs, rather than merely relabeling
+  it.
 - Pixelarticons is visual research only for the current design pass. Do not add
   it as a dependency, vendor its SVGs, or mechanically trace/downsample them.
   Raster 90 icons remain independently authored, project-owned matrices unless
@@ -445,6 +447,10 @@ rtk adb -s <phone-serial> shell wm density
 - [x] Implement the header-free unavailable-weather presentation as a neutral
   icon plus `--` on one centered row.
 - [x] Live-test a fresh available state with real physical-watch weather data.
+- [x] Add an editable Celsius-default temperature-unit setting with an explicit
+  Fahrenheit override and declarative conversion of the WFF provider value;
+  verify both editor choices on the primary Wear OS 5 emulator and live
+  converted Celsius output on the physical watch.
 - [ ] Live-test a stale state with real location/weather data.
 - [ ] Refine the provisional expanded time numerals; the solid 16×16 icon family
   is selected but remains open to optical polish during implementation.

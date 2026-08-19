@@ -4,6 +4,23 @@
   <Metadata key="CLOCK_TYPE" value="DIGITAL"/>
   <Metadata key="PREVIEW_TIME" value="10:08:00"/>
 
+  <!-- The editor exposes a deliberate Celsius default with an explicit
+       Fahrenheit override.  The selected value is also used below to
+       normalize the provider's preferred-unit weather integer. -->
+  <UserConfigurations>
+    <ListConfiguration id="temperatureUnit"
+        displayName="temperature_unit_label"
+        screenReaderText="temperature_unit_label"
+        defaultValue="CELSIUS">
+      <ListOption id="CELSIUS"
+          displayName="temperature_unit_celsius"
+          screenReaderText="temperature_unit_celsius" />
+      <ListOption id="FAHRENHEIT"
+          displayName="temperature_unit_fahrenheit"
+          screenReaderText="temperature_unit_fahrenheit" />
+    </ListConfiguration>
+  </UserConfigurations>
+
   <BitmapFonts>
     <!-- 5x7 compact glyphs on the one solid 3x3 source grid.  Ordinary glyphs use
          six-cell (18-unit) advances; the literal space is two cells (6). -->
@@ -154,8 +171,8 @@
                   <Text align="START">
                     <BitmapFont family="raster_fine" size="21" color="#ffffffff">
                       <Template><![CDATA[%d°%s]]>
-                        <Parameter expression="[WEATHER.TEMPERATURE]"/>
-                        <Parameter expression="[WEATHER.TEMPERATURE_UNIT] == 1 ? &quot;C&quot; : &quot;F&quot;"/>
+                        <Parameter expression="[CONFIGURATION.temperatureUnit] == &quot;CELSIUS&quot; ? ([WEATHER.TEMPERATURE_UNIT] == 1 ? [WEATHER.TEMPERATURE] : round(([WEATHER.TEMPERATURE] - 32) * 5 / 9)) : ([WEATHER.TEMPERATURE_UNIT] == 2 ? [WEATHER.TEMPERATURE] : round([WEATHER.TEMPERATURE] * 9 / 5 + 32))"/>
+                        <Parameter expression="[CONFIGURATION.temperatureUnit] == &quot;CELSIUS&quot; ? &quot;C&quot; : &quot;F&quot;"/>
                       </Template>
                     </BitmapFont>
                   </Text>

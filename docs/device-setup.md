@@ -404,6 +404,59 @@ watch.
 
 ### End-to-end WFF v2 validation
 
+#### Raster 90 temperature-unit editor checkpoint — 2026-08-19
+
+Implemented and freshly validated the Celsius-default temperature setting on
+the primary Wear OS 5 emulator:
+
+- The resource-only WFF v2 bundle declares one editable `ListConfiguration`
+  with exactly two choices: Celsius by default and an explicit Fahrenheit
+  override. Focused resource contracts cover pass-through and rounded
+  conversion in both provider-unit directions without changing weather
+  availability, stale-state, fallback, geometry, or ambient behavior.
+- All deterministic asset/study checks, 30 Python tests, XML parsing,
+  debug/release builds, lint, WFF validator 1.7.0, and the official 10 MB
+  ambient / 100 MB active memory-limit evaluation passed on the reviewed tree.
+- `wear5-opw3` was identity-proven as Android 14 / API 34, circular 466×466 at
+  320 dpi with the watch and WFF runtime features before installation. The APK
+  installed and selected through debug surface runtime version 2.
+- The watch-face picker exposed its Edit action. The editor opened with
+  `Temperature unit` set to `Celsius`, showed exactly the `Celsius` and
+  `Fahrenheit` choices, and accepted a switch to `Fahrenheit`. The emulator was
+  returned to Celsius before the editor was closed.
+- A fresh face selection after clearing earlier boot/install noise produced no
+  WFF runtime warnings or errors. The emulator had no usable weather data, so
+  it truthfully rendered the neutral icon-plus-`--` fallback. The physical
+  follow-up below subsequently closed the Celsius-output validation gate.
+- Ignored review evidence is retained under
+  `outputs/raster90/captures/temperature-unit-setting/`, including the native
+  interactive capture and editor hierarchy dumps for the Celsius default,
+  two-choice list, and Fahrenheit selection.
+
+The emulator was stopped only after re-proving the `wear5-opw3` AVD name.
+
+#### Raster 90 physical Celsius checkpoint — 2026-08-19
+
+After the watch re-advertised Wireless debugging, the temperature-unit build
+was deployed and checked on the physical OnePlus Watch 3:
+
+- The selected ADB endpoint was independently identity-proven as `OPWWE251`,
+  Android 14 / API 34, 466×466 at 320 dpi, with `armeabi-v7a,armeabi` and the
+  watch/WFF runtime features before installation. No transient endpoint is
+  recorded.
+- The validated debug APK installed successfully, and the WFF debug surface
+  selected `io.github.byebyebryan.raster90.watchface` using runtime version 2.
+- The unobscured native capture rendered the live night-family weather icon
+  with `17°C`. This is consistent with the setting's rounded conversion of the
+  same provider surface that previously rendered `63°F`, and proves the
+  Celsius-default output with real physical-watch weather data.
+- After clearing earlier install noise, a fresh re-selection produced no WFF
+  runtime warnings or errors. Raster 90 was left active in Celsius.
+- The physical capture and window evidence are retained under
+  `outputs/raster90/captures/temperature-unit-setting/`. Physical selection of
+  the Fahrenheit override is unnecessary for the Celsius-default gate and was
+  not performed; both editor choices remain emulator-proven.
+
 #### Raster 90 physical-watch interactive checkpoint — 2026-08-19
 
 Deployed the committed solid-grid runtime to the paired OnePlus Watch 3 and
@@ -428,8 +481,12 @@ or always-on-display preferences:
 - Official WFF documentation defines temperature-unit value `1` as Celsius and
   `2` as Fahrenheit. Raster 90 correctly rendered the WFF provider's Fahrenheit
   value under the watch's `en-US` locale. The separate OnePlus Weather tile
-  displayed `20°` using its own Celsius preference, exposing a future product
-  choice between following WFF or offering a Celsius override.
+  displayed `20°` under its own Celsius preference/setting; the capture did not
+  literally show `20°C`. These are separate provider/cache surfaces, not
+  synchronized readings. The current product decision is Celsius by default
+  with an explicit Fahrenheit override in the editable WFF v2 setting;
+  resource tests cover rounded conversion in both directions, and the later
+  physical Celsius checkpoint above proves the selected default with live data.
 - The watch had sustained AOD disabled (`ambient_enabled=0`, `doze_enabled=0`).
   Interactive information disappeared during the sleep transition as designed,
   but the display then slept fully; no AOD preference was changed, so sustained
