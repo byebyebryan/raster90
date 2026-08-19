@@ -12,6 +12,10 @@ local.properties
 .cxx/
 .externalNativeBuild/
 
+# Python tooling caches
+__pycache__/
+*.py[cod]
+
 # Generated packages and local validation artifacts
 *.apk
 *.aab

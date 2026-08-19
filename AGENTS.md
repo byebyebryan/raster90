@@ -22,45 +22,55 @@ general Wear OS app.
   calibration changes the exact geometry.
 - The permanent watch-face application ID is
   `io.github.byebyebryan.raster90.watchface`.
-- Typography starts from the CC0 Pixel Operator family, but V1 packages only
-  deterministic bitmap-font glyphs generated from project-owned matrices. The
+- Typography starts from the CC0 Pixel Operator family, but the runtime packages
+  only deterministic bitmap-font glyphs generated from project-owned matrices. The
   four approved source TTFs and their license remain under `third_party/` as
   design provenance, never under the module's `res/font`.
-- The post-V1 design direction treats the centered 450×450 active frame as one
-  fictional 150×150 framebuffer. Every visible source pixel uses a 3×3 pitch
-  with a 2×2 lit square and one-unit gutter; hierarchy comes from matrix size,
-  not from a second physical pixel scale. Use 8-cell text line boxes, uniform
-  16×16 icon tiles, and a 32-cell time line box as the provisional 1:2:4
-  layout rhythm. The packaged V1 remains on its implemented 5/4 and 10/8
-  two-tier assets until native, scaled, and physical-watch calibration approves
-  the new grid.
-- The 3/2 study may reuse the existing project-owned 5×7 compact glyph shapes
-  inside 8-cell line boxes. Its high-resolution time must use the same 3/2
-  source pixels rather than simulating a larger pixel tier. The degree mark is
-  a closed ring or box, never an open upper semicircle. Design fixtures default
-  to Celsius; live WFF weather continues to follow the device's preferred unit
-  unless an explicit product setting is added later.
+- The packaged single-grid runtime treats the centered 450×450 active frame as
+  one fictional 150×150 framebuffer. It currently uses a 3-unit pitch with a
+  2×2 lit square and one-unit gutter. That implementation is live-validated at
+  native 466×466 and scaled 454×454, but it is now an implementation baseline,
+  not the selected next visual design.
+- The approved next design keeps the same 150×150 framebuffer and 3-unit pitch
+  but fills every source cell as a solid 3×3 square with no gutter. All elements
+  continue to use one physical pixel scale. This direction is captured in
+  deterministic mocks only; do not claim it is packaged or emulator-validated
+  until the assets and WFF composition are deliberately updated and retested.
+- Compact text remains based on the project-owned 5×7 glyphs. In the selected
+  interactive composition, each 16-cell information band contains one
+  vertically centered text line rather than two stacked 8-cell lines. The
+  degree mark is a closed ring or box, never an open upper semicircle. Preview
+  fixtures default to Celsius; live WFF weather follows the device's preferred
+  unit unless an explicit product setting is added later.
 - Pixelarticons is visual research only for the current design pass. Do not add
   it as a dependency, vendor its SVGs, or mechanically trace/downsample them.
   Raster 90 icons remain independently authored, project-owned matrices unless
   a later explicit decision pins and licenses selected upstream assets.
-- All persistent icon and sprite resources in the post-V1 study use one
-  uniform 16×16 canvas at the 3/2 pixel pitch, producing a 48×48 WFF tile.
-  Weather, calendar, steps, battery, unknown, and event artwork should be
-  optically comparable in size; transparent padding may correct shape-specific
-  weight, but there is no utility-versus-feature canvas split. The persistent
-  indexed-color plane is provisionally one 16×16 tile and remains weather-only.
-- The V1 interactive composition omits seconds and uses a static colon. Its
-  fixed information set is time, date, current weather, step count, and battery;
-  weather sits above the date and uses the only persistent indexed-color sprite
-  plane, with at most four flat visible palette entries. All other information
-  remains white; ambient mode reduces this to monochrome time only.
-- V1 row boxes use a fixed 20-unit vertical gap at active-frame bands 65–105,
-  125–160, 180–270, 290–325, and 345–380. The time is vertically centered and
-  uses one 350-unit `TimeText`; its 30-unit colon resource uses two lit coarse
-  cells followed by a blank; the preceding digit's trailing blank supplies the
-  leading separation and the colon's trailing blank supplies the following
-  separation. Keep preview and runtime coordinates identical.
+- The selected icon family is authored directly at true 16×16 resolution and
+  rendered with solid 3×3 cells into 48×48 WFF tiles. The persistent resting
+  icons are weather, steps, and battery. The calendar icon is intentionally
+  removed; `SAT 15 AUG` is centered as text because it is already unambiguous.
+  The weather tile remains the only persistent indexed-color plane. Do not
+  integer-expand 8×8 art or use fractional nearest-neighbour resampling in the
+  selected family; structural lines must be authored cell-by-cell with balanced
+  optical weight.
+- The interactive composition omits seconds and uses a static colon. Its
+  fixed information set is time, date, current weather, step count, and battery.
+  The selected resting rows are `[weather] 21°C`, centered `SAT 15 AUG`,
+  `[steps] 03642`, and `[battery] 82%`; do not restore the redundant `WX`,
+  `STP`, or `BAT` headers. Weather uses at most four flat visible palette
+  entries; all other information remains white. Ambient mode reduces this to
+  monochrome time only.
+- The selected mock preserves the current active-frame bands 45–93, 111–159,
+  177–273, 291–339, and 357–405 as the first implementation target. The solid
+  3×3 time remains vertically centered in one 342×96 `TimeText`, but its
+  mechanically expanded numeral silhouettes are still provisional. Keep
+  preview and runtime coordinates identical when implementing. Weather/date
+  spacing may receive a later optical pass; do not change it implicitly.
+- Current runtime fallback behavior remains authoritative until the redesign is
+  implemented. Available/stale/unavailable weather must remain truthful, but
+  the header-free unavailable presentation still needs an explicit design and
+  live-data validation.
 - Power Saver Mode support is not required for the custom face. On the physical
   watch, entering Power Saver with an unsupported third-party face displays a
   warning and substitutes a basic OnePlus face; that fallback is acceptable.
@@ -232,9 +242,9 @@ The `:watchfaces:raster90` scaffold follows the official WFF sample structure:
 - Generated bitmap fonts, weather sprites, strings, and the picker preview live
   in their normal `res/` directories. Source matrices live in
   `design/raster90/`, outside the application module.
-- V1 uses a 466×466 WFF canvas with a centered 450×450 active grid. The official
-  454×454 target scales that coordinate space cleanly; the physical watch
-  remains authoritative.
+- The packaged runtime uses a 466×466 WFF canvas with a centered 450×450 active
+  grid. The official 454×454 target scales that coordinate space cleanly; the
+  physical watch remains authoritative.
 
 Build with the wrapper and JBR 25:
 
@@ -270,6 +280,15 @@ rtk adb -s <wear-emulator-serial> shell am broadcast \
 ```
 
 Confirm the selected face visually after every deploy.
+
+The debug broadcast's favorite ID is not proof that the screenshot is
+unobscured. A cold-booted AVD may leave its charging activity or app launcher
+above the WFF window. On an identity-proven emulator only, use `emu power ac
+off` and `emu power status discharging`, dismiss the overlay, and verify that
+`mObscuringWindow` is
+`com.google.wear.watchface.runtime.DeclarativeWatchFaceRuntime0` before
+retaining a capture. Never send emulator-console power commands to a physical
+device.
 
 Use both textual and visual checks:
 
@@ -402,18 +421,30 @@ rtk adb -s <phone-serial> shell wm density
   time-only ambient composition.
 - [x] Validate V1 interactive and ambient rendering on both the native 466×466
   and scaled 454×454 Wear OS 5 emulators.
-- [ ] Validate V1 on the physical watch; the physical watch remains
-  authoritative for AMOLED appearance, bezel, AOD, wrist-distance, and battery.
+- [ ] Validate the selected solid-grid redesign on the physical watch after its
+  emulator gate; the watch remains authoritative for AMOLED appearance, bezel,
+  AOD, wrist-distance, and battery. The current 3/2 runtime remains reference
+  evidence until then.
 - [ ] Live-test available and stale weather states with real location/weather
   data; emulator testing currently proves the truthful `WX --` fallback.
 - [x] Produce actual-size icon studies exposing the optical-weight and
   recognizability problems in the earlier 8×8/12×12 split.
-- [ ] Calibrate the provisional 150×150 single-grid system at native 466×466,
-  scaled 454×454, and on the physical watch before replacing V1 geometry.
-- [ ] Design the complete WFF weather-condition family and revised information
-  layout on uniform 16×16 icon tiles after the 3/2 source pixel is approved.
-- [ ] Recalculate row bands and circular fit for the selected single-grid
-  composition before replacing the text-heavy V1 runtime assets.
+- [x] Package and validate the 150×150 single-grid system at native 466×466 and
+  scaled 454×454, including interactive, time-only ambient, and 12/24-hour sync.
+- [x] Normalize and package all mapped WFF weather conditions plus calendar,
+  steps, and battery on uniform 16×16 icon tiles.
+- [x] Recalculate and implement the single-grid row bands and circular fit.
+- [x] Select the next visual direction from deterministic mocks: solid 3×3 base
+  cells, true 16×16 weather/steps/battery icons, one icon-led value per row,
+  centered date text, and no calendar or redundant field headers.
+- [ ] Implement the selected solid-grid design in generated assets, preview, and
+  WFF without weakening truthful weather fallbacks.
+- [ ] Validate the selected redesign at native 466×466 and scaled 454×454 before
+  treating the mocks as runtime evidence.
+- [ ] Resolve the header-free unavailable/stale weather presentation and test it
+  with real location/weather data.
+- [ ] Refine the provisional expanded time numerals; the solid 16×16 icon family
+  is selected but remains open to optical polish during implementation.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.

@@ -23,7 +23,14 @@ from typing import Mapping, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "design" / "raster90"))
 
-from matrices import FINE_GLYPHS  # noqa: E402
+from matrices import (  # noqa: E402
+    FINE_GLYPHS,
+    SINGLE_GRID_UTILITY_ICONS,
+    SINGLE_GRID_WEATHER_DAY,
+    SINGLE_GRID_WEATHER_NIGHT,
+    WEATHER_CONDITIONS,
+    WEATHER_STALE,
+)
 from single_grid_study import (  # noqa: E402
     ACTIVE_ORIGIN,
     ACTIVE_SIZE,
@@ -55,6 +62,10 @@ PixelGrid = list[list[RGBA]]
 BLACK: RGBA = (0, 0, 0, 255)
 WHITE: RGBA = (255, 255, 255, 255)
 OUTPUT_DIR_REL = Path("outputs/raster90/studies/single-grid")
+ICON_SHEET_WIDTH = 1248
+ICON_SHEET_HEIGHT = 950
+ICON_SHEET_PITCH = PIXEL_PITCH * 2
+ICON_SHEET_LIT = PIXEL_LIT * 2
 
 
 def _png_chunk(kind: bytes, payload: bytes) -> bytes:
@@ -285,6 +296,87 @@ def build_calibration_sheet() -> PixelGrid:
     return pixels
 
 
+def build_current_icon_sheet() -> PixelGrid:
+    """Render every icon matrix currently consumed by the packaged face."""
+
+    pixels = _blank(ICON_SHEET_WIDTH, ICON_SHEET_HEIGHT)
+    _draw_text(pixels, "RASTER 90 CURRENT ICONS", x=24, line_y=18)
+    _draw_text(pixels, "EXACT MATRICES  2X REVIEW SCALE", x=24, line_y=48)
+    _draw_text(pixels, "UTILITY", x=24, line_y=82)
+
+    column_width = 300
+    utility_y = 138
+    for column, (label, rows) in enumerate(SINGLE_GRID_UTILITY_ICONS.items()):
+        card_x = 24 + column * column_width
+        _draw_text(pixels, label.upper(), x=card_x, line_y=108)
+        _draw_matrix(
+            pixels,
+            rows,
+            x=card_x,
+            y=utility_y,
+            pitch=ICON_SHEET_PITCH,
+            lit=ICON_SHEET_LIT,
+            color_for=lambda _symbol: WHITE,
+        )
+
+    stale_x = 24 + 3 * column_width
+    _draw_text(pixels, "STALE 2X2", x=stale_x, line_y=108)
+    # Preserve the marker's true size relative to a 16x16 icon tile.
+    stale_offset = (16 - len(WEATHER_STALE)) * ICON_SHEET_PITCH // 2
+    _draw_matrix(
+        pixels,
+        WEATHER_STALE,
+        x=stale_x + stale_offset,
+        y=utility_y + stale_offset,
+        pitch=ICON_SHEET_PITCH,
+        lit=ICON_SHEET_LIT,
+        color_for=lambda _symbol: WHITE,
+    )
+
+    _draw_text(pixels, "WFF CONDITIONS  DAY AND NIGHT", x=24, line_y=250)
+    icon_size = 16 * ICON_SHEET_PITCH
+    for condition, condition_name in enumerate(WEATHER_CONDITIONS):
+        column = condition % 4
+        row = condition // 4
+        card_x = 24 + column * column_width
+        card_y = 282 + row * 166
+        label = f"{condition:02d} {condition_name.replace('_', ' ').upper()}"
+        _draw_text(pixels, label, x=card_x, line_y=card_y)
+
+        day_x = card_x + 24
+        night_x = card_x + 164
+        icon_y = card_y + 30
+        for rows, x in (
+            (SINGLE_GRID_WEATHER_DAY[condition], day_x),
+            (SINGLE_GRID_WEATHER_NIGHT[condition], night_x),
+        ):
+            _draw_matrix(
+                pixels,
+                rows,
+                x=x,
+                y=icon_y,
+                pitch=ICON_SHEET_PITCH,
+                lit=ICON_SHEET_LIT,
+                color_for=lambda symbol: _icon_color("weather", symbol),
+            )
+
+        day_label_width = _text_width("DAY")
+        night_label_width = _text_width("NIGHT")
+        _draw_text(
+            pixels,
+            "DAY",
+            x=day_x + (icon_size - day_label_width) // 2,
+            line_y=card_y + 130,
+        )
+        _draw_text(
+            pixels,
+            "NIGHT",
+            x=night_x + (icon_size - night_label_width) // 2,
+            line_y=card_y + 130,
+        )
+    return pixels
+
+
 def _chord_at(active_y: int) -> float:
     distance = abs(active_y - SAFE_CENTER[1])
     return 2.0 * math.sqrt(SAFE_RADIUS**2 - distance**2)
@@ -364,7 +456,7 @@ def geometry_text(report: Mapping[str, object]) -> str:
             "",
             f"All rows fit the conservative circle: {report['all_safe']}",
             "The time silhouette is an expanded V1 placeholder for pitch review, not final numeral art.",
-            "The icon shapes are normalized study placeholders, not selected production art.",
+            "Utility strokes are native 16x16; utility shapes and integer-normalized weather remain provisional art.",
         ]
     )
     return "\n".join(lines) + "\n"
@@ -386,6 +478,7 @@ def expected_output_bytes() -> dict[str, bytes]:
         "raster90-single-grid-face-454.png": encode_png(scaled),
         "raster90-single-grid-comparison.png": encode_png(build_comparison_sheet()),
         "raster90-single-grid-calibration.png": encode_png(build_calibration_sheet()),
+        "raster90-current-icon-sheet.png": encode_png(build_current_icon_sheet()),
         "raster90-single-grid-geometry.json": (
             json.dumps(report, indent=2, sort_keys=True) + "\n"
         ).encode(),

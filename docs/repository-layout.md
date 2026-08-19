@@ -6,7 +6,7 @@ Use a product-focused Android monorepo rooted at `/home/bryan/code/wear-os`.
 Separate APK/AAB packaging requirements are module boundaries, not Git
 repository boundaries.
 
-The first product and display name are Raster 90. Its resource-only V1 module is
+The first product and display name are Raster 90. Its resource-only module is
 `:watchfaces:raster90`, using application ID
 `io.github.byebyebryan.raster90.watchface`. The active design contract remains
 in `docs/watchface-design.md`.
@@ -71,18 +71,25 @@ The first scaffold pins Gradle 9.2.1 and Android Gradle Plugin 9.0.0, uses
 Android Studio JBR 25, and includes only the `:watchfaces:raster90` Android
 module.
 
-## Current V1 asset boundary
+## Current asset boundary
 
 - `design/raster90/matrices.py` is the human-reviewable source of truth.
+- `design/raster90/icon_resolution_studies.py` records the selected true 16×16
+  solid-icon candidates separately until they are promoted into packaged asset
+  generation.
 - `tools/generate_raster90_assets.py` is the sole deterministic producer and
-  checker for the 87 packaged/preview PNGs.
+  checker for the 90 packaged/preview PNGs.
+- `tools/render_raster90_icon_resolution_studies.py` produces ignored,
+  deterministic comparison sheets and full-face mocks; it does not change the
+  watch-face module.
 - `third_party/pixel-operator/` retains the four approved CC0 source fonts and
-  license as design provenance; no TTF is packaged in V1.
+  license as design provenance; no TTF is packaged.
 - `outputs/` is Git-ignored and namespaced by product and purpose:
   `outputs/raster90/studies/<study>/` holds generated design studies,
   `outputs/raster90/captures/<checkpoint>/` holds emulator or physical-device
-  evidence, and `outputs/references/` holds external visual references. Do not
-  place new artifacts directly in the root.
+  evidence, `outputs/references/` holds external visual references, and
+  `outputs/tooling/<tool>/` holds locally downloaded validators and their
+  licenses. Do not place new artifacts directly in the root.
 
 Physical-watch adjustment and post-V1 motion/color decisions remain tracked in
 `docs/watchface-design.md`; they do not change the monorepo boundary.

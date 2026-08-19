@@ -1,27 +1,32 @@
 """Reviewable source matrices for the Raster 90 3/2 single-grid study.
 
-This is design-study input, not the packaged watch-face asset source.  The
-study treats the 450-unit active frame as one 150x150 source framebuffer.  A
-source pixel has a 3-unit pitch, a 2x2 lit square, and a one-unit gutter.
+This is the reviewable source for the 450-unit active frame treated as one
+150x150 source framebuffer.  A source pixel has a 3-unit pitch, a 2x2 lit
+square, and a one-unit gutter.  Native 16x16 utility tiles, integer-normalized
+weather tiles, and expanded time boxes are shared with the packaged resource
+generator.
 
-The existing icon candidates are normalized only to test the proposed pixel
-size and common 16x16 registration.  They are placeholders, not selected
-production art.  Likewise, the time expands the proven V1 silhouettes onto the
-finer source grid so pitch can be judged before new high-resolution numerals
-are authored.
+The utility matrices now enforce consistent structural stroke weights.  Their
+exact shapes and the integer-normalized weather family remain provisional art.
+Likewise, the time expands the proven V1 silhouettes onto the finer source grid
+so pitch can be judged before new high-resolution numerals are authored.
 """
 
 from __future__ import annotations
 
-from typing import Final, Mapping, Sequence
+from typing import Final, Mapping
 
-from icon_studies import (
-    FOCUS_BATTERY_ICONS,
-    FOCUS_CALENDAR_ICONS,
-    FOCUS_STEP_12,
-    FOCUS_WEATHER_12,
+from matrices import (
+    FINE_GLYPHS,
+    PALETTE,
+    SINGLE_GRID_UTILITY_ICONS,
+    SINGLE_GRID_TIME_COLON_CELLS,
+    SINGLE_GRID_TIME_DIGIT_CELLS,
+    SINGLE_GRID_TIME_LINE_CELLS,
+    SINGLE_GRID_WEATHER_DAY,
+    TIME_COLON,
+    TIME_DIGITS,
 )
-from matrices import COARSE_COLON, COARSE_DIGITS, FINE_GLYPHS, PALETTE
 
 
 Matrix = tuple[str, ...]
@@ -37,7 +42,7 @@ SAFE_RADIUS: Final = 210
 
 TEXT_LINE_CELLS: Final = 8
 ICON_CELLS: Final = 16
-TIME_LINE_CELLS: Final = 32
+TIME_LINE_CELLS: Final = SINGLE_GRID_TIME_LINE_CELLS
 ROW_GAP_CELLS: Final = 6
 EDGE_MARGIN_CELLS: Final = 15
 ICON_TEXT_GAP_CELLS: Final = 2
@@ -62,97 +67,18 @@ STUDY_TEXT: Final[Mapping[str, tuple[str, str]]] = {
 WEATHER_PALETTE = PALETTE
 
 
-def _live_bounds(rows: Sequence[str]) -> tuple[int, int, int, int]:
-    points = [
-        (x, y)
-        for y, row in enumerate(rows)
-        for x, symbol in enumerate(row)
-        if symbol not in ("0", ".")
-    ]
-    if not points:
-        raise ValueError("cannot normalize an empty icon")
-    return (
-        min(x for x, _y in points),
-        min(y for _x, y in points),
-        max(x for x, _y in points),
-        max(y for _x, y in points),
-    )
-
-
-def _normalize_icon(
-    rows: Sequence[str],
-    *,
-    empty: str,
-    canvas: int = ICON_CELLS,
-    live_extent: int = 14,
-) -> Matrix:
-    """Crop and nearest-resample an icon into a common review canvas."""
-
-    min_x, min_y, max_x, max_y = _live_bounds(rows)
-    cropped = tuple(row[min_x : max_x + 1] for row in rows[min_y : max_y + 1])
-    source_height = len(cropped)
-    source_width = len(cropped[0])
-    scale = live_extent / max(source_width, source_height)
-    target_width = max(1, round(source_width * scale))
-    target_height = max(1, round(source_height * scale))
-    resized = tuple(
-        "".join(
-            cropped[min(source_height - 1, int(y * source_height / target_height))][
-                min(source_width - 1, int(x * source_width / target_width))
-            ]
-            for x in range(target_width)
-        )
-        for y in range(target_height)
-    )
-    left = (canvas - target_width) // 2
-    top = (canvas - target_height) // 2
-    output = [[empty for _x in range(canvas)] for _y in range(canvas)]
-    for y, row in enumerate(resized):
-        for x, symbol in enumerate(row):
-            output[top + y][left + x] = empty if symbol in ("0", ".") else symbol
-    return tuple("".join(row) for row in output)
-
-
 ICONS: Final[Mapping[str, Matrix]] = {
-    "weather": _normalize_icon(
-        FOCUS_WEATHER_12["outline"]["partly_cloudy"], empty="."
-    ),
-    "date": _normalize_icon(FOCUS_CALENDAR_ICONS["tearoff"], empty="0"),
-    "steps": _normalize_icon(FOCUS_STEP_12["walker_a"], empty="0"),
-    "battery": _normalize_icon(FOCUS_BATTERY_ICONS["high"], empty="0"),
+    # Condition 14 is the documented representative partly-cloudy day state;
+    # its normalized tile is also used by the packaged preview.
+    "weather": SINGLE_GRID_WEATHER_DAY[14],
+    "date": SINGLE_GRID_UTILITY_ICONS["date"],
+    "steps": SINGLE_GRID_UTILITY_ICONS["steps"],
+    "battery": SINGLE_GRID_UTILITY_ICONS["battery"],
 }
 
 
-def _expand_time_glyph(
-    rows: Sequence[str], *, box_width: int, box_height: int = TIME_LINE_CELLS
-) -> Matrix:
-    """Expand a V1 silhouette onto fine pixels for pitch-only calibration."""
-
-    factor = 3
-    expanded_rows: list[str] = []
-    for row in rows:
-        expanded = "".join(symbol * factor for symbol in row)
-        expanded_rows.extend(expanded for _copy in range(factor))
-    content_width = len(expanded_rows[0])
-    content_height = len(expanded_rows)
-    left = (box_width - content_width) // 2
-    top = (box_height - content_height) // 2
-    output = [["0" for _x in range(box_width)] for _y in range(box_height)]
-    for y, row in enumerate(expanded_rows):
-        for x, symbol in enumerate(row):
-            output[top + y][left + x] = symbol
-    return tuple("".join(row) for row in output)
-
-
-TIME_DIGIT_CELLS: Final = 26
-TIME_COLON_CELLS: Final = 10
-TIME_DIGITS: Final[Mapping[str, Matrix]] = {
-    digit: _expand_time_glyph(rows, box_width=TIME_DIGIT_CELLS)
-    for digit, rows in COARSE_DIGITS.items()
-}
-TIME_COLON: Final[Matrix] = _expand_time_glyph(
-    COARSE_COLON, box_width=TIME_COLON_CELLS
-)
+TIME_DIGIT_CELLS: Final = SINGLE_GRID_TIME_DIGIT_CELLS
+TIME_COLON_CELLS: Final = SINGLE_GRID_TIME_COLON_CELLS
 
 
 def validate_single_grid_study() -> None:

@@ -6,11 +6,15 @@ place.  Keeping these definitions as plain strings makes a glyph or sprite
 reviewable without an image editor.
 """
 
+from __future__ import annotations
+
+from typing import Sequence
+
 # Fine information plane: five columns by seven rows for ordinary glyphs.
-# Each source cell is a 5x5 pitch with a 4x4 illuminated square.  The generator
-# gives every ordinary glyph a six-cell (30-unit) advance by adding one empty
-# column to the image width.  The literal space is deliberately only two
-# source cells wide, making its shared separator token a 10-unit advance.
+# Each source cell is expanded by the selected runtime generator to the single
+# 3-unit pitch with a 2x2 illuminated square.  The generator gives every
+# ordinary glyph a six-cell advance by adding one empty column to the image
+# width; the literal space is deliberately only two source cells wide.
 FINE_GLYPHS = {
     " ": (
         "00",
@@ -392,10 +396,9 @@ FINE_GLYPHS = {
     ),
 }
 
-# Coarse time plane: seven columns by nine rows.  Each source cell is a
-# 10x10 pitch with an 8x8 illuminated square.  Digits use one trailing blank
-# cell for a 10-unit inter-digit gap.  The colon owns a three-cell separator bay
-# with two-cell dots followed by one blank cell, so it cannot fuse with minutes.
+# Reviewed V1 time silhouettes: seven columns by nine rows.  These matrices are
+# retained as source art for the post-V1 expanded 26x32/10x32 candidate below;
+# they are not a second physical runtime raster.
 COARSE_DIGITS = {
     "0": (
         "0111110",
@@ -519,6 +522,47 @@ COARSE_COLON = (
     "110",
     "110",
     "000",
+)
+
+# Post-V1 single-grid time resources.  The source silhouettes remain the
+# reviewed V1 7x9 matrices above; they are expanded onto the one approved
+# physical raster so the packaged face never introduces a second pixel tier.
+SINGLE_GRID_PITCH = 3
+SINGLE_GRID_LIT = 2
+SINGLE_GRID_TIME_DIGIT_CELLS = 26
+SINGLE_GRID_TIME_COLON_CELLS = 10
+SINGLE_GRID_TIME_LINE_CELLS = 32
+
+
+def _expand_single_grid_time(
+    rows: Sequence[str], *, box_width: int, box_height: int = SINGLE_GRID_TIME_LINE_CELLS
+) -> tuple[str, ...]:
+    """Center a reviewed V1 time silhouette in a 3/2 source-cell box."""
+
+    factor = 3
+    expanded_rows: list[str] = []
+    for row in rows:
+        expanded = "".join(symbol * factor for symbol in row)
+        expanded_rows.extend(expanded for _copy in range(factor))
+    content_width = len(expanded_rows[0])
+    content_height = len(expanded_rows)
+    if content_width > box_width or content_height > box_height:
+        raise ValueError("single-grid time silhouette exceeds its line box")
+    left = (box_width - content_width) // 2
+    top = (box_height - content_height) // 2
+    output = [["0" for _x in range(box_width)] for _y in range(box_height)]
+    for y, row in enumerate(expanded_rows):
+        for x, symbol in enumerate(row):
+            output[top + y][left + x] = symbol
+    return tuple("".join(row) for row in output)
+
+
+TIME_DIGITS = {
+    digit: _expand_single_grid_time(rows, box_width=SINGLE_GRID_TIME_DIGIT_CELLS)
+    for digit, rows in COARSE_DIGITS.items()
+}
+TIME_COLON = _expand_single_grid_time(
+    COARSE_COLON, box_width=SINGLE_GRID_TIME_COLON_CELLS
 )
 
 # Weather sprites are eight fine cells square.  A dot is transparent; the
@@ -725,6 +769,128 @@ WEATHER_NIGHT_RESOLUTION = (
     "partly_night",
     "windy",
 )
+
+
+def normalize_single_grid_icon(
+    rows: Sequence[str], *, empty: str, canvas: int = 16, live_extent: int = 16
+) -> tuple[str, ...]:
+    """Crop and integer-scale a study sprite into a 16-cell tile.
+
+    Fractional nearest-neighbour scaling gives nominally identical source
+    strokes different target thicknesses.  Integer replication keeps every
+    source row and column the same weight; unused cells become optical padding.
+    Keeping this operation here lets both the design study and packaged PNG
+    generator use exactly the same deterministic normalization rule.
+    """
+
+    if not rows or not rows[0] or any(len(row) != len(rows[0]) for row in rows):
+        raise ValueError("single-grid icon rows must be a non-empty rectangle")
+    if live_extent <= 0 or live_extent > canvas:
+        raise ValueError("single-grid icon live extent must fit its canvas")
+    points = [
+        (x, y)
+        for y, row in enumerate(rows)
+        for x, symbol in enumerate(row)
+        if symbol not in ("0", ".")
+    ]
+    if not points:
+        raise ValueError("cannot normalize an empty single-grid icon")
+    min_x = min(x for x, _y in points)
+    min_y = min(y for _x, y in points)
+    max_x = max(x for x, _y in points)
+    max_y = max(y for _x, y in points)
+    cropped = tuple(row[min_x : max_x + 1] for row in rows[min_y : max_y + 1])
+    source_height = len(cropped)
+    source_width = len(cropped[0])
+    scale = max(1, live_extent // max(source_width, source_height))
+    target_width = source_width * scale
+    target_height = source_height * scale
+    resized = tuple(
+        "".join(symbol * scale for symbol in row)
+        for row in cropped
+        for _repeat in range(scale)
+    )
+    left = (canvas - target_width) // 2
+    top = (canvas - target_height) // 2
+    output = [[empty for _x in range(canvas)] for _y in range(canvas)]
+    for y, row in enumerate(resized):
+        for x, symbol in enumerate(row):
+            output[top + y][left + x] = empty if symbol in ("0", ".") else symbol
+    return tuple("".join(row) for row in output)
+
+
+SINGLE_GRID_UTILITY_ICONS = {
+    # Production icons are authored directly at 16x16.  Every structural line
+    # is two source cells thick; intersections may be wider, but opposing edges
+    # never acquire different weights through resampling.
+    "date": (
+        "0000110011000000",
+        "0000110011000000",
+        "0011111111111100",
+        "0011111111111100",
+        "0011000000001100",
+        "0011000000001100",
+        "0011111111111100",
+        "0011111111111100",
+        "0011000000001100",
+        "0011000000001100",
+        "0011000000001100",
+        "0011000000001100",
+        "0011000000001100",
+        "0011000000001100",
+        "0011111111111100",
+        "0011111111111100",
+    ),
+    "steps": (
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000110000000",
+        "0000000110000000",
+        "0000001111000000",
+        "0000110110110000",
+        "0000010110100000",
+        "0000000110000000",
+        "0000001001000000",
+        "0000011001100000",
+        "0000110000110000",
+        "0001100000011000",
+        "0011000000001100",
+        "0000000000000000",
+        "0000000000000000",
+    ),
+    "battery": (
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+        "0011111111110000",
+        "0011111111110000",
+        "0011000000111100",
+        "0011000000111100",
+        "0011000000111100",
+        "0011000000111100",
+        "0011111111110000",
+        "0011111111110000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+    ),
+}
+
+
+# Existing day/night condition sprites are the authoritative weather art.  The
+# runtime only changes their registration and pitch: it does not invent new
+# condition semantics or add an external icon source.
+SINGLE_GRID_WEATHER_DAY = {
+    condition: normalize_single_grid_icon(WEATHER_SPRITES[sprite_name], empty=".")
+    for condition, sprite_name in enumerate(WEATHER_DAY_RESOLUTION)
+}
+SINGLE_GRID_WEATHER_NIGHT = {
+    condition: normalize_single_grid_icon(WEATHER_SPRITES[sprite_name], empty=".")
+    for condition, sprite_name in enumerate(WEATHER_NIGHT_RESOLUTION)
+}
 
 # Opaque colors are deliberately limited to the four visible weather entries
 # in the product contract.  The generator uses transparent pixels for gutters.

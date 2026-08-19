@@ -1,9 +1,13 @@
 # Raster 90 — Watch Face Design Direction
 
-Status: Raster 90 V1 is implemented and validated on the 466×466 and 454×454
-Wear OS 5 emulators. Physical-watch rendering, live available/stale weather,
-and any animation or transient color event remain open validation or post-V1
-work.
+Status: the packaged 3/2 single-grid runtime is implemented and live-validated
+on the 466×466 and 454×454 Wear OS 5 emulators. The approved next design keeps
+its 150×150 geometry but uses solid 3×3 cells, true 16×16 icons, icon-led
+single-row values, and centered date text without a calendar icon. That solid
+design is captured in deterministic mocks but is not packaged or
+emulator-validated yet. Its time numerals, physical-watch rendering, live
+available/stale weather, and any animation or transient color event remain
+open work.
 
 ## Product identity
 
@@ -47,13 +51,13 @@ Its limitations are visible, but the result remains dependable and glanceable.
 
 ## Target geometry
 
-The primary hardware target is the 466×466 OnePlus Watch 3. The proposed WFF
+The primary hardware target is the 466×466 OnePlus Watch 3. The current WFF
 canvas is also 466×466 so the primary target can be evaluated at 1:1 geometry.
-The emulator result is encouraging, but this must also be proven on the
-physical watch before it becomes an implementation invariant.
+The emulator result is clean, but this must also be proven on the physical watch
+before the geometry becomes an implementation invariant.
 
-Place a centered 450×450 fictional framebuffer at `(8, 8)`. The post-V1
-direction treats it as one 150×150 source-pixel display:
+The packaged runtime places a centered 450×450 fictional framebuffer at `(8,
+8)` and treats it as one 150×150 source-pixel display:
 
 ```text
 physical / WFF canvas: 466×466
@@ -64,12 +68,23 @@ lit square:                  2×2 units
 gutter:                      1 unit right and below each lit square
 ```
 
-Every element uses that same physical source pixel. Hierarchy comes from its
-logical box: an 8-pixel text line, a uniform 16×16 icon tile, or a 32-pixel time
-line. The initial high-resolution time study expands the proven V1 numeral
-silhouettes only to isolate pixel-pitch behavior; final numerals must be
-authored for the finer matrix rather than becoming mechanically enlarged V1
-art.
+The approved redesign preserves the canvas, active frame, source framebuffer,
+and 3-unit pitch while filling each source cell completely:
+
+```text
+physical / WFF canvas: 466×466
+active framebuffer:   450×450 at x=8, y=8
+source framebuffer:      150×150 pixels
+source pixel:                 3×3 solid units
+gutter:                       none
+```
+
+Every element still uses that one physical source pixel. Hierarchy comes from
+logical artwork size rather than another pixel tier: 5×7 compact text, true
+16×16 icons, and a 32-cell time box. The packaged high-resolution time expands
+the proven V1 silhouettes to validate pitch and fit; its final solid-grid
+numerals still need direct authorship rather than acceptance as mechanically
+enlarged V1 art.
 
 The outer eight-unit margin is overscan, not an information-bearing region. A
 provisional circular safe radius of 210 units, centered at `(225, 225)` in
@@ -77,33 +92,42 @@ active-framebuffer coordinates, supplies a further 15-unit inset from the
 active circle. This is a conservative design margin, not a platform guarantee;
 the bezel and physical watch remain authoritative.
 
-### Calibration gate
+### Runtime evidence and redesign gate
 
-The 3/2 source pixel is provisional until exact-size studies prove:
+The 2026-08-18 runtime pass proved crisp 2×2 lit squares and one-unit gutters at
+native 466×466, acceptable WFF scaling at 454×454, legible 5×7 compact text,
+uniform 16×16 tile geometry, and a detailed time treatment using the same
+physical pixels. The remaining gate is physical-watch wrist-distance, AMOLED,
+bezel, AOD, and low-brightness behavior. Icon recognizability and final time
+art remain design judgments rather than geometry blockers.
 
-- crisp 2×2 lit squares and one-unit gutters at native 466×466;
-- acceptable WFF scaling on the official 454×454 reference;
-- legible 5×7 compact text inside an 8-pixel line box;
-- readable uniform 16×16 icon tiles with comparable optical scale;
-- a detailed time treatment using the same physical pixels; and
-- physical-watch wrist-distance, AMOLED, and low-brightness behavior.
+The subsequent deterministic comparisons selected solid 3×3 cells over both
+2×2 solid cells and 3-pitch/2-lit dot-matrix cells. At native mock size, 2×2
+cells reduced a 16×16 icon to 32×32 and made the information stack too quiet;
+solid 3×3 cells retained the approved 48×48 icon scale while removing the
+dither-like one-third gutter. This is design evidence, not runtime evidence.
 
 Regenerate or byte-check the design-only specimens with:
 
 ```sh
 rtk python3 -B tools/render_raster90_single_grid_study.py
 rtk python3 -B tools/render_raster90_single_grid_study.py --check
-rtk python3 -B -m unittest tools/test_render_raster90_single_grid_study.py
+rtk python3 -B tools/render_raster90_icon_resolution_studies.py --check
+rtk python3 -B -m unittest \
+  tools/test_generate_raster90_assets.py \
+  tools/test_render_raster90_icon_resolution_studies.py \
+  tools/test_render_raster90_single_grid_study.py
 ```
 
-The review PNGs and geometry reports remain under the ignored
-`outputs/raster90/studies/single-grid/` directory. They do not modify WFF
-geometry or packaged single-grid assets.
+Runtime review PNGs and geometry reports remain under the ignored
+`outputs/raster90/studies/single-grid/` directory. Solid-grid icon sheets and
+full-face decision mocks remain under
+`outputs/raster90/studies/icon-resolution/`. Only the first directory currently
+corresponds to packaged WFF assets.
 
-The packaged V1 intentionally remains on its earlier two-tier geometry while
-this gate is open. That implementation uses a 90×90 5/4 fine raster and an
-aligned 45×45 10/8 coarse time tier. It is historical implementation evidence,
-not the post-V1 design target.
+The earlier two-tier V1 used a 90×90 5/4 fine raster and aligned 45×45 10/8
+coarse time tier. It is now historical implementation evidence; the packaged
+runtime uses the single 3/2 grid.
 
 The historical calibration face established the raster before V1. It contained:
 
@@ -116,30 +140,32 @@ The historical calibration face established the raster before V1. It contained:
 - representative bitmap glyphs; and
 - marks at the active-framebuffer and circular-safe-area boundaries.
 
-Original-resolution V1 captures now prove crisp cell edges at native 466×466
-and clean, unclipped WFF scaling at 454×454. The physical watch remains
+Original-resolution single-grid captures now prove crisp cell edges at native
+466×466 and clean, unclipped WFF scaling at 454×454. The physical watch remains
 authoritative for AMOLED appearance, bezel clearance, brightness, AOD, and
 wrist-distance judgment.
 
-The calibration scaffold has been replaced by the functional V1 composition in
-`:watchfaces:raster90`, application ID
-`io.github.byebyebryan.raster90.watchface`. On 2026-08-17 its live native
+The current composition lives in `:watchfaces:raster90`, application ID
+`io.github.byebyebryan.raster90.watchface`. On 2026-08-18 its live native
 466×466 and scaled 454×454 renders preserved the intended hierarchy and reduced
-ambient mode to time alone. The system charging indicator still occupies the
-bottom-center edge, below V1's information stack. This is emulator evidence;
-physical-watch validation remains open.
+ambient mode to time alone. This is emulator evidence; physical-watch
+validation remains open.
 
 ## Fictional hardware contract
 
-Treat the face as though it runs on the following imaginary display controller:
+Treat the selected design as though it runs on the following imaginary display
+controller. The packaged 3/2 runtime is an earlier implementation of this
+fiction rather than the current visual target:
 
-- One 150×150 source framebuffer; every visible cell has a 3-unit pitch, a 2×2
-  lit square, and a one-unit gutter.
+- One 150×150 source framebuffer; every visible cell is one solid 3×3 square
+  with no internal gutter.
 - Black is unlit; white is the normal illuminated state.
 - Text, icons, and time use the same physical source pixels. They gain hierarchy
-  from 8-, 16-, and 32-pixel logical boxes rather than different pixel sizes.
-- Every persistent icon uses one uniform 16×16 tile. A single weather tile may
-  use the indexed-color plane; all other resting content remains monochrome.
+  from their authored matrices rather than different pixel sizes.
+- Persistent icons are authored directly at true 16×16 resolution. Weather,
+  steps, and battery use icons; the centered date is text-only. A single weather
+  tile may use the indexed-color plane; all other resting content remains
+  monochrome.
 - At most four flat visible palette entries can be active in that region in one
   frame, including white.
 - No alpha blending, antialiasing, gradients, or partial cell brightness as a
@@ -166,7 +192,7 @@ white.
 ### Indexed-color plane
 
 "8-bit color" describes the sprite's visual language, not a requirement to
-display 256 colors or to use eight bits per RGB channel. V1 uses a small fixed
+display 256 colors or to use eight bits per RGB channel. The face uses a small fixed
 palette, with at most four flat visible entries in one weather sprite: yellow
 `#FFD800`, pale cyan `#49DFFF`, medium blue `#2474FF`, and white. Physical
 AMOLED judgment can refine these values later without changing the indexed
@@ -239,13 +265,14 @@ not the other way around.
 
 ### Glyph scope
 
-Provisional glyph families:
+Selected compact-glyph contract:
 
-- 5×7 compact matrices centered in 8-pixel-high line boxes for labels and
-  values. Two such lines fit beside one 16×16 icon tile.
+- 5×7 compact matrices use one line vertically centered inside each 16-cell
+  information band. The selected resting face does not stack a header above a
+  value.
 - Approximately 26×30 live digit matrices inside a 32-pixel-high time line.
-  Time uses the same 3/2 source pixels as every other element; it does not have
-  a coarse physical pixel mode.
+  Time uses the same solid 3×3 source pixels as every other element; it does not
+  have a coarse physical pixel mode.
 - Uppercase Latin letters, digits, colon, percent, degree and temperature-unit
   marks, basic punctuation, and a deliberately small set of symbols.
 - Compact ordinary glyphs provisionally advance six source pixels (18 WFF
@@ -258,10 +285,9 @@ Provisional glyph families:
 - Weather icons must cover every WFF condition on uniform 16×16 tiles and be
   judged at actual wrist distance.
 
-Each glyph pixel resolves to exactly one pixel in its selected tier; it must
-not be smoothed into a conventional typeface. The source glyph matrices should
-be kept in a human-reviewable form so bitmap resources can be regenerated
-deterministically.
+Each glyph cell resolves to exactly one solid 3×3 source pixel; it must not be
+smoothed into a conventional typeface. The source glyph matrices should remain
+human-reviewable so bitmap resources can be regenerated deterministically.
 
 ### Icon source and canvas roles
 
@@ -279,10 +305,12 @@ density through two-unit marks. For the current design pass:
   human-reviewable matrices. If direct reuse is proposed later, pin the exact
   upstream revision and review the license of every selected asset first.
 
-The post-V1 direction has one icon resource class: a 16×16 source matrix on the
-3/2 grid, rendered as a 48×48 WFF tile. Weather, calendar, steps, battery,
-unknown, and event art all use that canvas. There is no utility-versus-feature
-size split.
+The selected direction has one icon resource class: a true 16×16 source matrix
+rendered with solid 3×3 cells as a 48×48 WFF tile. Weather, steps, battery,
+unknown, stale-state, and event art use that canvas or an explicitly registered
+overlay within it. There is no utility-versus-feature size split. The calendar
+icon is intentionally absent because `SAT 15 AUG` is already semantically
+complete.
 
 The art should occupy broadly comparable optical bounds instead of forcing
 every shape into an identical square silhouette. A wide battery and a tall
@@ -290,6 +318,27 @@ walker may have different bounding rectangles, but neither should read as a
 small marker beside a dominant weather illustration. Transparent edge cells
 remain available for centering, animation registration, and condition-to-
 condition stability.
+
+The packaged runtime still exposes why this redesign is required: its weather
+art is integer-expanded from 8×8 and much of its utility geometry follows
+paired cells, so a nominal 16×16 canvas still carries roughly 8×8 effective
+detail. Fractional nearest-neighbour scaling is also forbidden because it gives
+opposing strokes different thicknesses. Canvas dimensions and effective art
+resolution must never be described as the same thing.
+
+Deterministic studies under
+`outputs/raster90/studies/icon-resolution/` compared true 8×8 solid art, true
+16×16 dot-matrix art, and the same true 16×16 art with solid cells. The selected
+solid 16×16 family was then polished for centered calendar geometry, a readable
+walking figure, a flat battery terminal, and a weather stale marker shown in
+context. Subsequent full-face mocks selected 3×3 over 2×2 cells, one text row
+over two, removal of `WX`/`STP`/`BAT`, and finally removal of the calendar icon.
+
+The selected project-owned matrices remain in
+`design/raster90/icon_resolution_studies.py` until implementation deliberately
+promotes them into the packaged generator. A validator rejects 16×16 candidates
+that are merely duplicated 8×8 blocks. Opposing structural edges must retain
+balanced source-cell weight before whole-face WFF scaling is considered.
 
 The implemented V1 8×8 weather sprites and the subsequent 8×8/12×12 studies are
 retained as evidence: they showed that the smaller grid could not express
@@ -308,7 +357,7 @@ made the composition top-heavy. They are not the selected post-V1 system.
 
 ## Information hierarchy
 
-V1 information priority:
+Resting-face information priority:
 
 1. Hour and minute, always dominant.
 2. Day and date.
@@ -323,29 +372,64 @@ first composition. Weather and steps use fixed WFF system data so their glyphs,
 fallbacks, and alignment remain under the face's control. Consider at most one
 configurable complication only after the core identity is proven.
 
-Use short, period-plausible labels and fixed-width alignment. The face may be
+Use short, period-plausible values and fixed-width alignment. Do not add a text
+header where the selected icon already communicates the field. The face may be
 information-dense in small regions, but black space is part of the design.
 
-## Baseline composition
+## Resting composition
 
-V1 uses a centered stack rather than a simulated rectangular device casing:
+### Selected next composition
+
+The approved available-weather mock uses the following centered stack:
 
 ```text
-             [WX]  21°C
-              SAT 15 AUG
+              [weather] 21°C
+                 SAT 15 AUG
 
-                 10:08
+                    10:08
 
-              STP 03642
-              BAT 82%
+               [walker] 03642
+              [battery] 82%
+```
+
+- The weather, steps, and battery icons carry their own semantics, so `WX`,
+  `STP`, and `BAT` are intentionally absent.
+- `SAT 15 AUG` is centered without a calendar icon. `SAT` remains because it is
+  day-of-week data, not a field header.
+- Each ordinary value uses one 5×7 line vertically centered inside its existing
+  16-cell band.
+- The selected mock retains the established row bands and time position to
+  isolate the approved content changes. Weather/date spacing may receive a
+  later explicit optical pass.
+- The available-state layout is selected. Header-free unavailable and stale
+  weather presentation must be resolved without hiding uncertainty or moving
+  the time.
+
+### Packaged runtime baseline
+
+The current runtime uses a centered stack rather than a simulated rectangular
+device casing:
+
+```text
+             [weather] WX
+                       21°C
+            [calendar] SAT
+                       15 AUG
+
+                    10:08
+
+              [walker] STP
+                       03642
+             [battery] BAT
+                       82%
 ```
 
 - The time occupies the optical center and largest glyph scale.
 - Weather is the top status row, with the quieter date immediately below it;
   steps and battery occupy the lower status region.
-- `[WX]` is an 8×8 or 12×12 fine-tier indexed-color condition sprite, not a
-  literal label. It uses at most four flat palette entries; the adjacent
-  temperature remains white.
+- `[weather]` is a uniform 16×16 indexed-color condition sprite, not a literal
+  label. It uses at most four flat palette entries; the adjacent temperature
+  remains white. Calendar, walker, and battery use monochrome 16×16 tiles.
 - Temperature follows the user's unit and includes the degree mark.
 - Step counts through 99,999 use the fixed-width `STP 03642` treatment. Six
   digits use the same narrow separator as `STP 123456`; values above 999,999
@@ -355,14 +439,15 @@ V1 uses a centered stack rather than a simulated rectangular device casing:
 - Top and bottom rows narrow as they approach the circular bezel.
 - Nothing important enters the eight-unit overscan region.
 
-### Post-V1 single-grid revision
+### Packaged single-grid composition
 
 V1 proves the bitmap typography, live data bindings, and ambient reduction, but
 its unavailable-weather state and `STP` / `BAT` labels leave the resting face
 too close to a text-only segmented watch. That composition is an implementation
 baseline, not the final visual-density target.
 
-The next study uses an exact 1:2:4 logical rhythm on the single 3/2 pixel grid:
+The implemented candidate uses an exact 1:2:4 logical rhythm on the single 3/2
+pixel grid:
 
 ```text
 15 cells  top margin
@@ -380,32 +465,16 @@ The next study uses an exact 1:2:4 logical rhythm on the single 3/2 pixel grid:
 150 cells
 ```
 
-The first text arrangement to test is:
+Each 16-cell information row contains one icon and two 8-cell text lines. The
+layout is one centered vertical stack, not a two-column face. These are the
+packaged baseline matrices, including integer-normalized weather art; the
+degree mark is closed and preview fixtures default to Celsius.
 
-```text
-[ weather ]  WX       [ calendar ]  SAT
-[  16×16  ]  21°C     [   16×16  ]  15 AUG
+### Selected solid-grid fit budget
 
-                  10:08
-
-[  walker  ]  STP      [ battery ]  BAT
-[  16×16   ]  03642    [  16×16  ]  82%
-```
-
-This notation illustrates the two-line relationship, not a two-column face;
-the initial runtime study retains one centered vertical stack. All icons are
-independently authored project matrices, the degree mark is closed, and study
-fixtures default to Celsius.
-
-Review the 3/2 system at native 466×466 and scaled 454×454 size before changing
-runtime geometry, then repeat it on the physical watch. The following table is
-retained only as the implemented V1 fit budget; a selected single-grid layout
-must replace it with newly calculated geometry.
-
-### V1 fit budget
-
-The following implemented bands are relative to the 450×450 active framebuffer.
-They remain subject to physical-watch optical adjustment. For the provisional
+The selected mock initially reuses the following implemented bands relative to
+the 450×450 active framebuffer. They remain subject to runtime and
+physical-watch optical adjustment. For the provisional
 safe circle with radius `r = 210`, the usable chord at vertical coordinate `y`
 is:
 
@@ -413,46 +482,42 @@ is:
 usable width = 2 × sqrt(r² - (y - 225)²)
 ```
 
-The estimate assumes a 30-unit ordinary fine-glyph advance (with the shared
-10-unit literal-space separator) for 5×7 status glyphs and a 7×9 coarse time
-matrix. The chord is evaluated at the edge of each band farthest from the
-center.
+The estimate uses 18-unit ordinary compact-glyph advances, a 6-unit literal
+space, solid 48×48 icon tiles, 78-unit time digits, and a 30-unit colon. The
+chord is evaluated at the edge of each band farthest from the center.
 
-| Region | V1 y band | Conservative content | Needed width | Safe chord | Spare |
+| Region | Active-frame y band | Conservative content | Needed width | Safe chord | Spare |
 |---|---:|---|---:|---:|---:|
-| Weather | 65–105 | 8×8 icon + `-100°F` | 230 | 272.0 | 42.0 |
-| Date | 125–160 | `SAT 15 AUG` | 260 | 369.3 | 109.3 |
-| Time | 180–270 | `23:59` | 350 | 410.2 | 60.2 |
-| Steps | 290–325 | `STP 123456` | 280 | 369.3 | 89.3 |
-| Battery | 345–380 | `BAT 100%` | 220 | 283.4 | 63.4 |
+| Weather | 45–93 | 16×16 icon + `-100°F` | 162 | 216.3 | 54.3 |
+| Date | 111–159 | centered `SAT 31 DEC` | 156 | 352.7 | 196.7 |
+| Time | 177–273 | `23:59` | 342 | 408.9 | 66.9 |
+| Steps | 291–339 | 16×16 icon + `123456` | 162 | 352.7 | 190.7 |
+| Battery | 357–405 | 16×16 icon + `100%` | 126 | 216.3 | 90.3 |
 
-Every adjacent row box has an explicit 20-unit gap. The visible stack leaves
-65 units above weather and 70 below battery, while the 90-unit time box is
-centered exactly at active-frame `y=225`. The time width is four 80-unit digit
-advances plus a 30-unit colon separator. Its two lit coarse cells are followed
-by one blank cell; the preceding digit's trailing blank supplies the matching
-leading separation, preventing the colon from fusing with minute digits while
-retaining a single low-cost `TimeText`.
+Every adjacent row box retains an explicit 18-unit gap. The visible stack leaves
+45 units above weather and below battery, while the 96-unit time box is centered
+exactly at active-frame `y=225`. The time width is four 78-unit digit advances
+plus a 30-unit colon separator in one low-cost `TimeText`.
 
 This calculation exposes real constraints:
 
-- Weather uses the 8×8 sprite. A 12×12 sprite combined with the extreme
-  temperature string would exceed the revised top-row budget.
+- Weather, steps, and battery use the same true 16×16 tile; date is text-only.
 - Integrate stale/error state into the weather sprite instead of appending a
   new field.
 - Define compact formatting for extreme temperatures before implementation.
 - Do not add another top or bottom information field without recalculating the
   circular fit.
-- Do not append an `AM`/`PM` suffix to the coarse time without budgeting it.
+- Do not append an `AM`/`PM` suffix to the time without budgeting it.
 - The arithmetic and emulator captures do not prove physical bezel clearance or
   AMOLED appearance; those remain physical-watch checks.
 
-V1 weather has explicit states:
+Current weather has explicit states:
 
 - available and fresh: show the condition icon and temperature;
 - available but refresh failed: retain the last value with a small monochrome
   stale marker integrated into the weather-sprite region;
-- unavailable: show `WX --` without moving the time; and
+- unavailable: the current runtime shows `WX --` without moving the time; the
+  selected header-free presentation is still unresolved; and
 - unknown condition: show a neutral, truthful icon rather than guessing.
 
 The available-state generated preview is deterministic. Live emulator testing
@@ -466,9 +531,9 @@ These generated mockups reflect the current no-seconds information hierarchy,
 but still test mood and composition only. They are not production assets or
 evidence of renderer geometry. Their exact glyph proportions, weather icon,
 spacing, and cell construction are exploratory output rather than approved
-requirements. They motivated the two-tier proposal but do not measure or prove
-it. The eventual cells, glyphs, and frames must be generated deterministically
-from the fictional hardware grid after calibration.
+requirements. They motivated the eventual single-grid hierarchy but do not
+measure or prove it. Production cells, glyphs, and frames are generated
+deterministically from the fictional hardware grid.
 
 - [Interactive resting state with indexed-color weather](../design/concepts/interactive-indexed-weather.png)
 - [Indexed-color weather refresh event](../design/concepts/indexed-weather-refresh.png)
@@ -490,17 +555,21 @@ Ambient mode exposes the machine's base hardware:
 The result must remain below the Wear OS 15% illuminated-pixel limit throughout
 a full day and within the WFF ambient memory budget.
 
-As an intentionally pessimistic full-digit-cell bound, four fully lit 7×9
-coarse digit matrices contribute `4 × 7 × 9 × 64 = 16,128` square units. The
-colon's two 2×2 dots contribute eight lit coarse cells, or `8 × 64 = 512`
-square units; together they consume 16,640 square units, about 10.5% of the
-centered 225-radius active circle's 159,043 square units. Real outlined glyphs
-are substantially lower. The official evaluator reports 149,400 maximum
-ambient bytes for the current typography revision.
+For the packaged 3/2 runtime, an intentionally pessimistic full-box bound is
+`114 × 32 × 4 = 14,592` lit units. For the selected solid grid that same bound
+would be too pessimistic at `114 × 32 × 9 = 32,832`, so ambient review must use
+actual glyph occupancy. Across every 24-hour `HH:MM` value, the current
+provisional matrices peak at `08:08`: 1,458 live source cells, or 13,122 solid
+units, about 8.25% of the centered 225-radius active circle's 159,043 units.
+That is below the 15% design limit, but the evaluator must be rerun after the
+solid resources and final numerals are packaged. For the current 3/2 runtime,
+the official evaluator reports 155,520 maximum ambient bytes conservatively;
+its optional optimization estimate reports 101,002 bytes. Neither result
+applies to the unimplemented solid-grid assets.
 
 ## WFF v2 feasibility boundaries
 
-The V1 implementation uses:
+The current implementation uses:
 
 - a 466×466 `WatchFace` coordinate space;
 - exact-size bitmap/drawable-backed glyphs derived from reviewable matrices;
@@ -531,33 +600,46 @@ Review every serious design on:
 6. Every weather condition plus fresh, stale, unavailable, unknown, Celsius,
    and Fahrenheit cases.
 7. Static interactive, localized color-event, and every animation frame.
-8. Fine/coarse tier alignment, the provisional 210-unit safe circle, and the
-   worst-case width strings from the fit budget.
+8. Solid 3×3 cell consistency, the provisional 210-unit safe circle, actual
+   ambient glyph occupancy, and the worst-case width strings from the fit
+   budget.
 
 ## Implementation slices
 
-Slices 1–5 form V1 and are complete on both emulators:
+The implementation has reached these emulator-proven slices:
 
-1. Fine/coarse renderer and Pixel Operator specimen calibration.
+1. Historical fine/coarse renderer and Pixel Operator specimen calibration.
 2. Deterministic glyph and sprite asset pipeline.
-3. Static base composition and matching generated preview.
-4. Live WFF time, date, weather, step, and battery bindings with truthful
+3. Functional V1 data bindings and truthful fallback behavior.
+4. Single-grid geometry, icon, and time studies.
+5. Packaged single-grid composition and matching generated preview.
+6. Live WFF time, date, weather, step, and battery bindings with truthful
    weather fallback states.
-5. Time-only ambient composition plus validator and memory-footprint gates.
+7. Time-only ambient composition, 12/24-hour sync, dual-size renderer checks,
+   validator, and memory-footprint gates.
 
 Later slices remain separately gated:
 
-6. Physical-watch validation and adjustment.
-7. One on-visible low-frame-rate animation.
-8. One rare color event.
-9. Optional complication/configuration work only after the identity is stable.
+8. Promote the selected solid 3×3 grid, true 16×16 icons, icon-led values, and
+   text-only date into generated assets, preview, and WFF.
+9. Resolve truthful header-free unavailable/stale weather states and validate
+   the redesign on both Wear emulators.
+10. Physical-watch validation and adjustment.
+11. Final time-numeral authorship and icon-family optical polish.
+12. One on-visible low-frame-rate animation.
+13. One rare color event.
+14. Optional complication/configuration work only after the identity is stable.
 
 ## Open decisions
 
-- Confirmation of the provisional 4+1 fine and 8+2 coarse pixel construction
-  after physical-watch calibration.
-- Physical-watch adjustment of the V1 bands, optical time position, safe radius,
-  square cells, and indexed weather palette.
+- Runtime and physical-watch confirmation of the selected solid 3×3 cells.
+- Whether weather/date spacing needs an explicit optical adjustment after the
+  calendar icon is removed.
+- Truthful header-free unavailable/stale weather presentation.
+- Physical-watch adjustment of the single-grid bands, optical time position,
+  safe radius, solid cells, and indexed weather palette.
+- Final authored time numerals and optical refinement of the selected true
+  16×16 icon family.
 - Live verification of available, stale, day/night, Celsius/Fahrenheit, and
   extreme-value weather branches.
 - Which single animation best introduces the face's personality.

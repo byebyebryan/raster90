@@ -42,6 +42,28 @@ class SingleGridStudyTests(unittest.TestCase):
             self.assertEqual(len(rows), 16)
             self.assertTrue(all(len(row) == 16 for row in rows))
 
+    def test_utility_icon_structural_lines_have_symmetric_weight(self) -> None:
+        battery = study.ICONS["battery"]
+        self.assertEqual(battery[4:6], battery[10:12])
+        self.assertTrue(all(row[2:4] == "11" for row in battery[4:12]))
+        self.assertTrue(all(row[10:12] == "11" for row in battery[4:12]))
+
+        calendar = study.ICONS["date"]
+        self.assertEqual(calendar[2:4], calendar[14:16])
+        self.assertTrue(all(row[2:4] == "11" for row in calendar[2:16]))
+        self.assertTrue(all(row[12:14] == "11" for row in calendar[2:16]))
+
+    def test_current_icon_sheet_covers_exact_runtime_icon_surface(self) -> None:
+        sheet = study.build_current_icon_sheet()
+        self.assertEqual(
+            (len(sheet[0]), len(sheet)),
+            (study.ICON_SHEET_WIDTH, study.ICON_SHEET_HEIGHT),
+        )
+        self.assertEqual(set(study.SINGLE_GRID_WEATHER_DAY), set(range(16)))
+        self.assertEqual(set(study.SINGLE_GRID_WEATHER_NIGHT), set(range(16)))
+        allowed = {study.BLACK, study.WHITE, *study.WEATHER_PALETTE.values()}
+        self.assertTrue(all(pixel in allowed for row in sheet for pixel in row))
+
     def test_check_rejects_corrupt_output(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)

@@ -27,14 +27,23 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "design" / "raster90"))
 
 from matrices import (  # noqa: E402  (path is intentionally set above)
-    COARSE_COLON,
-    COARSE_DIGITS,
     FINE_GLYPHS,
     PALETTE,
-    WEATHER_DAY_RESOLUTION,
-    WEATHER_NIGHT_RESOLUTION,
-    WEATHER_SPRITES,
+    SINGLE_GRID_LIT,
+    SINGLE_GRID_PITCH,
+    SINGLE_GRID_TIME_COLON_CELLS,
+    SINGLE_GRID_TIME_DIGIT_CELLS,
+    SINGLE_GRID_TIME_LINE_CELLS,
+    SINGLE_GRID_WEATHER_DAY,
+    SINGLE_GRID_WEATHER_NIGHT,
+    TIME_COLON,
+    TIME_DIGITS,
     WEATHER_STALE,
+)
+from single_grid_study import (  # noqa: E402  (selected study inputs)
+    ICONS,
+    ICON_CELLS,
+    ROW_BANDS as STUDY_ROW_BANDS,
 )
 
 
@@ -45,11 +54,11 @@ CANVAS = 466
 ACTIVE_ORIGIN = (8, 8)
 ACTIVE_SIZE = 450
 
-FINE_PITCH = 5
-FINE_LIT = 4
+FINE_PITCH = SINGLE_GRID_PITCH
+FINE_LIT = SINGLE_GRID_LIT
 # Ordinary fine glyph matrices use five source cells and receive one trailing
-# blank cell for their 30-unit advance.  The literal space is authored as two
-# blank source cells and intentionally keeps that 10-unit width.
+# blank cell for their 18-unit advance.  The literal space is authored as two
+# blank source cells and intentionally keeps that 6-unit width.
 FINE_GLYPH_CELLS = 5
 FINE_ADVANCE_CELLS = 6
 FINE_SPACE_ADVANCE_CELLS = 2
@@ -57,18 +66,45 @@ FINE_WIDTH = FINE_ADVANCE_CELLS * FINE_PITCH
 FINE_SPACE_WIDTH = FINE_SPACE_ADVANCE_CELLS * FINE_PITCH
 FINE_HEIGHT = 7 * FINE_PITCH
 
-COARSE_PITCH = 10
-COARSE_LIT = 8
-COARSE_DIGIT_ADVANCE_CELLS = 8
-COARSE_DIGIT_WIDTH = COARSE_DIGIT_ADVANCE_CELLS * COARSE_PITCH
-COARSE_COLON_ADVANCE_CELLS = 3
-COARSE_COLON_WIDTH = COARSE_COLON_ADVANCE_CELLS * COARSE_PITCH
-COARSE_HEIGHT = 9 * COARSE_PITCH
+TIME_PITCH = SINGLE_GRID_PITCH
+TIME_LIT = SINGLE_GRID_LIT
+TIME_DIGIT_CELLS = SINGLE_GRID_TIME_DIGIT_CELLS
+TIME_DIGIT_WIDTH = TIME_DIGIT_CELLS * TIME_PITCH
+TIME_COLON_CELLS = SINGLE_GRID_TIME_COLON_CELLS
+TIME_COLON_WIDTH = TIME_COLON_CELLS * TIME_PITCH
+TIME_LINE_CELLS = SINGLE_GRID_TIME_LINE_CELLS
+TIME_HEIGHT = TIME_LINE_CELLS * TIME_PITCH
+TIME_WIDTH = 4 * TIME_DIGIT_WIDTH + TIME_COLON_WIDTH
 
-WEATHER_PITCH = 5
-WEATHER_LIT = 4
-WEATHER_CELLS = 8
-WEATHER_SIZE = WEATHER_CELLS * WEATHER_PITCH
+ICON_PITCH = SINGLE_GRID_PITCH
+ICON_LIT = SINGLE_GRID_LIT
+ICON_SIZE = ICON_CELLS * ICON_PITCH
+WEATHER_SIZE = ICON_SIZE
+
+ROW_BANDS = {
+    name: tuple(cell * SINGLE_GRID_PITCH for cell in band)
+    for name, band in STUDY_ROW_BANDS.items()
+}
+ROW_X = {
+    "weather": 162,
+    "date": 150,
+    "steps": 153,
+    "battery": 171,
+}
+ROW_WIDTHS = {
+    # Widths reserve the verified dynamic extremes: -100°F weather,
+    # 31 DEC, six-digit steps, and 100% battery.
+    "weather": 162,
+    "date": 150,
+    "steps": 162,
+    "battery": 126,
+}
+
+UTILITY_ASSETS = {
+    "date": "raster_icon_calendar",
+    "steps": "raster_icon_steps",
+    "battery": "raster_icon_battery",
+}
 
 OPAQUE_BLACK: RGBA = (0, 0, 0, 255)
 TRANSPARENT: RGBA = (0, 0, 0, 0)
@@ -264,31 +300,54 @@ def _fine_pixels(rows: Sequence[str]) -> PixelGrid:
     )
 
 
-def _coarse_pixels(rows: Sequence[str], width_cells: int) -> PixelGrid:
+def _time_pixels(rows: Sequence[str], width_cells: int) -> PixelGrid:
     _validate_rows(
-        "coarse glyph",
+        "time glyph",
         rows,
-        3 if width_cells == COARSE_COLON_ADVANCE_CELLS else 7,
+        width_cells,
         {"0", "1"},
-        expected_height=9,
+        expected_height=TIME_LINE_CELLS,
     )
     return _paint_cells(
         rows,
-        pitch=COARSE_PITCH,
-        lit=COARSE_LIT,
+        pitch=TIME_PITCH,
+        lit=TIME_LIT,
         width_cells=width_cells,
         color_for=lambda symbol: OPAQUE_WHITE,
     )
 
 
 def _weather_pixels(rows: Sequence[str]) -> PixelGrid:
-    _validate_rows("weather sprite", rows, 8, set(PALETTE) | {"."})
+    _validate_rows(
+        "weather sprite",
+        rows,
+        ICON_CELLS,
+        set(PALETTE) | {"."},
+        expected_height=ICON_CELLS,
+    )
     return _paint_cells(
         rows,
-        pitch=WEATHER_PITCH,
-        lit=WEATHER_LIT,
-        width_cells=WEATHER_CELLS,
+        pitch=ICON_PITCH,
+        lit=ICON_LIT,
+        width_cells=ICON_CELLS,
         color_for=lambda symbol: PALETTE[symbol],
+    )
+
+
+def _utility_pixels(rows: Sequence[str]) -> PixelGrid:
+    _validate_rows(
+        "utility icon",
+        rows,
+        ICON_CELLS,
+        {"0", "1"},
+        expected_height=ICON_CELLS,
+    )
+    return _paint_cells(
+        rows,
+        pitch=ICON_PITCH,
+        lit=ICON_LIT,
+        width_cells=ICON_CELLS,
+        color_for=lambda symbol: OPAQUE_WHITE,
     )
 
 
@@ -296,8 +355,8 @@ def _stale_pixels() -> PixelGrid:
     _validate_rows("stale marker", WEATHER_STALE, 2, {"0", "1"}, expected_height=2)
     return _paint_cells(
         WEATHER_STALE,
-        pitch=FINE_PITCH,
-        lit=FINE_LIT,
+        pitch=ICON_PITCH,
+        lit=ICON_LIT,
         width_cells=2,
         color_for=lambda symbol: OPAQUE_WHITE,
     )
@@ -333,8 +392,8 @@ def _centered_fine_x(text: str) -> int:
     return (ACTIVE_SIZE - _fine_string_width(text)) // 2
 
 
-def _coarse_name(character: str) -> str:
-    return "raster_coarse_colon" if character == ":" else f"raster_coarse_{character}"
+def _time_name(character: str) -> str:
+    return "raster_time_colon" if character == ":" else f"raster_time_{character}"
 
 
 def _weather_name(day_or_night: str, condition: int) -> str:
@@ -345,20 +404,24 @@ def _expected_pngs() -> dict[str, bytes]:
     assets: dict[str, bytes] = {}
     for character, rows in FINE_GLYPHS.items():
         assets[f"{_fine_name(character)}.png"] = encode_png(_fine_pixels(rows))
-    for digit, rows in COARSE_DIGITS.items():
-        assets[f"{_coarse_name(digit)}.png"] = encode_png(_coarse_pixels(rows, COARSE_DIGIT_ADVANCE_CELLS))
-    assets[f"{_coarse_name(':')}.png"] = encode_png(
-        _coarse_pixels(COARSE_COLON, COARSE_COLON_ADVANCE_CELLS)
+    for digit, rows in TIME_DIGITS.items():
+        assets[f"{_time_name(digit)}.png"] = encode_png(
+            _time_pixels(rows, TIME_DIGIT_CELLS)
+        )
+    assets[f"{_time_name(':')}.png"] = encode_png(
+        _time_pixels(TIME_COLON, TIME_COLON_CELLS)
     )
 
-    for condition, sprite_name in enumerate(WEATHER_DAY_RESOLUTION):
+    for condition, rows in SINGLE_GRID_WEATHER_DAY.items():
         assets[f"{_weather_name('day', condition)}.png"] = encode_png(
-            _weather_pixels(WEATHER_SPRITES[sprite_name])
+            _weather_pixels(rows)
         )
-    for condition, sprite_name in enumerate(WEATHER_NIGHT_RESOLUTION):
+    for condition, rows in SINGLE_GRID_WEATHER_NIGHT.items():
         assets[f"{_weather_name('night', condition)}.png"] = encode_png(
-            _weather_pixels(WEATHER_SPRITES[sprite_name])
+            _weather_pixels(rows)
         )
+    for name, asset_name in UTILITY_ASSETS.items():
+        assets[f"{asset_name}.png"] = encode_png(_utility_pixels(ICONS[name]))
     assets["raster_weather_stale.png"] = encode_png(_stale_pixels())
     assets["preview.png"] = encode_png(_preview_pixels())
     return assets
@@ -396,7 +459,7 @@ def _draw_fine_string(pixels: PixelGrid, text: str, x: int, y: int) -> None:
             pixels,
             rows,
             x=cursor,
-            y=y,
+            y=y + 1,
             pitch=FINE_PITCH,
             lit=FINE_LIT,
             color_for=lambda symbol: OPAQUE_WHITE,
@@ -404,75 +467,76 @@ def _draw_fine_string(pixels: PixelGrid, text: str, x: int, y: int) -> None:
         cursor += _fine_advance(character)
 
 
-def _draw_coarse_time(pixels: PixelGrid, text: str, x: int, y: int) -> None:
+def _draw_time(pixels: PixelGrid, text: str, x: int, y: int) -> None:
     if len(text) != 5 or text[2] != ":":
         raise ValueError(f"preview time must use HH:MM, got {text!r}")
     cursor = x
     for character in text:
         if character == ":":
-            rows = COARSE_COLON
-            width = COARSE_COLON_WIDTH
+            rows = TIME_COLON
+            width = TIME_COLON_WIDTH
         else:
             try:
-                rows = COARSE_DIGITS[character]
+                rows = TIME_DIGITS[character]
             except KeyError as error:
-                raise ValueError(f"preview uses an undefined coarse glyph {character!r}") from error
-            width = COARSE_DIGIT_WIDTH
+                raise ValueError(f"preview uses an undefined time glyph {character!r}") from error
+            width = TIME_DIGIT_WIDTH
         _draw_matrix(
             pixels,
             rows,
             x=cursor,
             y=y,
-            pitch=COARSE_PITCH,
-            lit=COARSE_LIT,
+            pitch=TIME_PITCH,
+            lit=TIME_LIT,
             color_for=lambda symbol: OPAQUE_WHITE,
         )
         cursor += width
+
+
+def _icon_color(name: str, symbol: str) -> RGBA:
+    if name == "weather":
+        try:
+            return PALETTE[symbol]
+        except KeyError as error:
+            raise ValueError(f"preview uses an unknown weather symbol {symbol!r}") from error
+    return OPAQUE_WHITE
+
+
+def _draw_information_row(
+    pixels: PixelGrid, name: str, first_line: str, second_line: str
+) -> None:
+    icon_width = ICON_SIZE
+    total_width = ROW_WIDTHS[name]
+    row_y = ACTIVE_ORIGIN[1] + ROW_BANDS[name][0]
+    x = ACTIVE_ORIGIN[0] + ROW_X[name]
+    _draw_matrix(
+        pixels,
+        ICONS[name],
+        x=x,
+        y=row_y,
+        pitch=ICON_PITCH,
+        lit=ICON_LIT,
+        color_for=lambda symbol: _icon_color(name, symbol),
+    )
+    text_x = x + icon_width + 2 * FINE_PITCH
+    _draw_fine_string(pixels, first_line, text_x, row_y)
+    _draw_fine_string(pixels, second_line, text_x, row_y + 8 * FINE_PITCH)
 
 
 def _preview_pixels() -> PixelGrid:
     """Render the fixed review preview from the same source matrices."""
 
     pixels = _blank(CANVAS, CANVAS, OPAQUE_BLACK)
-    active_x, active_y = ACTIVE_ORIGIN
-
-    # V1 uses a 20-unit gap between every visible row box: weather 65..105,
-    # date 125..160, time 180..270, steps 290..325, and battery 345..380.
-    # The representative weather state is partly-cloudy daylight at 21 C.
-    _draw_matrix(
+    _draw_information_row(pixels, "weather", "WX", "21°C")
+    _draw_information_row(pixels, "date", "SAT", "15 AUG")
+    _draw_time(
         pixels,
-        WEATHER_SPRITES["partly_day"],
-        x=active_x + 145,
-        y=active_y + 65,
-        pitch=WEATHER_PITCH,
-        lit=WEATHER_LIT,
-        color_for=lambda symbol: PALETTE[symbol],
+        "10:08",
+        ACTIVE_ORIGIN[0] + (ACTIVE_SIZE - TIME_WIDTH) // 2,
+        ACTIVE_ORIGIN[1] + ROW_BANDS["time"][0],
     )
-    _draw_fine_string(pixels, "21°C", active_x + 195, active_y + 65)
-
-    # Date, time, steps, and battery bands follow the settled active-frame
-    # coordinates.  Centering from the authored advances keeps the preview
-    # representative of the live face's alignment rather than of a one-off
-    # screenshot crop.
-    _draw_fine_string(
-        pixels,
-        "SAT 15 AUG",
-        active_x + _centered_fine_x("SAT 15 AUG"),
-        active_y + 125,
-    )
-    _draw_coarse_time(pixels, "10:08", active_x + 50, active_y + 180)
-    _draw_fine_string(
-        pixels,
-        "STP 03642",
-        active_x + _centered_fine_x("STP 03642"),
-        active_y + 290,
-    )
-    _draw_fine_string(
-        pixels,
-        "BAT 82%",
-        active_x + _centered_fine_x("BAT 82%"),
-        active_y + 345,
-    )
+    _draw_information_row(pixels, "steps", "STP", "03642")
+    _draw_information_row(pixels, "battery", "BAT", "82%")
     return pixels
 
 
@@ -483,8 +547,10 @@ def _asset_role(name: str) -> str:
         return "stale"
     if name.startswith("raster_weather_"):
         return "weather"
-    if name.startswith("raster_coarse_"):
-        return "coarse"
+    if name.startswith("raster_time_"):
+        return "time"
+    if name.startswith("raster_icon_"):
+        return "icon"
     return "fine"
 
 
@@ -515,9 +581,13 @@ def _check_palette(name: str, width: int, height: int, pixels: PixelGrid) -> Non
             FINE_SPACE_WIDTH if name.endswith("space.png") else FINE_WIDTH,
             FINE_HEIGHT,
         ),
-        "coarse": (COARSE_COLON_WIDTH if name.endswith("colon.png") else COARSE_DIGIT_WIDTH, COARSE_HEIGHT),
+        "time": (
+            TIME_COLON_WIDTH if name.endswith("colon.png") else TIME_DIGIT_WIDTH,
+            TIME_HEIGHT,
+        ),
+        "icon": (ICON_SIZE, ICON_SIZE),
         "weather": (WEATHER_SIZE, WEATHER_SIZE),
-        "stale": (2 * FINE_PITCH, 2 * FINE_PITCH),
+        "stale": (2 * ICON_PITCH, 2 * ICON_PITCH),
     }[role]
     if (width, height) != expected_size:
         raise ValueError(f"{name}: expected {expected_size[0]}x{expected_size[1]}, got {width}x{height}")

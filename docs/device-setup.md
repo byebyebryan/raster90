@@ -404,6 +404,113 @@ watch.
 
 ### End-to-end WFF v2 validation
 
+#### Raster 90 icon stroke-weight correction — 2026-08-18
+
+Corrected and freshly validated the single-grid icon rasterization on both Wear
+OS 5 targets:
+
+- The defect was in the source pipeline, not WFF scaling: fractional
+  nearest-neighbour expansion mapped the compact battery's top edge to three
+  source rows and its bottom edge to two. The unavailable-weather outline and
+  other sprites were vulnerable to the same unequal replication.
+- Calendar, steps, and battery are now explicit project-owned 16×16 matrices.
+  The battery uses equal two-cell top/bottom and left/right structural strokes;
+  its terminal is an intentional two-cell extension.
+- Weather candidates now use integer-only cell replication and optical padding.
+  No source row or column can acquire a different target weight through
+  normalization.
+- Asset/study checks and 15 unit tests passed, including regression assertions
+  for battery/calendar opposing edges and the unavailable-weather border. The
+  exact generated surface remains 90 PNGs.
+- Debug/release builds, lint, XML checks, WFF validator 1.7.0, and the official
+  memory limits passed. The conservative evaluator report measured 696,240
+  maximum active bytes and 155,520 maximum ambient bytes. Its optional
+  `--estimate-optimization` report measured 464,220 and 101,002 bytes
+  respectively; both are retained as distinct measurements.
+- `wear5-opw3` was identity-proven as API 34, circular 466×466 at 320 dpi. Its
+  unobscured WFF capture shows equal battery and unavailable-weather opposing
+  edges, with the calendar outline following the same rule.
+- `wear5` was independently identity-proven as API 34, circular 454×454 at 320
+  dpi. The same strokes remained visually balanced and unclipped after WFF
+  scaling.
+- Runtime logs contained no WFF parse, resource, expression, or fatal failure.
+  Both emulators lacked usable weather and reported provider error code 5,
+  correctly selecting `WX --`. Both AVD names were re-proven before shutdown;
+  no physical device was connected or modified.
+
+Local review artifacts are retained under the Git-ignored
+`outputs/raster90/captures/icon-weight/` directory:
+
+- `raster90-icon-weight-wear5-opw3-interactive-466.png`
+- `raster90-icon-weight-wear5-interactive-454.png`
+- matching `raster90-icon-weight-*-logcat.txt` files
+
+This checkpoint supersedes the single-grid runtime record below for icon
+rasterization, test count, memory, and current interactive appearance. Icon
+silhouettes and optical scale remain open design work; this correction only
+makes their structural cell weight deterministic and symmetric.
+
+#### Raster 90 single-grid runtime candidate — 2026-08-18
+
+Freshly validated the packaged 150×150 single-grid candidate on both Wear OS 5
+targets:
+
+- `tools/generate_raster90_assets.py --check` verified the exact deterministic
+  surface of 90 PNGs. The asset set uses one 3-unit pitch / 2×2 lit-square grid,
+  18×21 compact glyph advances, uniform 48×48 icon and weather tiles, 78×96
+  time digits, and a 30×96 colon.
+- The asset, icon-study, and single-grid-study checks passed together with 13
+  unit tests. The tests assert exact resource dimensions and palette bounds,
+  reject stale/corrupt resources, and parse the generated WFF geometry and its
+  single ambient variant.
+- `xmllint` passed and WFF validator 1.7.0 accepted `watchface.xml` as format
+  version 2.
+- `assembleDebug`, `assembleRelease`, and `lintDebug` passed under Android
+  Studio JBR 25. Lint reported zero errors and 16 existing non-fatal warnings.
+- The official memory-footprint evaluator passed the 10 MB ambient / 100 MB
+  active limits. Its optimization-estimate report measured 428,176 maximum
+  active bytes and 101,002 maximum ambient bytes.
+- The primary runtime was identity-proven as `wear5-opw3`, Android 14 / API 34,
+  model `sdk_gwear_x86_64`, circular 466×466 at 320 dpi, with the watch and WFF
+  runtime features. After simulated AC power was disabled and the charging
+  overlay dismissed, the debug surface selected Raster 90 and the unobscured
+  WFF window rendered the complete single-grid composition.
+- The native interactive capture showed the truthful `WX --` fallback, live
+  weekday/date and time, `STP 00000`, and `BAT 100%`. All five row bands were
+  centered and unclipped, the colon remained separated from the minute digits,
+  and the uniform weather/calendar/walker/battery tile geometry was visible.
+- Confirmed Dozing state reduced the 466×466 face to monochrome time only.
+  Device-synchronized 12-hour rendering showed `06:xx`; forcing the emulator to
+  24-hour mode showed `18:xx` without shifting or clipping, after which the
+  original automatic setting was restored.
+- The secondary runtime was independently identity-proven as `wear5`, Android
+  14 / API 34, model `sdk_gwear_x86_64`, circular 454×454 at 320 dpi, with the
+  same watch and WFF runtime features. Interactive and ambient captures remained
+  centered and unclipped after WFF scaling.
+- Runtime logs contained no WFF parse, resource, expression, or fatal failure.
+  The 466 and 454 emulators reported weather-provider error codes 5 and 4
+  respectively because neither had usable weather data; both correctly selected
+  `WX --`.
+- Both emulators were stopped only after re-proving their AVD names. No physical
+  device was connected or modified.
+
+Local review artifacts are retained under the Git-ignored
+`outputs/raster90/captures/single-grid-runtime/` directory:
+
+- `raster90-single-grid-runtime-wear5-opw3-interactive-466.png`
+- `raster90-single-grid-runtime-wear5-opw3-ambient-466.png`
+- `raster90-single-grid-runtime-wear5-opw3-24h-466.png`
+- `raster90-single-grid-runtime-wear5-interactive-454.png`
+- `raster90-single-grid-runtime-wear5-ambient-454.png`
+- matching `*-window.xml` and `*-logcat.txt` evidence
+
+The official validator and memory evaluator used for this check are retained
+with their licenses under the ignored `outputs/tooling/google-watchface/`
+namespace. This checkpoint supersedes the typography and V1 records below for
+current packaged geometry, resource count, memory, and emulator appearance. The
+expanded time numerals and icon artwork remain provisional; live
+available/stale weather and the physical OnePlus Watch 3 remain separate gates.
+
 #### Raster 90 typography refinement — 2026-08-18
 
 Freshly validated the consistent-separator and coarse-colon refinement on both
@@ -562,6 +669,23 @@ rtk adb -s <wear-emulator-serial> shell am broadcast \
   -a com.google.android.wearable.app.DEBUG_SURFACE \
   --es operation set-watchface --es watchFaceId <application-id>
 ```
+
+The debug broadcast's favorite ID proves selection was requested, not that a
+screenshot is unobscured. A cold-booted AVD can show its full-screen charging
+activity or app launcher above the WFF window. On an identity-proven emulator,
+disable simulated AC power and dismiss the overlay before retaining evidence:
+
+```sh
+rtk adb -s <wear-emulator-serial> emu power ac off
+rtk adb -s <wear-emulator-serial> emu power status discharging
+rtk adb -s <wear-emulator-serial> shell input keyevent KEYCODE_BACK
+rtk adb -s <wear-emulator-serial> shell dumpsys window
+```
+
+Only retain the capture after `mObscuringWindow` identifies
+`com.google.wear.watchface.runtime.DeclarativeWatchFaceRuntime0`. This is an
+emulator presentation check; do not send emulator-console power commands to a
+physical device.
 
 When both targets are attached, identify them before installing:
 

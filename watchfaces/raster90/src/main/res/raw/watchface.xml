@@ -1,132 +1,136 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<!-- Raster 90 V1: resource-only WFF v2 composition. -->
+<!-- Raster 90 post-V1 single-grid composition: resource-only WFF v2. -->
 <WatchFace width="466" height="466">
   <Metadata key="CLOCK_TYPE" value="DIGITAL"/>
   <Metadata key="PREVIEW_TIME" value="10:08:00"/>
 
   <BitmapFonts>
-    <!-- 5x7 fine glyphs: 5-unit pitch, 4-unit lit square, 30-unit ordinary
-         advance; the literal space is the shared 10-unit separator. -->
+    <!-- 5x7 compact glyphs on the one 3/2 source grid.  Ordinary glyphs use
+         six-cell (18-unit) advances; the literal space is two cells (6). -->
     <BitmapFont name="raster_fine">
-      <Character name=" " resource="raster_fine_space" width="10" height="35"/>
-      <Character name="+" resource="raster_fine_plus" width="30" height="35"/>
-      <Character name="-" resource="raster_fine_minus" width="30" height="35"/>
-      <Character name="%" resource="raster_fine_percent" width="30" height="35"/>
-      <Character name="°" resource="raster_fine_degree" width="30" height="35"/>
-      <Character name="?" resource="raster_fine_question" width="30" height="35"/>
-      <Character name="0" resource="raster_fine_0" width="30" height="35"/>
-      <Character name="1" resource="raster_fine_1" width="30" height="35"/>
-      <Character name="2" resource="raster_fine_2" width="30" height="35"/>
-      <Character name="3" resource="raster_fine_3" width="30" height="35"/>
-      <Character name="4" resource="raster_fine_4" width="30" height="35"/>
-      <Character name="5" resource="raster_fine_5" width="30" height="35"/>
-      <Character name="6" resource="raster_fine_6" width="30" height="35"/>
-      <Character name="7" resource="raster_fine_7" width="30" height="35"/>
-      <Character name="8" resource="raster_fine_8" width="30" height="35"/>
-      <Character name="9" resource="raster_fine_9" width="30" height="35"/>
-      <Character name="A" resource="raster_fine_a" width="30" height="35"/>
-      <Character name="B" resource="raster_fine_b" width="30" height="35"/>
-      <Character name="C" resource="raster_fine_c" width="30" height="35"/>
-      <Character name="D" resource="raster_fine_d" width="30" height="35"/>
-      <Character name="E" resource="raster_fine_e" width="30" height="35"/>
-      <Character name="F" resource="raster_fine_f" width="30" height="35"/>
-      <Character name="G" resource="raster_fine_g" width="30" height="35"/>
-      <Character name="H" resource="raster_fine_h" width="30" height="35"/>
-      <Character name="I" resource="raster_fine_i" width="30" height="35"/>
-      <Character name="J" resource="raster_fine_j" width="30" height="35"/>
-      <Character name="K" resource="raster_fine_k" width="30" height="35"/>
-      <Character name="L" resource="raster_fine_l" width="30" height="35"/>
-      <Character name="M" resource="raster_fine_m" width="30" height="35"/>
-      <Character name="N" resource="raster_fine_n" width="30" height="35"/>
-      <Character name="O" resource="raster_fine_o" width="30" height="35"/>
-      <Character name="P" resource="raster_fine_p" width="30" height="35"/>
-      <Character name="Q" resource="raster_fine_q" width="30" height="35"/>
-      <Character name="R" resource="raster_fine_r" width="30" height="35"/>
-      <Character name="S" resource="raster_fine_s" width="30" height="35"/>
-      <Character name="T" resource="raster_fine_t" width="30" height="35"/>
-      <Character name="U" resource="raster_fine_u" width="30" height="35"/>
-      <Character name="V" resource="raster_fine_v" width="30" height="35"/>
-      <Character name="W" resource="raster_fine_w" width="30" height="35"/>
-      <Character name="X" resource="raster_fine_x" width="30" height="35"/>
-      <Character name="Y" resource="raster_fine_y" width="30" height="35"/>
-      <Character name="Z" resource="raster_fine_z" width="30" height="35"/>
+      <Character name=" " resource="raster_fine_space" width="6" height="21"/>
+      <Character name="+" resource="raster_fine_plus" width="18" height="21"/>
+      <Character name="-" resource="raster_fine_minus" width="18" height="21"/>
+      <Character name="%" resource="raster_fine_percent" width="18" height="21"/>
+      <Character name="°" resource="raster_fine_degree" width="18" height="21"/>
+      <Character name="?" resource="raster_fine_question" width="18" height="21"/>
+      <Character name="0" resource="raster_fine_0" width="18" height="21"/>
+      <Character name="1" resource="raster_fine_1" width="18" height="21"/>
+      <Character name="2" resource="raster_fine_2" width="18" height="21"/>
+      <Character name="3" resource="raster_fine_3" width="18" height="21"/>
+      <Character name="4" resource="raster_fine_4" width="18" height="21"/>
+      <Character name="5" resource="raster_fine_5" width="18" height="21"/>
+      <Character name="6" resource="raster_fine_6" width="18" height="21"/>
+      <Character name="7" resource="raster_fine_7" width="18" height="21"/>
+      <Character name="8" resource="raster_fine_8" width="18" height="21"/>
+      <Character name="9" resource="raster_fine_9" width="18" height="21"/>
+      <Character name="A" resource="raster_fine_a" width="18" height="21"/>
+      <Character name="B" resource="raster_fine_b" width="18" height="21"/>
+      <Character name="C" resource="raster_fine_c" width="18" height="21"/>
+      <Character name="D" resource="raster_fine_d" width="18" height="21"/>
+      <Character name="E" resource="raster_fine_e" width="18" height="21"/>
+      <Character name="F" resource="raster_fine_f" width="18" height="21"/>
+      <Character name="G" resource="raster_fine_g" width="18" height="21"/>
+      <Character name="H" resource="raster_fine_h" width="18" height="21"/>
+      <Character name="I" resource="raster_fine_i" width="18" height="21"/>
+      <Character name="J" resource="raster_fine_j" width="18" height="21"/>
+      <Character name="K" resource="raster_fine_k" width="18" height="21"/>
+      <Character name="L" resource="raster_fine_l" width="18" height="21"/>
+      <Character name="M" resource="raster_fine_m" width="18" height="21"/>
+      <Character name="N" resource="raster_fine_n" width="18" height="21"/>
+      <Character name="O" resource="raster_fine_o" width="18" height="21"/>
+      <Character name="P" resource="raster_fine_p" width="18" height="21"/>
+      <Character name="Q" resource="raster_fine_q" width="18" height="21"/>
+      <Character name="R" resource="raster_fine_r" width="18" height="21"/>
+      <Character name="S" resource="raster_fine_s" width="18" height="21"/>
+      <Character name="T" resource="raster_fine_t" width="18" height="21"/>
+      <Character name="U" resource="raster_fine_u" width="18" height="21"/>
+      <Character name="V" resource="raster_fine_v" width="18" height="21"/>
+      <Character name="W" resource="raster_fine_w" width="18" height="21"/>
+      <Character name="X" resource="raster_fine_x" width="18" height="21"/>
+      <Character name="Y" resource="raster_fine_y" width="18" height="21"/>
+      <Character name="Z" resource="raster_fine_z" width="18" height="21"/>
     </BitmapFont>
 
-    <!-- 7x9 coarse digits plus a three-cell colon separator with two-cell dots. -->
-    <BitmapFont name="raster_coarse">
-      <Character name="0" resource="raster_coarse_0" width="80" height="90"/>
-      <Character name="1" resource="raster_coarse_1" width="80" height="90"/>
-      <Character name="2" resource="raster_coarse_2" width="80" height="90"/>
-      <Character name="3" resource="raster_coarse_3" width="80" height="90"/>
-      <Character name="4" resource="raster_coarse_4" width="80" height="90"/>
-      <Character name="5" resource="raster_coarse_5" width="80" height="90"/>
-      <Character name="6" resource="raster_coarse_6" width="80" height="90"/>
-      <Character name="7" resource="raster_coarse_7" width="80" height="90"/>
-      <Character name="8" resource="raster_coarse_8" width="80" height="90"/>
-      <Character name="9" resource="raster_coarse_9" width="80" height="90"/>
-      <Character name=":" resource="raster_coarse_colon" width="30" height="90"/>
+    <!-- Expanded V1 silhouettes used only as a 3/2 calibration candidate:
+         four 26-cell digit boxes and a 10-cell colon make 342 units. -->
+    <BitmapFont name="raster_time">
+      <Character name="0" resource="raster_time_0" width="78" height="96"/>
+      <Character name="1" resource="raster_time_1" width="78" height="96"/>
+      <Character name="2" resource="raster_time_2" width="78" height="96"/>
+      <Character name="3" resource="raster_time_3" width="78" height="96"/>
+      <Character name="4" resource="raster_time_4" width="78" height="96"/>
+      <Character name="5" resource="raster_time_5" width="78" height="96"/>
+      <Character name="6" resource="raster_time_6" width="78" height="96"/>
+      <Character name="7" resource="raster_time_7" width="78" height="96"/>
+      <Character name="8" resource="raster_time_8" width="78" height="96"/>
+      <Character name="9" resource="raster_time_9" width="78" height="96"/>
+      <Character name=":" resource="raster_time_colon" width="30" height="96"/>
     </BitmapFont>
 
-    <!-- The weather CONDITION enum is indexed directly by these fonts. -->
+    <!-- Weather CONDITION is mapped to one normalized 16x16 tile per
+         day/night family.  The two families retain the existing WFF v2
+         condition semantics and four-entry flat weather palette. -->
     <BitmapFont name="raster_weather_day">
-      <Character name="0" resource="raster_weather_day_00" width="40" height="40"/>
-      <Character name="1" resource="raster_weather_day_01" width="40" height="40"/>
-      <Character name="2" resource="raster_weather_day_02" width="40" height="40"/>
-      <Character name="3" resource="raster_weather_day_03" width="40" height="40"/>
-      <Character name="4" resource="raster_weather_day_04" width="40" height="40"/>
-      <Character name="5" resource="raster_weather_day_05" width="40" height="40"/>
-      <Character name="6" resource="raster_weather_day_06" width="40" height="40"/>
-      <Character name="7" resource="raster_weather_day_07" width="40" height="40"/>
-      <Character name="8" resource="raster_weather_day_08" width="40" height="40"/>
-      <Character name="9" resource="raster_weather_day_09" width="40" height="40"/>
-      <Word name="10" resource="raster_weather_day_10" width="40" height="40"/>
-      <Word name="11" resource="raster_weather_day_11" width="40" height="40"/>
-      <Word name="12" resource="raster_weather_day_12" width="40" height="40"/>
-      <Word name="13" resource="raster_weather_day_13" width="40" height="40"/>
-      <Word name="14" resource="raster_weather_day_14" width="40" height="40"/>
-      <Word name="15" resource="raster_weather_day_15" width="40" height="40"/>
+      <Character name="0" resource="raster_weather_day_00" width="48" height="48"/>
+      <Character name="1" resource="raster_weather_day_01" width="48" height="48"/>
+      <Character name="2" resource="raster_weather_day_02" width="48" height="48"/>
+      <Character name="3" resource="raster_weather_day_03" width="48" height="48"/>
+      <Character name="4" resource="raster_weather_day_04" width="48" height="48"/>
+      <Character name="5" resource="raster_weather_day_05" width="48" height="48"/>
+      <Character name="6" resource="raster_weather_day_06" width="48" height="48"/>
+      <Character name="7" resource="raster_weather_day_07" width="48" height="48"/>
+      <Character name="8" resource="raster_weather_day_08" width="48" height="48"/>
+      <Character name="9" resource="raster_weather_day_09" width="48" height="48"/>
+      <Word name="10" resource="raster_weather_day_10" width="48" height="48"/>
+      <Word name="11" resource="raster_weather_day_11" width="48" height="48"/>
+      <Word name="12" resource="raster_weather_day_12" width="48" height="48"/>
+      <Word name="13" resource="raster_weather_day_13" width="48" height="48"/>
+      <Word name="14" resource="raster_weather_day_14" width="48" height="48"/>
+      <Word name="15" resource="raster_weather_day_15" width="48" height="48"/>
     </BitmapFont>
     <BitmapFont name="raster_weather_night">
-      <Character name="0" resource="raster_weather_night_00" width="40" height="40"/>
-      <Character name="1" resource="raster_weather_night_01" width="40" height="40"/>
-      <Character name="2" resource="raster_weather_night_02" width="40" height="40"/>
-      <Character name="3" resource="raster_weather_night_03" width="40" height="40"/>
-      <Character name="4" resource="raster_weather_night_04" width="40" height="40"/>
-      <Character name="5" resource="raster_weather_night_05" width="40" height="40"/>
-      <Character name="6" resource="raster_weather_night_06" width="40" height="40"/>
-      <Character name="7" resource="raster_weather_night_07" width="40" height="40"/>
-      <Character name="8" resource="raster_weather_night_08" width="40" height="40"/>
-      <Character name="9" resource="raster_weather_night_09" width="40" height="40"/>
-      <Word name="10" resource="raster_weather_night_10" width="40" height="40"/>
-      <Word name="11" resource="raster_weather_night_11" width="40" height="40"/>
-      <Word name="12" resource="raster_weather_night_12" width="40" height="40"/>
-      <Word name="13" resource="raster_weather_night_13" width="40" height="40"/>
-      <Word name="14" resource="raster_weather_night_14" width="40" height="40"/>
-      <Word name="15" resource="raster_weather_night_15" width="40" height="40"/>
+      <Character name="0" resource="raster_weather_night_00" width="48" height="48"/>
+      <Character name="1" resource="raster_weather_night_01" width="48" height="48"/>
+      <Character name="2" resource="raster_weather_night_02" width="48" height="48"/>
+      <Character name="3" resource="raster_weather_night_03" width="48" height="48"/>
+      <Character name="4" resource="raster_weather_night_04" width="48" height="48"/>
+      <Character name="5" resource="raster_weather_night_05" width="48" height="48"/>
+      <Character name="6" resource="raster_weather_night_06" width="48" height="48"/>
+      <Character name="7" resource="raster_weather_night_07" width="48" height="48"/>
+      <Character name="8" resource="raster_weather_night_08" width="48" height="48"/>
+      <Character name="9" resource="raster_weather_night_09" width="48" height="48"/>
+      <Word name="10" resource="raster_weather_night_10" width="48" height="48"/>
+      <Word name="11" resource="raster_weather_night_11" width="48" height="48"/>
+      <Word name="12" resource="raster_weather_night_12" width="48" height="48"/>
+      <Word name="13" resource="raster_weather_night_13" width="48" height="48"/>
+      <Word name="14" resource="raster_weather_night_14" width="48" height="48"/>
+      <Word name="15" resource="raster_weather_night_15" width="48" height="48"/>
     </BitmapFont>
   </BitmapFonts>
 
   <Scene backgroundColor="#ff000000">
     <Group x="8" y="8" width="450" height="450" name="active_frame">
-      <!-- All non-time information is omitted by one ambient variant. -->
+      <!-- Ambient intentionally leaves only the live time outside this group. -->
       <Group x="0" y="0" width="450" height="450" name="interactive_information">
         <Variant mode="AMBIENT" target="alpha" value="0"/>
 
-        <Group x="0" y="65" width="450" height="40" name="weather_region">
+        <!-- 45..93 active-frame band: 16x16 weather tile and two text lines. -->
+        <Group x="162" y="45" width="162" height="48" name="weather_region">
           <Condition>
             <Expressions>
               <Expression name="weather_available">[WEATHER.IS_AVAILABLE]</Expression>
             </Expressions>
             <Compare expression="weather_available">
-              <Group x="0" y="0" width="450" height="40" name="weather_available_view">
+              <Group x="0" y="0" width="162" height="48" name="weather_available_view">
                 <Condition>
                   <Expressions>
                     <Expression name="weather_is_day">[WEATHER.IS_DAY]</Expression>
                   </Expressions>
                   <Compare expression="weather_is_day">
-                    <PartText x="145" y="0" width="40" height="40" name="weather_icon_day">
+                    <PartText x="0" y="0" width="48" height="48" name="weather_icon_day">
                       <Text align="CENTER">
-                        <BitmapFont family="raster_weather_day" size="40">
+                        <BitmapFont family="raster_weather_day" size="48">
                           <Template><![CDATA[%s]]>
                             <Parameter expression="([WEATHER.CONDITION] &gt;= 0 &amp;&amp; [WEATHER.CONDITION] &lt;= 15) ? [WEATHER.CONDITION] : 0"/>
                           </Template>
@@ -135,9 +139,9 @@
                     </PartText>
                   </Compare>
                   <Default>
-                    <PartText x="145" y="0" width="40" height="40" name="weather_icon_night">
+                    <PartText x="0" y="0" width="48" height="48" name="weather_icon_night">
                       <Text align="CENTER">
-                        <BitmapFont family="raster_weather_night" size="40">
+                        <BitmapFont family="raster_weather_night" size="48">
                           <Template><![CDATA[%s]]>
                             <Parameter expression="([WEATHER.CONDITION] &gt;= 0 &amp;&amp; [WEATHER.CONDITION] &lt;= 15) ? [WEATHER.CONDITION] : 0"/>
                           </Template>
@@ -146,10 +150,14 @@
                     </PartText>
                   </Default>
                 </Condition>
-
-                <PartText x="195" y="0" width="180" height="40" name="weather_temperature">
+                <PartText x="54" y="0" width="108" height="24" name="weather_label">
                   <Text align="START">
-                    <BitmapFont family="raster_fine" size="35" color="#ffffffff">
+                    <BitmapFont family="raster_fine" size="21" color="#ffffffff">WX</BitmapFont>
+                  </Text>
+                </PartText>
+                <PartText x="54" y="24" width="108" height="24" name="weather_temperature">
+                  <Text align="START">
+                    <BitmapFont family="raster_fine" size="21" color="#ffffffff">
                       <Template><![CDATA[%d°%s]]>
                         <Parameter expression="[WEATHER.TEMPERATURE]"/>
                         <Parameter expression="[WEATHER.TEMPERATURE_UNIT] == 1 ? &quot;C&quot; : &quot;F&quot;"/>
@@ -157,13 +165,12 @@
                     </BitmapFont>
                   </Text>
                 </PartText>
-
                 <Condition>
                   <Expressions>
                     <Expression name="weather_error">[WEATHER.IS_ERROR]</Expression>
                   </Expressions>
                   <Compare expression="weather_error">
-                    <PartImage x="175" y="30" width="10" height="10" name="weather_stale_marker">
+                    <PartImage x="42" y="0" width="6" height="6" name="weather_stale_marker">
                       <Image resource="raster_weather_stale"/>
                     </PartImage>
                   </Compare>
@@ -171,38 +178,72 @@
               </Group>
             </Compare>
             <Default>
-              <PartText x="0" y="0" width="450" height="35" name="weather_unavailable">
-                <Text align="CENTER">
-                  <BitmapFont family="raster_fine" size="35" color="#ffffffff"><![CDATA[WX --]]></BitmapFont>
-                </Text>
-              </PartText>
+              <Group x="18" y="0" width="90" height="48" name="weather_unavailable_view">
+                <PartImage x="0" y="0" width="48" height="48" name="weather_unknown_icon">
+                  <Image resource="raster_weather_day_00"/>
+                </PartImage>
+                <PartText x="54" y="0" width="36" height="24" name="weather_unavailable_label">
+                  <Text align="START">
+                    <BitmapFont family="raster_fine" size="21" color="#ffffffff">WX</BitmapFont>
+                  </Text>
+                </PartText>
+                <PartText x="54" y="24" width="36" height="24" name="weather_unavailable_value">
+                  <Text align="START">
+                    <BitmapFont family="raster_fine" size="21" color="#ffffffff">--</BitmapFont>
+                  </Text>
+                </PartText>
+              </Group>
             </Default>
           </Condition>
         </Group>
 
-        <PartText x="75" y="125" width="300" height="35" name="date">
-          <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE"/>
-          <Text align="CENTER">
-            <BitmapFont family="raster_fine" size="35" color="#ffffffff">
-              <Template><![CDATA[%s %d %s]]>
-                <Parameter expression="[DAY_OF_WEEK] == 1 ? &quot;SUN&quot; : [DAY_OF_WEEK] == 2 ? &quot;MON&quot; : [DAY_OF_WEEK] == 3 ? &quot;TUE&quot; : [DAY_OF_WEEK] == 4 ? &quot;WED&quot; : [DAY_OF_WEEK] == 5 ? &quot;THU&quot; : [DAY_OF_WEEK] == 6 ? &quot;FRI&quot; : &quot;SAT&quot;"/>
-                <Parameter expression="[DAY]"/>
-                <Parameter expression="[MONTH_0_11] == 0 ? &quot;JAN&quot; : [MONTH_0_11] == 1 ? &quot;FEB&quot; : [MONTH_0_11] == 2 ? &quot;MAR&quot; : [MONTH_0_11] == 3 ? &quot;APR&quot; : [MONTH_0_11] == 4 ? &quot;MAY&quot; : [MONTH_0_11] == 5 ? &quot;JUN&quot; : [MONTH_0_11] == 6 ? &quot;JUL&quot; : [MONTH_0_11] == 7 ? &quot;AUG&quot; : [MONTH_0_11] == 8 ? &quot;SEP&quot; : [MONTH_0_11] == 9 ? &quot;OCT&quot; : [MONTH_0_11] == 10 ? &quot;NOV&quot; : &quot;DEC&quot;"/>
-              </Template>
-            </BitmapFont>
-          </Text>
-        </PartText>
+        <!-- 111..159 active-frame band: calendar tile and weekday/date lines. -->
+        <Group x="150" y="111" width="150" height="48" name="date_region">
+          <PartImage x="0" y="0" width="48" height="48" name="calendar_icon">
+            <Image resource="raster_icon_calendar"/>
+          </PartImage>
+          <PartText x="54" y="0" width="96" height="24" name="weekday">
+            <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE"/>
+            <Text align="START">
+              <BitmapFont family="raster_fine" size="21" color="#ffffffff">
+                <Template><![CDATA[%s]]>
+                  <Parameter expression="[DAY_OF_WEEK] == 1 ? &quot;SUN&quot; : [DAY_OF_WEEK] == 2 ? &quot;MON&quot; : [DAY_OF_WEEK] == 3 ? &quot;TUE&quot; : [DAY_OF_WEEK] == 4 ? &quot;WED&quot; : [DAY_OF_WEEK] == 5 ? &quot;THU&quot; : [DAY_OF_WEEK] == 6 ? &quot;FRI&quot; : &quot;SAT&quot;"/>
+                </Template>
+              </BitmapFont>
+            </Text>
+          </PartText>
+          <PartText x="54" y="24" width="96" height="24" name="date_value">
+            <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE"/>
+            <Text align="START">
+              <BitmapFont family="raster_fine" size="21" color="#ffffffff">
+                <Template><![CDATA[%d %s]]>
+                  <Parameter expression="[DAY]"/>
+                  <Parameter expression="[MONTH_0_11] == 0 ? &quot;JAN&quot; : [MONTH_0_11] == 1 ? &quot;FEB&quot; : [MONTH_0_11] == 2 ? &quot;MAR&quot; : [MONTH_0_11] == 3 ? &quot;APR&quot; : [MONTH_0_11] == 4 ? &quot;MAY&quot; : [MONTH_0_11] == 5 ? &quot;JUN&quot; : [MONTH_0_11] == 6 ? &quot;JUL&quot; : [MONTH_0_11] == 7 ? &quot;AUG&quot; : [MONTH_0_11] == 8 ? &quot;SEP&quot; : [MONTH_0_11] == 9 ? &quot;OCT&quot; : [MONTH_0_11] == 10 ? &quot;NOV&quot; : &quot;DEC&quot;"/>
+                </Template>
+              </BitmapFont>
+            </Text>
+          </PartText>
+        </Group>
 
-        <Group x="0" y="290" width="450" height="35" name="steps">
+        <!-- 291..339 active-frame band: walker tile and truthful step value. -->
+        <Group x="153" y="291" width="162" height="48" name="steps_region">
+          <PartImage x="0" y="0" width="48" height="48" name="steps_icon">
+            <Image resource="raster_icon_steps"/>
+          </PartImage>
+          <PartText x="54" y="0" width="108" height="24" name="steps_label">
+            <Text align="START">
+              <BitmapFont family="raster_fine" size="21" color="#ffffffff">STP</BitmapFont>
+            </Text>
+          </PartText>
           <Condition>
             <Expressions>
               <Expression name="steps_six_digits">[STEP_COUNT] &gt; 99999</Expression>
             </Expressions>
             <Compare expression="steps_six_digits">
-              <PartText x="85" y="0" width="280" height="35" name="steps_six_digit_value">
-                <Text align="CENTER">
-                  <BitmapFont family="raster_fine" size="35" color="#ffffffff">
-                    <Template><![CDATA[STP %d]]>
+              <PartText x="54" y="24" width="108" height="24" name="steps_six_digit_value">
+                <Text align="START">
+                  <BitmapFont family="raster_fine" size="21" color="#ffffffff">
+                    <Template><![CDATA[%d]]>
                       <Parameter expression="clamp([STEP_COUNT], 0, 999999)"/>
                     </Template>
                   </BitmapFont>
@@ -210,10 +251,10 @@
               </PartText>
             </Compare>
             <Default>
-              <PartText x="90" y="0" width="270" height="35" name="steps_padded_value">
-                <Text align="CENTER">
-                  <BitmapFont family="raster_fine" size="35" color="#ffffffff">
-                    <Template><![CDATA[STP %05d]]>
+              <PartText x="54" y="24" width="108" height="24" name="steps_padded_value">
+                <Text align="START">
+                  <BitmapFont family="raster_fine" size="21" color="#ffffffff">
+                    <Template><![CDATA[%05d]]>
                       <Parameter expression="clamp([STEP_COUNT], 0, 99999)"/>
                     </Template>
                   </BitmapFont>
@@ -223,22 +264,33 @@
           </Condition>
         </Group>
 
-        <PartText x="105" y="345" width="240" height="35" name="battery">
-          <Text align="CENTER">
-            <BitmapFont family="raster_fine" size="35" color="#ffffffff">
-              <Template><![CDATA[BAT %d%%]]>
-                <Parameter expression="clamp([BATTERY_PERCENT], 0, 100)"/>
-              </Template>
-            </BitmapFont>
-          </Text>
-        </PartText>
+        <!-- 357..405 active-frame band: battery tile and bounded percentage. -->
+        <Group x="171" y="357" width="126" height="48" name="battery_region">
+          <PartImage x="0" y="0" width="48" height="48" name="battery_icon">
+            <Image resource="raster_icon_battery"/>
+          </PartImage>
+          <PartText x="54" y="0" width="72" height="24" name="battery_label">
+            <Text align="START">
+              <BitmapFont family="raster_fine" size="21" color="#ffffffff">BAT</BitmapFont>
+            </Text>
+          </PartText>
+          <PartText x="54" y="24" width="72" height="24" name="battery_value">
+            <Text align="START">
+              <BitmapFont family="raster_fine" size="21" color="#ffffffff">
+                <Template><![CDATA[%d%%]]>
+                  <Parameter expression="clamp([BATTERY_PERCENT], 0, 100)"/>
+                </Template>
+              </BitmapFont>
+            </Text>
+          </PartText>
+        </Group>
       </Group>
 
-      <!-- The only content outside the ambient-hidden group is live time. -->
-      <DigitalClock x="50" y="180" width="350" height="90">
+      <!-- One live clock, no seconds; this is also the complete ambient face. -->
+      <DigitalClock x="54" y="177" width="342" height="96">
         <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE"/>
-        <TimeText x="0" y="0" width="350" height="90" format="hh:mm" hourFormat="SYNC_TO_DEVICE" align="CENTER">
-          <BitmapFont family="raster_coarse" size="90" color="#ffffffff"/>
+        <TimeText x="0" y="0" width="342" height="96" format="hh:mm" hourFormat="SYNC_TO_DEVICE" align="CENTER">
+          <BitmapFont family="raster_time" size="96" color="#ffffffff"/>
         </TimeText>
       </DigitalClock>
     </Group>
