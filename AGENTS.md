@@ -26,25 +26,30 @@ general Wear OS app.
   deterministic bitmap-font glyphs generated from project-owned matrices. The
   four approved source TTFs and their license remain under `third_party/` as
   design provenance, never under the module's `res/font`.
-- The provisional raster hierarchy uses one shared 5-unit lattice with two
-  exact integer tiers: 5×5 pitch / 4×4 lit pixels for compact information and
-  10×10 pitch / 8×8 lit pixels for time. Do not introduce an independently
-  aligned grid or third pixel scale. The mathematical fit uses a conservative
-  210-unit circular safe radius but still requires renderer and physical-watch
-  calibration.
-- Ordinary fine glyphs retain 30-unit advances; the literal space is a shared
-  10-unit fine-tier separator used by weather fallback, date, steps, and
-  battery formatting.
+- The post-V1 design direction treats the centered 450×450 active frame as one
+  fictional 150×150 framebuffer. Every visible source pixel uses a 3×3 pitch
+  with a 2×2 lit square and one-unit gutter; hierarchy comes from matrix size,
+  not from a second physical pixel scale. Use 8-cell text line boxes, uniform
+  16×16 icon tiles, and a 32-cell time line box as the provisional 1:2:4
+  layout rhythm. The packaged V1 remains on its implemented 5/4 and 10/8
+  two-tier assets until native, scaled, and physical-watch calibration approves
+  the new grid.
+- The 3/2 study may reuse the existing project-owned 5×7 compact glyph shapes
+  inside 8-cell line boxes. Its high-resolution time must use the same 3/2
+  source pixels rather than simulating a larger pixel tier. The degree mark is
+  a closed ring or box, never an open upper semicircle. Design fixtures default
+  to Celsius; live WFF weather continues to follow the device's preferred unit
+  unless an explicit product setting is added later.
 - Pixelarticons is visual research only for the current design pass. Do not add
   it as a dependency, vendor its SVGs, or mechanically trace/downsample them.
   Raster 90 icons remain independently authored, project-owned matrices unless
   a later explicit decision pins and licenses selected upstream assets.
-- Icon canvas size does not introduce another pixel tier: 8×8 utility icons,
-  12×12 feature sprites, and any exceptional 16×16 scene all retain the shared
-  5-unit fine pitch. Use 8×8 for persistent calendar/steps/battery semantics;
-  prefer one 12×12 weather/event feature when revised geometry permits; reserve
-  16×16 for a transient scene that replaces content. The indexed-color plane
-  remains capped at 12×12.
+- All persistent icon and sprite resources in the post-V1 study use one
+  uniform 16×16 canvas at the 3/2 pixel pitch, producing a 48×48 WFF tile.
+  Weather, calendar, steps, battery, unknown, and event artwork should be
+  optically comparable in size; transparent padding may correct shape-specific
+  weight, but there is no utility-versus-feature canvas split. The persistent
+  indexed-color plane is provisionally one 16×16 tile and remains weather-only.
 - The V1 interactive composition omits seconds and uses a static colon. Its
   fixed information set is time, date, current weather, step count, and battery;
   weather sits above the date and uses the only persistent indexed-color sprite
@@ -269,15 +274,20 @@ Confirm the selected face visually after every deploy.
 Use both textual and visual checks:
 
 ```sh
-rtk mkdir -p outputs
+rtk mkdir -p outputs/raster90/captures/<checkpoint>
 rtk adb -s <wear-emulator-serial> shell uiautomator dump /sdcard/window.xml
 rtk adb -s <wear-emulator-serial> exec-out cat /sdcard/window.xml
-rtk adb -s <wear-emulator-serial> exec-out screencap -p > outputs/watchface.png
+rtk adb -s <wear-emulator-serial> exec-out screencap -p \
+  > outputs/raster90/captures/<checkpoint>/watchface.png
 ```
 
 Keep disposable but reviewable local artifacts under the Git-ignored root
-`outputs/` directory rather than `/tmp`. Use descriptive target-and-mode names
-when retaining multiple captures.
+`outputs/` directory rather than `/tmp`. Namespace artifacts by product, then
+purpose: generated studies belong under `outputs/raster90/studies/<study>/`,
+emulator or physical-device evidence under
+`outputs/raster90/captures/<checkpoint>/`, and external visual references under
+`outputs/references/`. Do not restore a flat output dump. Use descriptive
+target-and-mode names when retaining multiple captures.
 
 For renderer failures, first obtain the runtime PID with
 `rtk adb -s <serial> shell pidof -s com.google.wear.watchface.runtime`, then
@@ -396,9 +406,13 @@ rtk adb -s <phone-serial> shell wm density
   authoritative for AMOLED appearance, bezel, AOD, wrist-distance, and battery.
 - [ ] Live-test available and stale weather states with real location/weather
   data; emulator testing currently proves the truthful `WX --` fallback.
-- [ ] Produce actual-size icon studies comparing an all-8×8 treatment with one
-  12×12 weather/event feature plus 8×8 calendar, steps, and battery utilities.
-- [ ] Recalculate the row bands and circular fit for the selected icon-led
+- [x] Produce actual-size icon studies exposing the optical-weight and
+  recognizability problems in the earlier 8×8/12×12 split.
+- [ ] Calibrate the provisional 150×150 single-grid system at native 466×466,
+  scaled 454×454, and on the physical watch before replacing V1 geometry.
+- [ ] Design the complete WFF weather-condition family and revised information
+  layout on uniform 16×16 icon tiles after the 3/2 source pixel is approved.
+- [ ] Recalculate row bands and circular fit for the selected single-grid
   composition before replacing the text-heavy V1 runtime assets.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.

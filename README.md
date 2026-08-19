@@ -10,6 +10,12 @@ weather, steps, and battery; ambient mode reduces it to time only. Its exact
 glyph and sprite resources are generated deterministically from reviewable
 cell matrices rather than rendered from a runtime TTF.
 
+The post-V1 design study is evaluating a single fictional 150×150 framebuffer:
+one 3-unit source-pixel pitch with 2×2 lit squares, uniform 16×16 icon tiles,
+8-pixel compact-text lines, and a 32-pixel high-resolution time line. This is
+not packaged runtime geometry until native, scaled, and physical-watch
+calibration approves it.
+
 The resting face is intentionally monochrome except for the small weather
 sprite. When emulator weather is unavailable it reports `WX --` without moving
 the time. The generated preview records the available-state composition with
@@ -58,7 +64,10 @@ The debug APK is written to
 [Device Setup](docs/device-setup.md) for explicit-target emulator deployment
 and the current validation record. Local screenshots, reports, and other
 reviewable generated artifacts belong in the Git-ignored root `outputs/`
-directory.
+directory. Keep them namespaced: Raster 90 generators use
+`outputs/raster90/studies/<study>/`, device evidence uses
+`outputs/raster90/captures/<checkpoint>/`, and external visual references use
+`outputs/references/`.
 
 Regenerate or verify the bitmap resources with:
 

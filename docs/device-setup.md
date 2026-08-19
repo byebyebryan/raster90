@@ -439,7 +439,8 @@ Wear OS 5 targets:
 - Both emulators were stopped only after re-proving their AVD names. No physical
   device was connected or modified.
 
-Local review artifacts are retained under the Git-ignored `outputs/` directory:
+Local review artifacts are retained under the Git-ignored
+`outputs/raster90/captures/typography/` directory:
 
 - `raster90-typography-wear5-opw3-interactive-466.png`
 - `raster90-typography-wear5-opw3-ambient-466.png`
@@ -487,7 +488,8 @@ Freshly validated the functional resource-only V1 on both Wear OS 5 targets:
 - Both emulators were stopped only after re-proving their AVD names. No physical
   device was connected or modified.
 
-Local review artifacts are retained under the Git-ignored `outputs/` directory:
+Local review artifacts are retained under the Git-ignored
+`outputs/raster90/captures/v1/` directory:
 
 - `raster90-v1-wear5-opw3-interactive-466.png`
 - `raster90-v1-wear5-opw3-ambient-466.png`

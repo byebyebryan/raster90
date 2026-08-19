@@ -78,8 +78,11 @@ module.
   checker for the 87 packaged/preview PNGs.
 - `third_party/pixel-operator/` retains the four approved CC0 source fonts and
   license as design provenance; no TTF is packaged in V1.
-- `outputs/` is Git-ignored and holds screenshots, logs, and other local review
-  artifacts.
+- `outputs/` is Git-ignored and namespaced by product and purpose:
+  `outputs/raster90/studies/<study>/` holds generated design studies,
+  `outputs/raster90/captures/<checkpoint>/` holds emulator or physical-device
+  evidence, and `outputs/references/` holds external visual references. Do not
+  place new artifacts directly in the root.
 
 Physical-watch adjustment and post-V1 motion/color decisions remain tracked in
 `docs/watchface-design.md`; they do not change the monorepo boundary.
