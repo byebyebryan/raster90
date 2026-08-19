@@ -68,7 +68,7 @@
       <Character name=":" resource="raster_time_colon" width="30" height="96"/>
     </BitmapFont>
 
-    <!-- Weather CONDITION is mapped to one normalized 16x16 tile per
+    <!-- Weather CONDITION is mapped to one direct-authored 16x16 tile per
          day/night family.  The two families retain the existing WFF v2
          condition semantics and four-entry flat weather palette. -->
     <BitmapFont name="raster_weather_day">

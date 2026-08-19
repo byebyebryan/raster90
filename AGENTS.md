@@ -428,8 +428,9 @@ rtk adb -s <phone-serial> shell wm density
   recognizability problems in the earlier 8×8/12×12 split.
 - [x] Package and validate the 150×150 single-grid system at native 466×466 and
   scaled 454×454, including interactive, time-only ambient, and 12/24-hour sync.
-- [x] Normalize and package all mapped WFF weather conditions plus calendar,
-  steps, and battery on uniform 16×16 icon tiles.
+- [x] Normalize and package all mapped WFF weather conditions plus steps and
+  battery on uniform 16×16 icon tiles; the calendar icon was deliberately
+  removed from the selected composition.
 - [x] Recalculate and implement the single-grid row bands and circular fit.
 - [x] Select the next visual direction from deterministic mocks: solid 3×3 base
   cells, true 16×16 weather/steps/battery icons, one icon-led value per row,
