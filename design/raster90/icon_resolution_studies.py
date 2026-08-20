@@ -1,28 +1,38 @@
-"""Raster 90 icon-resolution evidence and selected solid-grid matrices.
+"""Raster 90 icon-resolution evidence and historical design controls.
 
-Direction A keeps genuinely 8x8 artwork and assumes solid contiguous pixels.
-Direction B is authored directly at 16x16 for the earlier 3-pitch/2-lit
-fictional display. The selected runtime promotes the same true 16x16 matrices
-with solid 3x3 cells; this module remains their authoritative, reviewable
-source so the generator and design studies cannot drift.
+The selected runtime family is authoritative under ``icons/raster90/family.py``.
+This module retains the genuinely 8x8 comparison direction and the calendar
+study control used by old decision sheets. Its selected true-16 compatibility
+aliases point to the canonical family so design renderers cannot drift from
+the packaged surfaces.
 """
 
 from __future__ import annotations
 
 from typing import Final, Mapping, Sequence
 
-from matrices import (
+from icons.raster90.family import (
+    PALETTE,
+    SELECTED_UTILITY_ICONS,
+    STALE_MARKER,
     WEATHER_CONDITIONS,
+    WEATHER_DAY,
     WEATHER_DAY_RESOLUTION,
+    WEATHER_NIGHT,
     WEATHER_NIGHT_RESOLUTION,
     WEATHER_SPRITES,
-    WEATHER_STALE,
+)
+from matrices import (
+    WEATHER_SPRITES as EIGHT_WEATHER_SPRITES,
+    WEATHER_DAY_RESOLUTION as EIGHT_WEATHER_DAY_RESOLUTION,
+    WEATHER_NIGHT_RESOLUTION as EIGHT_WEATHER_NIGHT_RESOLUTION,
 )
 
 
 Matrix = tuple[str, ...]
 
 
+# Historical direction A: genuinely 8x8 artwork with solid contiguous cells.
 EIGHT_UTILITY_ICONS: Final[Mapping[str, Matrix]] = {
     "date": (
         ".1..1...",
@@ -57,397 +67,53 @@ EIGHT_UTILITY_ICONS: Final[Mapping[str, Matrix]] = {
 }
 
 EIGHT_WEATHER_DAY: Final[Mapping[int, Matrix]] = {
-    condition: WEATHER_SPRITES[sprite_name]
-    for condition, sprite_name in enumerate(WEATHER_DAY_RESOLUTION)
+    condition: EIGHT_WEATHER_SPRITES[sprite_name]
+    for condition, sprite_name in enumerate(EIGHT_WEATHER_DAY_RESOLUTION)
 }
 EIGHT_WEATHER_NIGHT: Final[Mapping[int, Matrix]] = {
-    condition: WEATHER_SPRITES[sprite_name]
-    for condition, sprite_name in enumerate(WEATHER_NIGHT_RESOLUTION)
+    condition: EIGHT_WEATHER_SPRITES[sprite_name]
+    for condition, sprite_name in enumerate(EIGHT_WEATHER_NIGHT_RESOLUTION)
 }
 
 
-def _overlay(*layers: Sequence[str]) -> Matrix:
-    """Combine same-sized direct-authored layers without resampling."""
+# Historical calendar-only control retained for the old icon-resolution sheet.
+_HISTORICAL_DATE_ICON: Final[Matrix] = (
+    "................",
+    ".....1...1......",
+    "..111111111111..",
+    "..1..........1..",
+    "..111111111111..",
+    "..1..........1..",
+    "..1..1..1..1.1..",
+    "..1..........1..",
+    "..1..1..1..1.1..",
+    "..1..........1..",
+    "..1..1..1..1.1..",
+    "..1..........1..",
+    "..1..1..1..1.1..",
+    "..1..........1..",
+    "..111111111111..",
+    "................",
+)
 
-    size = 16
-    output = [["." for _x in range(size)] for _y in range(size)]
-    for layer in layers:
-        if len(layer) != size or any(len(row) != size for row in layer):
-            raise ValueError("16x16 weather layer has invalid dimensions")
-        for y, row in enumerate(layer):
-            for x, symbol in enumerate(row):
-                if symbol != ".":
-                    output[y][x] = symbol
-    return tuple("".join(row) for row in output)
-
-
+# The design surface intentionally keeps ``date`` for historical comparisons,
+# but selected runtime utilities are imported by identity from the canonical
+# component and contain no calendar key.
 SIXTEEN_UTILITY_ICONS: Final[Mapping[str, Matrix]] = {
-    "date": (
-        "................",
-        ".....1...1......",
-        "..111111111111..",
-        "..1..........1..",
-        "..111111111111..",
-        "..1..........1..",
-        "..1..1..1..1.1..",
-        "..1..........1..",
-        "..1..1..1..1.1..",
-        "..1..........1..",
-        "..1..1..1..1.1..",
-        "..1..........1..",
-        "..1..1..1..1.1..",
-        "..1..........1..",
-        "..111111111111..",
-        "................",
-    ),
-    "steps": (
-        # Direct-authored paired footprints use separated toe pads and tapered,
-        # vertically offset soles for recognizability at native 3x3-cell scale.
-        ".........11.1...",
-        ".........11...1.",
-        "...1.11.........",
-        ".1...11..11111..",
-        ".........111111.",
-        "..11111..111111.",
-        ".111111..11111..",
-        ".111111..11111..",
-        ".11111....1111..",
-        "..1111....111...",
-        "..1111....111...",
-        "...111....111...",
-        "...111..........",
-        "...111..........",
-        "................",
-        "................",
-    ),
-    "battery": (
-        "................",
-        "................",
-        "................",
-        "................",
-        ".111111111111...",
-        ".1..........1...",
-        ".1..........111.",
-        ".1..........111.",
-        ".1..........111.",
-        ".1..........111.",
-        ".1..........1...",
-        ".111111111111...",
-        "................",
-        "................",
-        "................",
-        "................",
-    ),
+    "date": _HISTORICAL_DATE_ICON,
+    **SELECTED_UTILITY_ICONS,
 }
+SIXTEEN_WEATHER_SPRITES: Final[Mapping[str, Matrix]] = WEATHER_SPRITES
+SIXTEEN_WEATHER_DAY: Final[Mapping[int, Matrix]] = WEATHER_DAY
+SIXTEEN_WEATHER_NIGHT: Final[Mapping[int, Matrix]] = WEATHER_NIGHT
 
 
-_CLOUD_16: Final[Matrix] = (
-    "................",
-    "......WWW.......",
-    "....WW...WW.....",
-    "...W.......W....",
-    "...W........WW..",
-    "..W...........W.",
-    ".W.............W",
-    ".W.............W",
-    "..WWWWWWWWWWWW..",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-)
-
-_PARTLY_CLOUD_16: Final[Matrix] = (
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "........WWW.....",
-    "......WW...WW...",
-    ".....W.......W..",
-    "..WWW.........W.",
-    ".W.............W",
-    ".W.............W",
-    "..WWWWWWWWWWWW..",
-    "................",
-    "................",
-    "................",
-    "................",
-)
-
-_RAIN_16: Final[Matrix] = (
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "...B....B....B..",
-    "..B....B....B...",
-    "................",
-    "....B....B......",
-    "...B....B.......",
-    "................",
-)
-
-_HEAVY_RAIN_16: Final[Matrix] = (
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "...B...B...B....",
-    "..B...B...B.....",
-    ".B...B...B...B..",
-    "...B...B...B....",
-    "..B...B...B.....",
-    ".B...B...B...B..",
-    "................",
-)
-
-_SNOW_16: Final[Matrix] = (
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "...C......C.....",
-    "..CCC....CCC....",
-    "...C......C.....",
-    ".......C........",
-    "......CCC.......",
-    ".......C........",
-)
-
-_HEAVY_SNOW_16: Final[Matrix] = (
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "..C....C....C...",
-    ".CCC..CCC..CCC..",
-    "..C....C....C...",
-    "................",
-    "....C.....C.....",
-    "...CCC...CCC....",
-    "....C.....C.....",
-)
-
-_SLEET_16: Final[Matrix] = (
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "...B......C.....",
-    "..B......CCC....",
-    ".........C......",
-    "......C......B..",
-    ".....CCC....B...",
-    "......C.........",
-)
-
-_THUNDER_16: Final[Matrix] = (
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    ".......Y........",
-    "......YY........",
-    ".....YY.........",
-    ".......Y........",
-    "......Y.........",
-    ".....Y..........",
-    "................",
-)
-
-SIXTEEN_WEATHER_SPRITES: Final[Mapping[str, Matrix]] = {
-    "unknown": (
-        "....WWWWWWWW....",
-        "..WW........WW..",
-        ".W............W.",
-        ".W....WWW.....W.",
-        ".W...W...W....W.",
-        ".W.......W....W.",
-        ".W......W.....W.",
-        ".W.....W......W.",
-        ".W.....W......W.",
-        ".W............W.",
-        ".W.....W......W.",
-        ".W............W.",
-        ".W............W.",
-        "..WW........WW..",
-        "....WWWWWWWW....",
-        "................",
-    ),
-    "clear_day": (
-        ".......Y........",
-        "..Y....Y....Y...",
-        "...Y...Y...Y....",
-        ".....YYYYY......",
-        "....Y.....Y.....",
-        "....Y.....Y.....",
-        "YYY.Y.....Y.YYY.",
-        "....Y.....Y.....",
-        "....Y.....Y.....",
-        ".....YYYYY......",
-        "...Y...Y...Y....",
-        "..Y....Y....Y...",
-        ".......Y........",
-        "................",
-        "................",
-        "................",
-    ),
-    "clear_night": (
-        "......CC........",
-        "....CCCC........",
-        "...CCC.......C..",
-        "..CCC...........",
-        "..CC............",
-        ".CCC........C...",
-        ".CCC.......CCC..",
-        ".CCC........C...",
-        ".CCC............",
-        "..CC............",
-        "..CCC.......C...",
-        "...CCC..........",
-        "....CCCC........",
-        "......CC........",
-        "................",
-        "................",
-    ),
-    "partly_day": _overlay(
-        (
-            "....Y...........",
-            ".Y..Y..Y........",
-            "..YYYYY.........",
-            "..Y...Y.........",
-            ".YY...YY........",
-            "..Y...Y.........",
-            "..YYYYY.........",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-        ),
-        _PARTLY_CLOUD_16,
-    ),
-    "partly_night": _overlay(
-        (
-            "...CCC..........",
-            "..CC............",
-            ".CC.............",
-            ".CC........C....",
-            ".CC.......CCC...",
-            "..CC.......C....",
-            "...CCC..........",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-            "................",
-        ),
-        _PARTLY_CLOUD_16,
-    ),
-    "cloudy": _CLOUD_16,
-    "fog": (
-        "................",
-        "................",
-        "...WWWWWWW......",
-        "..W.......WW....",
-        "................",
-        ".....CCCCCC.....",
-        "...CC......CC...",
-        "................",
-        "..BBBBBBBBBB....",
-        ".B..........BBB.",
-        "................",
-        "....CCCCCCCC....",
-        "...C........CC..",
-        "................",
-        "................",
-        "................",
-    ),
-    "heavy_rain": _overlay(_CLOUD_16, _HEAVY_RAIN_16),
-    "heavy_snow": _overlay(_CLOUD_16, _HEAVY_SNOW_16),
-    "rain": _overlay(_CLOUD_16, _RAIN_16),
-    "snow": _overlay(_CLOUD_16, _SNOW_16),
-    "thunderstorm": _overlay(_CLOUD_16, _THUNDER_16),
-    "sleet": _overlay(_CLOUD_16, _SLEET_16),
-    "windy": (
-        "................",
-        "....CCCC........",
-        "..CC....CCC.....",
-        ".C........C.....",
-        "..........CC....",
-        "......BBBB......",
-        "...BBB....BBBB..",
-        "..B...........B.",
-        ".........BBBB...",
-        ".....BBBB.......",
-        "..CCC...........",
-        ".C....CCCCCCCC..",
-        "..CCC...........",
-        "................",
-        "................",
-        "................",
-    ),
-}
-
-SIXTEEN_WEATHER_DAY: Final[Mapping[int, Matrix]] = {
-    condition: SIXTEEN_WEATHER_SPRITES[sprite_name]
-    for condition, sprite_name in enumerate(WEATHER_DAY_RESOLUTION)
-}
-SIXTEEN_WEATHER_NIGHT: Final[Mapping[int, Matrix]] = {
-    condition: SIXTEEN_WEATHER_SPRITES[sprite_name]
-    for condition, sprite_name in enumerate(WEATHER_NIGHT_RESOLUTION)
-}
-
-STALE_MARKER: Final[Matrix] = WEATHER_STALE
-
-
-def _validate_matrix(name: str, rows: Sequence[str], size: int, symbols: set[str]) -> None:
+def _validate_matrix(
+    name: str,
+    rows: Sequence[str],
+    size: int,
+    symbols: set[str],
+) -> None:
     if len(rows) != size or any(len(row) != size for row in rows):
         raise ValueError(f"{name}: expected {size}x{size} matrix")
     used = set("".join(rows))
@@ -468,32 +134,44 @@ def _is_doubled_8x8(rows: Sequence[str]) -> bool:
 
 
 def validate_icon_resolution_studies() -> None:
+    """Validate both historical controls and canonical selected aliases."""
+
     if len(WEATHER_CONDITIONS) != 16:
         raise ValueError("expected all 16 WFF weather conditions")
     for name, rows in EIGHT_UTILITY_ICONS.items():
         _validate_matrix(f"8x8 utility {name}", rows, 8, {"0", "1", "."})
-    for phase, sprites in (
-        ("day", EIGHT_WEATHER_DAY),
-        ("night", EIGHT_WEATHER_NIGHT),
-    ):
+    for phase, sprites in (("day", EIGHT_WEATHER_DAY), ("night", EIGHT_WEATHER_NIGHT)):
         if set(sprites) != set(range(16)):
             raise ValueError(f"8x8 {phase}: incomplete WFF condition map")
         for condition, rows in sprites.items():
-            _validate_matrix(f"8x8 {phase} {condition}", rows, 8, {".", "Y", "C", "B", "W"})
-
+            _validate_matrix(
+                f"8x8 {phase} {condition}",
+                rows,
+                8,
+                {".", "Y", "C", "B", "W"},
+            )
     for name, rows in SIXTEEN_UTILITY_ICONS.items():
         _validate_matrix(f"16x16 utility {name}", rows, 16, {"0", "1", "."})
         if _is_doubled_8x8(rows):
             raise ValueError(f"16x16 utility {name}: still consists of doubled 8x8 cells")
-    for phase, sprites in (
-        ("day", SIXTEEN_WEATHER_DAY),
-        ("night", SIXTEEN_WEATHER_NIGHT),
-    ):
+    for phase, sprites in (("day", SIXTEEN_WEATHER_DAY), ("night", SIXTEEN_WEATHER_NIGHT)):
         if set(sprites) != set(range(16)):
             raise ValueError(f"16x16 {phase}: incomplete WFF condition map")
         for condition, rows in sprites.items():
-            _validate_matrix(f"16x16 {phase} {condition}", rows, 16, {".", "Y", "C", "B", "W"})
+            _validate_matrix(
+                f"16x16 {phase} {condition}",
+                rows,
+                16,
+                {".", "Y", "C", "B", "W"},
+            )
             if _is_doubled_8x8(rows):
-                raise ValueError(
-                    f"16x16 {phase} {condition}: still consists of doubled 8x8 cells"
-                )
+                raise ValueError(f"16x16 {phase} {condition}: still consists of doubled 8x8 cells")
+    if STALE_MARKER != ("10", "01"):
+        raise ValueError("stale marker drifted")
+    if PALETTE != {
+        "Y": (255, 216, 0, 255),
+        "C": (73, 223, 255, 255),
+        "B": (36, 116, 255, 255),
+        "W": (255, 255, 255, 255),
+    }:
+        raise ValueError("indexed palette drifted")

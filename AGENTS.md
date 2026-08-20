@@ -48,9 +48,10 @@ general Wear OS app.
   rendered with solid 3×3 cells into 48×48 WFF tiles. The persistent resting
   icons are weather, steps, and battery. The calendar icon is intentionally
   removed; `SAT 15 AUG` is centered as text because it is already unambiguous.
-  The selected step icon is a direct-authored pair of footprints with
-  separated toe pads and vertically offset, tapered soles; do not restore the
-  walking-person silhouette.
+  The selected step icon is the direct-authored `four-toe-vertical` pair of
+  closed footprints with separated toe pads, one vertical 1×2 big-toe mark,
+  three 1×1 toes per footprint, and vertically offset tapered soles; do not
+  restore the walking-person silhouette or historical solid control.
   The weather tile remains the only persistent indexed-color plane. Do not
   integer-expand 8×8 art or use fractional nearest-neighbour resampling in the
   selected family; structural lines must be authored cell-by-cell with balanced
@@ -244,11 +245,12 @@ The `:watchfaces:raster90` scaffold follows the official WFF sample structure:
 - `res/raw/watchface.xml` contains the face definition.
 - `res/xml/watch_face_info.xml` declares preview/editability metadata.
 - Generated bitmap fonts, weather sprites, strings, and the picker preview live
-  in their normal `res/` directories. Non-font source matrices live in
-  `design/raster90/`; the authoritative font component lives under
-  `fonts/raster90/`. Both remain outside the application module. The complete
-  secondary vocabulary is presentation/source-only while the generator packages
-  only current WFF expression glyphs.
+  in their normal `res/` directories. Non-font/non-runtime source matrices live
+  in `design/raster90/`; authoritative project-owned font and selected icon
+  components live under `fonts/raster90/` and `icons/raster90/`. All remain
+  outside the application module. The complete secondary vocabulary and
+  historical icon controls are presentation/source-only while the generators
+  package only current WFF expression glyphs and selected icon surfaces.
 - The packaged runtime uses a 466×466 WFF canvas with a centered 450×450 active
   grid. The official 454×454 target scales that coordinate space cleanly; the
   physical watch remains authoritative.
@@ -269,6 +271,8 @@ rtk python3 -B tools/generate_raster90_assets.py
 rtk python3 -B tools/generate_raster90_assets.py --check
 rtk python3 -B tools/render_raster90_font_family.py
 rtk python3 -B tools/render_raster90_font_family.py --check
+rtk python3 -B tools/render_raster90_icon_family.py
+rtk python3 -B tools/render_raster90_icon_family.py --check
 ```
 
 For a Wear emulator deployment, resolve the runtime serial and prove the exact

@@ -112,19 +112,41 @@ rtk python3 -B tools/render_raster90_single_grid_study.py
 rtk python3 -B tools/render_raster90_single_grid_study.py --check
 rtk python3 -B tools/render_raster90_icon_resolution_studies.py --check
 rtk python3 -B tools/render_raster90_font_family.py --check
+rtk python3 -B tools/render_raster90_icon_family.py
+rtk python3 -B tools/render_raster90_icon_family.py --check
+rtk python3 -B tools/render_raster90_step_icon_outline_study.py --check
 rtk python3 -B -m unittest \
   tools/test_generate_raster90_assets.py \
   tools/test_raster90_fonts.py \
   tools/test_render_raster90_icon_resolution_studies.py \
-  tools/test_render_raster90_single_grid_study.py
+  tools/test_render_raster90_single_grid_study.py \
+  tools/test_raster90_icons.py \
+  tools/test_render_raster90_step_icon_outline_study.py
 ```
 
 Runtime review PNGs and geometry reports remain under the ignored
 `outputs/raster90/studies/single-grid/` directory. Solid-grid icon sheets and
 full-face decision mocks remain under
 `outputs/raster90/studies/icon-resolution/`. The single-grid runtime mirror and
-selected true 16×16 matrices correspond to packaged WFF assets; rejected icon
-comparisons remain design evidence only.
+selected true 16×16 matrices correspond to packaged WFF assets. The
+authoritative selected icon source is `icons/raster90/family.py`; rejected icon
+comparisons, the historical solid step control, and calendar art remain design
+evidence only.
+
+The tracked icon component presents the selected utility tiles, every WFF
+weather condition as day/night pairs, truthful unavailable/stale treatment,
+the native 466×466 face, and magnified 16×16/solid-3×3 inspections. Regenerate
+or byte-check it with:
+
+```sh
+rtk python3 -B tools/render_raster90_icon_family.py
+rtk python3 -B tools/render_raster90_icon_family.py --check
+```
+
+The approved steps source is the project-owned `four-toe-vertical` matrix:
+closed tapered soles, one vertical 1×2 big-toe line, and three separate 1×1
+toe marks per footprint. This replaces only the runtime steps tile and derived
+previews; weather and battery runtime PNG bytes remain stable.
 
 The earlier two-tier V1 used a 90×90 5/4 fine raster and aligned 45×45 10/8
 coarse time tier. It is now historical implementation evidence; the packaged

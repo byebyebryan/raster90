@@ -28,8 +28,10 @@ wear-os/
 ├── tools/              # Deterministic asset generation; future validation helpers
 ├── fonts/
 │   └── raster90/       # Project-owned family source and tracked presentation
+├── icons/
+│   └── raster90/       # Project-owned icon source and tracked presentation
 ├── design/
-│   ├── raster90/       # Reviewable icon, palette, and legacy study matrices
+│   ├── raster90/       # Historical icon/layout controls and design studies
 │   └── concepts/       # Exploratory artwork; not production resources
 └── third_party/        # Retained source material, licenses, and provenance
 ```
@@ -81,15 +83,21 @@ module.
   remains the stable alias for the selected clean-chamfer runtime cut.
   `design/raster90/matrices.py` keeps compatibility aliases for design studies
   alongside palette and legacy comparison sprites.
-- `design/raster90/icon_resolution_studies.py` is the authoritative reviewable
-  source for the packaged true 16×16 weather, steps, and battery matrices while
-  retaining the rejected resolution candidates as design evidence.
+- `icons/raster90/family.py` is the authoritative source for the selected
+  true 16×16 weather, steps, and battery matrices, complete day/night WFF
+  condition maps, the exact palette, neutral unavailable icon, and stale
+  marker. `design/raster90/icon_resolution_studies.py` retains calendar,
+  resolution, and other historical controls while rebinding selected aliases
+  for comparison renderers.
 - `tools/generate_raster90_assets.py` is the sole deterministic producer and
   checker for the 87 packaged/preview PNGs; it consumes only the secondary
   runtime subset and the complete primary 0-9/colon surface.
 - `tools/render_raster90_font_family.py` produces and checks the tracked,
   self-contained family overview and specimen sheets under
   `fonts/raster90/preview/`.
+- `tools/render_raster90_icon_family.py` produces and checks the tracked,
+  self-contained selected icon/weather/state/matrix and native/magnified face
+  sheets under `icons/raster90/preview/`.
 - `tools/render_raster90_icon_resolution_studies.py` produces ignored,
   deterministic comparison sheets and full-face mocks; it does not change the
   watch-face module.

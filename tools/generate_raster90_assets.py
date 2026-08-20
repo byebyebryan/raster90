@@ -28,10 +28,15 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "design" / "raster90"))
 
 from matrices import (  # noqa: E402  (path is intentionally set above)
-    PALETTE,
     SINGLE_GRID_LIT,
     SINGLE_GRID_PITCH,
-    WEATHER_STALE,
+)
+from icons.raster90.family import (  # noqa: E402  (canonical icon source)
+    PALETTE,
+    SELECTED_UTILITY_ICONS,
+    STALE_MARKER,
+    WEATHER_DAY,
+    WEATHER_NIGHT,
 )
 from fonts.raster90.family import (  # noqa: E402  (authoritative font source)
     PRIMARY_COLON,
@@ -41,13 +46,7 @@ from fonts.raster90.family import (  # noqa: E402  (authoritative font source)
     PRIMARY_LINE_CELLS,
     RUNTIME_SECONDARY_GLYPHS,
 )
-from icon_resolution_studies import (  # noqa: E402  (selected runtime matrices)
-    SIXTEEN_WEATHER_DAY,
-    SIXTEEN_WEATHER_NIGHT,
-)
-from single_grid_study import (  # noqa: E402  (selected study inputs)
-    ICONS,
-    ICON_CELLS,
+from single_grid_study import (  # noqa: E402  (selected layout inputs)
     ROW_BANDS as STUDY_ROW_BANDS,
 )
 
@@ -88,8 +87,18 @@ TIME_WIDTH = 4 * TIME_DIGIT_WIDTH + TIME_COLON_WIDTH
 
 ICON_PITCH = SINGLE_GRID_PITCH
 ICON_LIT = SINGLE_GRID_LIT
+ICON_CELLS = 16
 ICON_SIZE = ICON_CELLS * ICON_PITCH
 WEATHER_SIZE = ICON_SIZE
+
+# The selected asset mapping is deliberately bound to the canonical component
+# rather than a design study. ``ICONS`` adds the representative available
+# weather tile only for the native face preview; the packaged weather assets
+# below use the complete canonical day/night maps directly.
+ICONS = {
+    "weather": WEATHER_DAY[14],
+    **SELECTED_UTILITY_ICONS,
+}
 
 ROW_BANDS = {
     name: tuple(cell * SINGLE_GRID_PITCH for cell in band)
@@ -366,9 +375,9 @@ def _utility_pixels(rows: Sequence[str]) -> PixelGrid:
 
 
 def _stale_pixels() -> PixelGrid:
-    _validate_rows("stale marker", WEATHER_STALE, 2, {"0", "1"}, expected_height=2)
+    _validate_rows("stale marker", STALE_MARKER, 2, {"0", "1"}, expected_height=2)
     return _paint_cells(
-        WEATHER_STALE,
+        STALE_MARKER,
         pitch=ICON_PITCH,
         lit=ICON_LIT,
         width_cells=2,
@@ -426,11 +435,11 @@ def _expected_pngs() -> dict[str, bytes]:
         _time_pixels(TIME_COLON, TIME_COLON_CELLS)
     )
 
-    for condition, rows in SIXTEEN_WEATHER_DAY.items():
+    for condition, rows in WEATHER_DAY.items():
         assets[f"{_weather_name('day', condition)}.png"] = encode_png(
             _weather_pixels(rows)
         )
-    for condition, rows in SIXTEEN_WEATHER_NIGHT.items():
+    for condition, rows in WEATHER_NIGHT.items():
         assets[f"{_weather_name('night', condition)}.png"] = encode_png(
             _weather_pixels(rows)
         )

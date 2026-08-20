@@ -17,14 +17,15 @@ from __future__ import annotations
 
 from typing import Final, Mapping
 
-from icon_resolution_studies import (
-    SIXTEEN_UTILITY_ICONS,
-    SIXTEEN_WEATHER_DAY,
-    SIXTEEN_WEATHER_NIGHT,
+from icons.raster90.family import (
+    BATTERY_ICON,
+    PALETTE,
+    APPROVED_STEP_ICON,
+    WEATHER_DAY,
+    WEATHER_NIGHT,
 )
 from matrices import (
     FINE_GLYPHS,
-    PALETTE,
     SINGLE_GRID_TIME_COLON_CELLS,
     SINGLE_GRID_TIME_DIGIT_CELLS,
     SINGLE_GRID_TIME_LINE_CELLS,
@@ -76,13 +77,13 @@ WEATHER_PALETTE = PALETTE
 ICONS: Final[Mapping[str, Matrix]] = {
     # Condition 14 is the documented representative partly-cloudy day state;
     # its direct-authored tile is also used by the packaged preview.
-    "weather": SIXTEEN_WEATHER_DAY[14],
-    "steps": SIXTEEN_UTILITY_ICONS["steps"],
-    "battery": SIXTEEN_UTILITY_ICONS["battery"],
+    "weather": WEATHER_DAY[14],
+    "steps": APPROVED_STEP_ICON,
+    "battery": BATTERY_ICON,
 }
 
-SINGLE_GRID_WEATHER_DAY = SIXTEEN_WEATHER_DAY
-SINGLE_GRID_WEATHER_NIGHT = SIXTEEN_WEATHER_NIGHT
+SINGLE_GRID_WEATHER_DAY = WEATHER_DAY
+SINGLE_GRID_WEATHER_NIGHT = WEATHER_NIGHT
 
 
 TIME_DIGIT_CELLS: Final = SINGLE_GRID_TIME_DIGIT_CELLS

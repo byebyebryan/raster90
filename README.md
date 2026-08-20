@@ -57,10 +57,15 @@ Generated mood and hierarchy studies are catalogued separately under
 [Concept Artwork](design/concepts/README.md); they are not production WFF
 resources or geometry references.
 
-The project-owned bitmap family is a first-class repository component under
-[`fonts/raster90/`](fonts/raster90/README.md). Its tracked
-[`preview/index.html`](fonts/raster90/preview/index.html) contains the complete
-matrix sheets and an interactive local specimen.
+The project-owned bitmap families are first-class repository components under
+[`fonts/raster90/`](fonts/raster90/README.md) and
+[`icons/raster90/`](icons/raster90/README.md). Their tracked
+[font preview](fonts/raster90/preview/index.html) contains the complete font
+matrix sheets and an interactive local specimen; the [icon
+preview](icons/raster90/preview/index.html) contains selected utility/weather
+matrices, truthful weather-state treatment, and native/magnified face views.
+The runtime icon generator imports selected surfaces directly from
+`icons/raster90/family.py`.
 
 Operational instructions for coding agents are in [AGENTS.md](AGENTS.md).
 
@@ -94,6 +99,10 @@ rtk python3 -B tools/generate_raster90_assets.py --check
 # Generate/check the complete tracked font-family presentation.
 rtk python3 -B tools/render_raster90_font_family.py
 rtk python3 -B tools/render_raster90_font_family.py --check
+
+# Generate/check the complete tracked icon-family presentation.
+rtk python3 -B tools/render_raster90_icon_family.py
+rtk python3 -B tools/render_raster90_icon_family.py --check
 ```
-The presentation writes complete primary and secondary sheets, native-scale
-specimens, and a self-contained `fonts/raster90/preview/index.html`.
+The presentations write complete font/icon sheets, native-scale specimens, and
+self-contained local `preview/index.html` files.

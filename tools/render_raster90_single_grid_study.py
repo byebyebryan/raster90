@@ -24,12 +24,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "design" / "raster90"))
 
-from icon_resolution_studies import (  # noqa: E402
-    SIXTEEN_UTILITY_ICONS,
-    SIXTEEN_WEATHER_DAY,
-    SIXTEEN_WEATHER_NIGHT,
-    WEATHER_CONDITIONS,
+from icons.raster90.family import (  # noqa: E402
+    PALETTE,
+    SELECTED_UTILITY_ICONS,
     STALE_MARKER,
+    WEATHER_CONDITIONS,
+    WEATHER_DAY,
+    WEATHER_NIGHT,
 )
 from matrices import FINE_GLYPHS  # noqa: E402
 from single_grid_study import (  # noqa: E402
@@ -56,8 +57,11 @@ from single_grid_study import (  # noqa: E402
     validate_single_grid_study,
 )
 
-SINGLE_GRID_WEATHER_DAY = SIXTEEN_WEATHER_DAY
-SINGLE_GRID_WEATHER_NIGHT = SIXTEEN_WEATHER_NIGHT
+SIXTEEN_UTILITY_ICONS = SELECTED_UTILITY_ICONS
+SIXTEEN_WEATHER_DAY = WEATHER_DAY
+SIXTEEN_WEATHER_NIGHT = WEATHER_NIGHT
+SINGLE_GRID_WEATHER_DAY = WEATHER_DAY
+SINGLE_GRID_WEATHER_NIGHT = WEATHER_NIGHT
 
 
 RGBA = tuple[int, int, int, int]
