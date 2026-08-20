@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import generate_raster90_assets as generator  # noqa: E402
+from fonts.raster90 import family as font_family  # noqa: E402
 from icon_resolution_studies import (  # noqa: E402
     SIXTEEN_UTILITY_ICONS,
     SIXTEEN_WEATHER_DAY,
@@ -48,6 +49,112 @@ class Raster90AssetGeneratorTests(unittest.TestCase):
         )
         self.assertNotIn("raster_icon_calendar.png", expected)
         generator._validate_expected(ROOT, expected)
+
+    def test_runtime_font_source_bytes_and_wff_tables_are_exact(self) -> None:
+        """Keep packaged font bytes and WFF tables tied to the promoted source."""
+
+        asset_dir = ROOT / generator.ASSET_DIR_REL
+        self.assertIs(generator.FINE_GLYPHS, font_family.RUNTIME_SECONDARY_GLYPHS)
+        self.assertIs(generator.TIME_DIGITS, font_family.PRIMARY_DIGITS)
+        self.assertIs(generator.TIME_COLON, font_family.PRIMARY_COLON)
+
+        for character, rows in font_family.RUNTIME_SECONDARY_GLYPHS.items():
+            name = f"{generator._fine_name(character)}.png"
+            data = (asset_dir / name).read_bytes()
+            self.assertEqual(
+                data,
+                generator.encode_png(generator._fine_pixels(rows)),
+                name,
+            )
+            width = (
+                generator.FINE_SPACE_WIDTH
+                if character == " "
+                else generator.FINE_WIDTH
+            )
+            self.assertEqual(
+                generator.decode_png(data)[:2],
+                (width, generator.FINE_HEIGHT),
+                name,
+            )
+
+        for digit, rows in font_family.PRIMARY_DIGITS.items():
+            name = f"{generator._time_name(digit)}.png"
+            data = (asset_dir / name).read_bytes()
+            self.assertEqual(
+                data,
+                generator.encode_png(
+                    generator._time_pixels(rows, generator.TIME_DIGIT_CELLS)
+                ),
+                name,
+            )
+            self.assertEqual(
+                generator.decode_png(data)[:2],
+                (generator.TIME_DIGIT_WIDTH, generator.TIME_HEIGHT),
+                name,
+            )
+
+        colon_name = "raster_time_colon.png"
+        colon_data = (asset_dir / colon_name).read_bytes()
+        self.assertEqual(
+            colon_data,
+            generator.encode_png(
+                generator._time_pixels(
+                    font_family.PRIMARY_COLON, generator.TIME_COLON_CELLS
+                )
+            ),
+            colon_name,
+        )
+        self.assertEqual(
+            generator.decode_png(colon_data)[:2],
+            (generator.TIME_COLON_WIDTH, generator.TIME_HEIGHT),
+            colon_name,
+        )
+
+        root = ET.parse(
+            ROOT / "watchfaces/raster90/src/main/res/raw/watchface.xml"
+        ).getroot()
+
+        def table(name: str) -> list[tuple[str, str, int, int]]:
+            bitmap_font = root.find(f"./BitmapFonts/BitmapFont[@name='{name}']")
+            self.assertIsNotNone(bitmap_font, name)
+            return [
+                (
+                    character.attrib["name"],
+                    character.attrib["resource"],
+                    int(character.attrib["width"]),
+                    int(character.attrib["height"]),
+                )
+                for character in bitmap_font
+            ]
+
+        self.assertEqual(
+            table("raster_fine"),
+            [
+                (
+                    character,
+                    generator._fine_name(character),
+                    generator.FINE_SPACE_WIDTH
+                    if character == " "
+                    else generator.FINE_WIDTH,
+                    generator.FINE_HEIGHT,
+                )
+                for character in font_family.RUNTIME_SECONDARY_KEYS
+            ],
+        )
+        self.assertEqual(
+            table("raster_time"),
+            [
+                (
+                    character,
+                    generator._time_name(character),
+                    generator.TIME_COLON_WIDTH
+                    if character == ":"
+                    else generator.TIME_DIGIT_WIDTH,
+                    generator.TIME_HEIGHT,
+                )
+                for character in (*"0123456789", ":")
+            ],
+        )
 
     def test_true16_icon_family_covers_conditions_without_resampling(self) -> None:
         validate_icon_resolution_studies()
