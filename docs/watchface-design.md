@@ -9,9 +9,10 @@ baseline, while the physical watch proves a fresh available night-weather row.
 The project-owned primary variants are now formalized: the selected time cut is
 the reviewed clean chamfer, while the square construction and earlier global
 fine-chamfer remain named source-only controls. The complete secondary/text
-vocabulary remains available for source-only review. Wearer
-optical judgment, sustained AOD, stale weather, selected-unit physical
-rendering, and any animation or transient color event remain open work.
+vocabulary remains available for source-only review. The clean-chamfer runtime
+has fresh native 466×466 interactive and confirmed Dozing evidence. Physical
+clean-chamfer optical judgment, sustained AOD, stale weather, and any animation
+or transient color event remain open work.
 
 ## Product identity
 
@@ -73,10 +74,10 @@ gutter:                       none
 
 Every element uses that one physical source pixel. Hierarchy comes from
 logical artwork size rather than another pixel tier: 5×7 compact text, true
-16×16 icons, and a 32-cell time box. The packaged high-resolution time expands
-the proven V1 silhouettes to validate pitch and fit; its final solid-grid
-numerals still need direct authorship rather than acceptance as mechanically
-enlarged V1 art.
+16×16 icons, and a 32-cell time box. The packaged high-resolution time uses
+the directly authored, reviewed clean-chamfer matrices; square and legacy
+fine-chamfer variants remain canonical comparison controls with identical box
+geometry.
 
 The outer eight-unit margin is overscan, not an information-bearing region. A
 provisional circular safe radius of 210 units, centered at `(225, 225)` in
@@ -89,10 +90,13 @@ the bezel and physical watch remain authoritative.
 The 2026-08-18 solid-grid runtime pass proved crisp solid 3×3 cells at native
 466×466, acceptable WFF scaling at 454×454, legible 5×7 compact text, direct
 true 16×16 tile geometry, centered/unclipped interactive rows, 12/24-hour time,
-and time-only ambient reduction. The remaining geometry gate is physical-watch
-wrist-distance, AMOLED, bezel, AOD, and low-brightness behavior. Icon
-recognizability and final time art remain design judgments rather than runtime
-geometry blockers.
+and time-only ambient reduction. The 2026-08-20 follow-up promoted the reviewed
+clean-chamfer numerals into the runtime and freshly proved the same unclipped
+composition in native 466×466 interactive and confirmed Dozing states. The
+remaining geometry gate is physical-watch wrist-distance, AMOLED, bezel, AOD,
+and low-brightness behavior. Icon recognizability and any later clean-chamfer
+optical adjustment remain design judgments rather than runtime geometry
+blockers.
 
 The preceding deterministic comparisons selected solid 3×3 cells over both
 2×2 solid cells and 3-pitch/2-lit dot-matrix cells. At native mock size, 2×2
@@ -641,17 +645,20 @@ The implementation has reached these emulator-proven slices:
 8. Packaged solid 3×3 cells, direct true 16×16 icons, icon-led one-line values,
    text-only date, deterministic preview parity, and live 466×466 / 454×454
    interactive and ambient validation.
+9. Canonical project-owned square and clean-chamfer primary cuts, with the
+   reviewed clean chamfer selected and freshly renderer-validated in native
+   466×466 interactive and confirmed Dozing states.
 
 Later slices remain separately gated:
 
-9. Live-test stale weather after proving fresh available and truthful,
+10. Live-test stale weather after proving fresh available and truthful,
    header-free unavailable states.
-10. Complete physical-watch wearer, sustained-AOD, and battery validation and
+11. Complete physical-watch wearer, sustained-AOD, and battery validation and
     adjustment.
-11. Final time-numeral authorship and icon-family optical polish.
-12. One on-visible low-frame-rate animation.
-13. One rare color event.
-14. Optional complication/configuration work only after the identity is stable.
+12. Clean-chamfer and icon-family optical polish driven by physical wear.
+13. One on-visible low-frame-rate animation.
+14. One rare color event.
+15. Optional complication/configuration work only after the identity is stable.
 
 ## Open decisions
 
@@ -661,10 +668,11 @@ Later slices remain separately gated:
   calendar icon is removed.
 - Physical-watch adjustment of the single-grid bands, optical time position,
   safe radius, solid cells, and indexed weather palette.
-- Final authored time numerals and optical refinement of the selected true
-  16×16 icon family.
-- Live verification of stale, day-family, selected-unit, and extreme-value
-  weather branches; fresh available, night-family, and the provider's
+- Whether physical wear calls for a further clean-chamfer optical adjustment;
+  the selected cut is already directly authored and emulator-proven.
+- Optical refinement of the selected true 16×16 icon family.
+- Live verification of stale, day-family, explicit-Fahrenheit-selection, and
+  extreme-value weather branches; fresh available, night-family, and the provider's
   Fahrenheit surface are proven. The emulator editor proves the Celsius
   default and both choices are reachable; resource tests cover both conversion
   directions, and the physical watch proves a live converted `17°C` default.

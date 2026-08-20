@@ -18,7 +18,10 @@ reviewable cell matrices rather than rendered from a runtime TTF. Its primary
 time uses the reviewed project-owned clean-chamfer cut; the square construction
 and legacy fine-chamfer remain named source controls, while the complete
 secondary family remains source-only outside the current runtime subset.
-Physical wearer-distance and AMOLED optical judgment remain open.
+The selected cut is freshly renderer-validated in interactive and confirmed
+Dozing states on the native 466×466 `wear5-opw3` target. No physical deployment
+of this selected cut is recorded yet; wearer-distance and AMOLED optical
+judgment remain open.
 
 The resting face is intentionally monochrome except for the small weather
 sprite. Weather is Celsius by default with an explicit Fahrenheit override in

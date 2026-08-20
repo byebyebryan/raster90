@@ -465,6 +465,9 @@ rtk adb -s <phone-serial> shell wm density
 - [x] Formalize the selected reviewed clean-chamfer primary/display numerals,
   retain square and legacy fine-chamfer controls, and complete the project-owned
   secondary/text family; physical wearer optical review remains open.
+- [x] Deploy the selected clean-chamfer runtime to the identity-proven
+  `wear5-opw3` target and capture native 466×466 interactive and confirmed
+  Dozing time-only evidence without clipping.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.
