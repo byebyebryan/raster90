@@ -76,9 +76,11 @@ module.
 ## Current asset boundary
 
 - `fonts/raster90/family.py` is the authoritative source for the complete
-  project-owned secondary vocabulary and approved one-cell-chamfered primary
-  display cut. `design/raster90/matrices.py` keeps compatibility aliases for
-  design studies alongside palette and legacy comparison sprites.
+  project-owned secondary vocabulary and named primary square, reviewed
+  clean-chamfer, and legacy fine-chamfer display variants. `PRIMARY_DIGITS`
+  remains the stable alias for the selected clean-chamfer runtime cut.
+  `design/raster90/matrices.py` keeps compatibility aliases for design studies
+  alongside palette and legacy comparison sprites.
 - `design/raster90/icon_resolution_studies.py` is the authoritative reviewable
   source for the packaged true 16×16 weather, steps, and battery matrices while
   retaining the rejected resolution candidates as design evidence.

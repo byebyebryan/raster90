@@ -40,7 +40,7 @@ class Raster90PrimaryFontRefinementTests(unittest.TestCase):
         self.assertTrue(
             any(
                 not _uses_only_complete_macro_cells(rows)
-                for rows in CANDIDATES["current-fine-chamfer"].values()
+                for rows in CANDIDATES["legacy-fine-chamfer"].values()
             )
         )
         square = CANDIDATES["clean-square"]
@@ -90,7 +90,7 @@ class Raster90PrimaryFontRefinementTests(unittest.TestCase):
             + renderer.assets.ROW_BANDS["time"][0]
         )
         time_bottom = time_y + renderer.assets.TIME_HEIGHT
-        control = decoded_faces["current-fine-chamfer"]
+        control = decoded_faces["legacy-fine-chamfer"]
         for candidate, pixels in decoded_faces.items():
             for y in (*range(time_y), *range(time_bottom, renderer.assets.CANVAS)):
                 self.assertEqual(pixels[y], control[y], (candidate, y))

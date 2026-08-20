@@ -12,11 +12,22 @@ dependency: the fictional display grid is the format.
 - The PNGs under `preview/` are deterministic native-scale and magnified
   specimens generated from the same source.
 
-The family contains two optical cuts on one solid 3×3 physical-cell grid:
+The family contains two named optical cuts on one solid 3×3 physical-cell grid,
+plus a retained legacy comparison control:
 
-- **Primary/display:** fixed-width `0–9` and colon for time, using 26×32 digit
-  boxes, a 10×32 colon box, a plain closed zero, and the approved one-cell
-  convex-corner chamfer.
+- **Primary square:** `PRIMARY_SQUARE_DIGITS` and
+  `PRIMARY_SQUARE_COLON` preserve the unmodified square construction.
+- **Primary clean chamfer:** `PRIMARY_CLEAN_CHAMFER_DIGITS` and
+  `PRIMARY_CLEAN_CHAMFER_COLON` contain the reviewed fine-raster edit. The
+  stable runtime aliases `PRIMARY_DIGITS` and `PRIMARY_COLON` point here, so
+  the watch face uses this cut.
+- **Legacy fine chamfer:** `PRIMARY_LEGACY_FINE_CHAMFER_DIGITS` retains the
+  earlier algorithmic one-cell/global chamfer as a named study control; it is
+  not selected by the runtime.
+- Both primary variants use fixed-width `0–9` and colon glyphs, 26×32 digit
+  boxes, a 10×32 colon box, and a plain closed zero. The tracked
+  `primary-display-cut.png` shows clean chamfer; `primary-square-cut.png`
+  shows the square control.
 - **Secondary/text:** a complete 5×7 source vocabulary containing space,
   symbols, digits, uppercase, lowercase, and common punctuation. The watch-face
   APK deliberately packages only the subset its current WFF expressions emit.

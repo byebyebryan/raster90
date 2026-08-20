@@ -12,145 +12,43 @@ from typing import Final, Mapping
 
 from fonts.raster90.family import (
     PRIMARY_COLON,
+    PRIMARY_CLEAN_CHAMFER_DIGITS,
+    PRIMARY_CONTENT_HEIGHT,
+    PRIMARY_CONTENT_LEFT,
+    PRIMARY_CONTENT_TOP,
+    PRIMARY_CONTENT_WIDTH,
     PRIMARY_DIGIT_CELLS,
-    PRIMARY_DIGITS,
+    PRIMARY_LEGACY_FINE_CHAMFER_DIGITS,
     PRIMARY_LINE_CELLS,
-    PRIMARY_SOURCE_DIGITS,
-    _expand_source_matrix,
+    PRIMARY_SQUARE_DIGITS,
+    CLEAN_CHAMFER_ADDITIONS,
+    CLEAN_CHAMFER_REMOVALS,
 )
 
 
 Matrix = tuple[str, ...]
-Coordinate = tuple[int, int]
 
-CONTENT_LEFT: Final = (PRIMARY_DIGIT_CELLS - 7 * 3) // 2
-CONTENT_TOP: Final = (PRIMARY_LINE_CELLS - 9 * 3) // 2
-CONTENT_WIDTH: Final = 7 * 3
-CONTENT_HEIGHT: Final = 9 * 3
+CONTENT_LEFT: Final = PRIMARY_CONTENT_LEFT
+CONTENT_TOP: Final = PRIMARY_CONTENT_TOP
+CONTENT_WIDTH: Final = PRIMARY_CONTENT_WIDTH
+CONTENT_HEIGHT: Final = PRIMARY_CONTENT_HEIGHT
 
-
-def _square_digits() -> Mapping[str, Matrix]:
-    return {
-        digit: _expand_source_matrix(
-            rows,
-            box_width=PRIMARY_DIGIT_CELLS,
-        )
-        for digit, rows in PRIMARY_SOURCE_DIGITS.items()
-    }
-
-
-CLEAN_CHAMFER_ADDITIONS: Final[Mapping[str, tuple[Coordinate, ...]]] = {
-    "0": (
-        (2, 1), (18, 1),
-        (1, 2), (2, 2), (18, 2), (19, 2),
-        (1, 24), (2, 24), (18, 24), (19, 24),
-        (2, 25), (18, 25),
-    ),
-    "1": ((5, 1), (4, 2), (5, 2)),
-    "2": (
-        (2, 1), (18, 1),
-        (1, 2), (2, 2), (18, 2), (19, 2),
-        (14, 7), (13, 8), (14, 8),
-        (11, 10), (10, 11), (11, 11),
-        (8, 13), (7, 14), (8, 14),
-        (5, 16), (4, 17), (5, 17),
-        (2, 19), (1, 20), (2, 20),
-    ),
-    "3": (
-        (18, 1), (18, 2), (19, 2),
-        (18, 9), (19, 9), (18, 10),
-        (18, 13), (18, 14), (19, 14),
-        (18, 24), (19, 24), (18, 25),
-    ),
-    "4": (
-        (8, 1), (7, 2), (8, 2),
-        (5, 4), (4, 5), (5, 5),
-        (2, 7), (1, 8), (2, 8),
-    ),
-    "5": (
-        (18, 10), (18, 11), (19, 11),
-        (6, 22), (6, 23), (7, 23),
-        (1, 24), (2, 24), (18, 24), (19, 24),
-        (2, 25), (18, 25),
-    ),
-    "6": (
-        (5, 1), (4, 2), (5, 2),
-        (2, 4), (1, 5), (2, 5),
-        (18, 13), (18, 14), (19, 14),
-        (1, 24), (2, 24), (18, 24), (19, 24),
-        (2, 25), (18, 25),
-    ),
-    "7": (
-        (14, 4), (13, 5), (14, 5),
-        (11, 7), (10, 8), (11, 8),
-        (8, 10), (7, 11), (8, 11),
-        (5, 13), (4, 14), (5, 14),
-    ),
-    "8": (
-        (2, 1), (18, 1),
-        (1, 2), (2, 2), (18, 2), (19, 2),
-        (1, 9), (2, 9), (18, 9), (19, 9),
-        (2, 10), (18, 10),
-        (1, 11), (2, 11), (18, 11), (19, 11),
-        (1, 24), (2, 24), (18, 24), (19, 24),
-        (2, 25), (18, 25),
-    ),
-    "9": (
-        (2, 1), (18, 1),
-        (1, 2), (2, 2), (18, 2), (19, 2),
-        (1, 12), (2, 12), (2, 13),
-        (18, 21), (19, 21), (18, 22),
-        (15, 24), (16, 24), (15, 25),
-    ),
-}
-
-CLEAN_CHAMFER_REMOVALS: Final[Mapping[str, tuple[Coordinate, ...]]] = {
-    "2": (
-        (5, 4), (4, 5), (5, 5),
-        (20, 7), (19, 8), (20, 8),
-        (17, 10), (16, 11), (17, 11),
-        (14, 13), (13, 14), (14, 14),
-        (11, 16), (10, 17), (11, 17),
-        (8, 19), (7, 20), (8, 20),
-    ),
-    "3": ((12, 9), (13, 9), (12, 10)),
-    "6": ((8, 4), (7, 5), (8, 5)),
-    "7": (
-        (20, 4), (19, 5), (20, 5),
-        (17, 7), (16, 8), (17, 8),
-        (14, 10), (13, 11), (14, 11),
-        (11, 13), (10, 14), (11, 14),
-    ),
-    "9": ((12, 21), (13, 21), (12, 22)),
-}
-
-
-def _clean_chamfer(square_digits: Mapping[str, Matrix]) -> Mapping[str, Matrix]:
-    """Apply the reviewed fine-raster edits without changing the skeleton."""
-
-    digits: dict[str, Matrix] = {}
-    for digit, square in square_digits.items():
-        rows = [list(row) for row in square]
-        for x, y in CLEAN_CHAMFER_ADDITIONS[digit]:
-            rows[CONTENT_TOP + y][CONTENT_LEFT + x] = "1"
-        for x, y in CLEAN_CHAMFER_REMOVALS.get(digit, ()):
-            rows[CONTENT_TOP + y][CONTENT_LEFT + x] = "0"
-        digits[digit] = tuple("".join(row) for row in rows)
-    return digits
-
-
-SQUARE_DIGITS: Final[Mapping[str, Matrix]] = _square_digits()
+SQUARE_DIGITS: Final[Mapping[str, Matrix]] = PRIMARY_SQUARE_DIGITS
+CLEAN_CHAMFER_DIGITS: Final[Mapping[str, Matrix]] = PRIMARY_CLEAN_CHAMFER_DIGITS
+LEGACY_FINE_CHAMFER_DIGITS: Final[Mapping[str, Matrix]] = (
+    PRIMARY_LEGACY_FINE_CHAMFER_DIGITS
+)
 
 CANDIDATES: Final[Mapping[str, Mapping[str, Matrix]]] = {
     "clean-square": SQUARE_DIGITS,
-    "clean-chamfer": _clean_chamfer(SQUARE_DIGITS),
-    "current-fine-chamfer": PRIMARY_DIGITS,
+    "clean-chamfer": CLEAN_CHAMFER_DIGITS,
+    "legacy-fine-chamfer": LEGACY_FINE_CHAMFER_DIGITS,
 }
 
 CANDIDATE_LABELS: Final[Mapping[str, str]] = {
     "clean-square": "CLEAN SQUARE",
     "clean-chamfer": "CLEAN CHAMFER",
-    "current-fine-chamfer": "CURRENT FINE CHAMFER",
+    "legacy-fine-chamfer": "LEGACY FINE CHAMFER",
 }
 
 
@@ -200,7 +98,7 @@ def validate_primary_refinement() -> None:
     if tuple(CANDIDATES) != (
         "clean-square",
         "clean-chamfer",
-        "current-fine-chamfer",
+        "legacy-fine-chamfer",
     ):
         raise ValueError("primary refinement candidate order drifted")
     for candidate, digits in CANDIDATES.items():
@@ -222,7 +120,7 @@ def validate_primary_refinement() -> None:
 
     if all(
         _uses_only_complete_macro_cells(rows)
-        for rows in CANDIDATES["current-fine-chamfer"].values()
+        for rows in CANDIDATES["legacy-fine-chamfer"].values()
     ):
         raise ValueError("control unexpectedly contains no fine-cell corner cuts")
     chamfered = CANDIDATES["clean-chamfer"]

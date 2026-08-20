@@ -36,6 +36,8 @@ from fonts.raster90.family import (  # noqa: E402
     PRIMARY_DIGIT_CELLS,
     PRIMARY_DIGITS,
     PRIMARY_LINE_CELLS,
+    PRIMARY_SQUARE_COLON,
+    PRIMARY_SQUARE_DIGITS,
     SECONDARY_GLYPHS,
     SECONDARY_KEYS,
 )
@@ -59,6 +61,7 @@ PREVIEW_GEOMETRY = {
 }
 
 PRIMARY_SHEET_NAME = "primary-display-cut.png"
+PRIMARY_SQUARE_SHEET_NAME = "primary-square-cut.png"
 SECONDARY_SHEET_NAME = "secondary-text-cut.png"
 FAMILY_SHEET_NAME = "family-specimen.png"
 NATIVE_FACE_NAME = "family-native-face-466.png"
@@ -144,22 +147,37 @@ def _outline(pixels: PixelGrid, *, x: int, y: int, width: int, height: int) -> N
             pixels[target_y][right] = WHITE
 
 
-def render_primary_sheet(*, scale: int = 3) -> PixelGrid:
-    """Render every primary glyph at the selected solid-cell scale."""
+def render_primary_sheet(
+    *,
+    scale: int = 3,
+    digits: Mapping[str, Sequence[str]] = PRIMARY_DIGITS,
+    colon: Sequence[str] = PRIMARY_COLON,
+) -> PixelGrid:
+    """Render a primary variant at the selected solid-cell scale."""
 
     gap = 4 * scale
-    widths = [PRIMARY_DIGIT_CELLS * scale] * 10 + [len(PRIMARY_COLON[0]) * scale]
+    widths = [PRIMARY_DIGIT_CELLS * scale] * 10 + [len(colon[0]) * scale]
     width = sum(widths) + gap * (len(widths) + 1)
     height = PRIMARY_LINE_CELLS * scale + 2 * gap
     pixels = _blank(width, height)
     x = gap
     for digit in "0123456789":
         _outline(pixels, x=x, y=gap, width=widths[int(digit)], height=PRIMARY_LINE_CELLS * scale)
-        _paint_matrix(pixels, PRIMARY_DIGITS[digit], x=x, y=gap, scale=scale)
+        _paint_matrix(pixels, digits[digit], x=x, y=gap, scale=scale)
         x += widths[int(digit)] + gap
     _outline(pixels, x=x, y=gap, width=widths[-1], height=PRIMARY_LINE_CELLS * scale)
-    _paint_matrix(pixels, PRIMARY_COLON, x=x, y=gap, scale=scale)
+    _paint_matrix(pixels, colon, x=x, y=gap, scale=scale)
     return pixels
+
+
+def render_primary_square_sheet(*, scale: int = 3) -> PixelGrid:
+    """Render the retained unmodified square primary construction."""
+
+    return render_primary_sheet(
+        scale=scale,
+        digits=PRIMARY_SQUARE_DIGITS,
+        colon=PRIMARY_SQUARE_COLON,
+    )
 
 
 def render_secondary_sheet(*, scale: int = 3) -> PixelGrid:
@@ -267,6 +285,7 @@ def render_html(images: Mapping[str, bytes]) -> bytes:
     inspection_src = image_data[INSPECTION_NAME]
     family_src = image_data[FAMILY_SHEET_NAME]
     primary_src = image_data[PRIMARY_SHEET_NAME]
+    square_src = image_data[PRIMARY_SQUARE_SHEET_NAME]
     secondary_src = image_data[SECONDARY_SHEET_NAME]
     preview_geometry = _safe_json(PREVIEW_GEOMETRY)
 
@@ -308,7 +327,7 @@ noscript {{ display: block; border: 1px solid #fff; padding: 1rem; }}
 <section class="contract" aria-labelledby="contract-heading">
 <h2 id="contract-heading">Design contract</h2>
 <ul>
-<li>Primary/display cut: dense fixed-width 0–9 plus colon, one-cell convex-corner chamfer, plain closed zero, 26×32 digit boxes and 10×32 colon box.</li>
+<li>Primary/display cut: dense fixed-width 0–9 plus colon, with the reviewed clean-chamfer selection and retained square construction control; both use 26×32 digit boxes and a 10×32 colon box.</li>
 <li>Secondary/text cut: complete 5×7 space, symbols, digits, uppercase, lowercase, and common punctuation vocabulary.</li>
 <li>All lit source cells expand to solid 3×3 squares. No glow, gradient, antialiasing, or downloaded runtime font is used.</li>
 <li>The APK packages only the secondary glyphs current WFF expressions can emit; this page intentionally shows the complete source-only surface.</li>
@@ -319,7 +338,8 @@ noscript {{ display: block; border: 1px solid #fff; padding: 1rem; }}
 <p>Native 3×3 family sheet:</p><div class="scroll"><img class="artifact" src="{family_src}" alt="Raster 90 primary and complete secondary family sheet at native 3x3 scale"></div>
 <p>Native 466×466 face preview using the selected runtime primary cut:</p><div class="scroll"><img class="artifact" src="{native_src}" alt="Raster 90 face with chamfered 10:08 time and information rows"></div>
 <p>Magnified primary inspection:</p><div class="scroll"><img class="artifact" src="{inspection_src}" alt="Magnified primary digits and colon showing one-cell corner chamfers"></div>
-<p>Separate primary sheet:</p><div class="scroll"><img class="artifact" src="{primary_src}" alt="Complete primary digits zero through nine and colon"></div>
+<p>Selected clean-chamfer primary sheet:</p><div class="scroll"><img class="artifact" src="{primary_src}" alt="Complete reviewed clean-chamfer primary digits zero through nine and colon"></div>
+<p>Retained square primary control:</p><div class="scroll"><img class="artifact" src="{square_src}" alt="Complete square primary digits zero through nine and colon"></div>
 <p>Separate secondary sheet:</p><div class="scroll"><img class="artifact" src="{secondary_src}" alt="Complete secondary text glyph surface"></div>
 </section>
 <section aria-labelledby="interactive-heading">
@@ -408,6 +428,7 @@ drawPreview();
 def _expected_outputs() -> dict[str, bytes]:
     images = {
         PRIMARY_SHEET_NAME: encode_png(render_primary_sheet()),
+        PRIMARY_SQUARE_SHEET_NAME: encode_png(render_primary_square_sheet()),
         SECONDARY_SHEET_NAME: encode_png(render_secondary_sheet()),
         FAMILY_SHEET_NAME: encode_png(render_family_sheet()),
         NATIVE_FACE_NAME: encode_png(runtime_assets._preview_pixels()),

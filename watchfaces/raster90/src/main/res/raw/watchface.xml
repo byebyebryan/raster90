@@ -67,8 +67,9 @@
       <Character name="Z" resource="raster_fine_z" width="18" height="21"/>
     </BitmapFont>
 
-    <!-- Approved primary/display cut: one-source-cell convex-corner chamfer,
-         four 26-cell digit boxes and a 10-cell colon make 342 units. -->
+    <!-- Selected primary/display cut: reviewed clean-chamfer variant,
+         four 26-cell digit boxes and a 10-cell colon make 342 units. The
+         square and legacy fine-chamfer controls remain source-only. -->
     <BitmapFont name="raster_time">
       <Character name="0" resource="raster_time_0" width="78" height="96"/>
       <Character name="1" resource="raster_time_1" width="78" height="96"/>

@@ -2,12 +2,15 @@
 
 This is the reviewable source for the 450-unit active frame treated as one
 150x150 source framebuffer. A source pixel has a 3-unit pitch and a solid 3x3
-lit square. The selected true16 utility and weather tiles, plus the approved
-chamfered primary time boxes, are shared with the packaged resource generator.
+lit square. The selected true16 utility and weather tiles, plus the reviewed
+clean-chamfer primary time boxes, are shared with the packaged resource
+generator. The square construction and legacy fine-chamfer controls remain
+canonical source variants for comparison.
 
 The utility and weather matrices are authored directly at true 16x16. The
-primary time cut expands the proven V1 silhouettes onto the same source grid
-and applies the approved one-cell convex-corner chamfer.
+primary time cut uses the canonical reviewed clean-chamfer matrices on the
+same source grid; the square construction and legacy global fine-chamfer remain
+available as named comparison controls.
 """
 
 from __future__ import annotations

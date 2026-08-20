@@ -65,9 +65,11 @@ general Wear OS app.
 - The packaged face uses active-frame bands 45–93, 111–159, 177–273, 291–339,
   and 357–405. The solid
   3×3 time remains vertically centered in one 342×96 `TimeText`, using the
-  approved one-cell-chamfered primary/display cut. Keep preview and runtime
-  coordinates identical when implementing. Weather/date spacing may receive a
-  later optical pass; do not change it implicitly.
+  selected reviewed clean-chamfer primary/display cut. The square construction
+  and legacy fine-chamfer controls remain source-only in the canonical font
+  component. Keep preview and runtime coordinates identical when implementing.
+  Weather/date spacing may receive a later optical pass; do not change it
+  implicitly.
 - Available/stale/unavailable weather must remain truthful. The packaged
   unavailable branch uses the neutral weather icon with `--` on the same
   single-line baseline as available weather; do not restore a `WX` header or
@@ -460,9 +462,9 @@ rtk adb -s <phone-serial> shell wm density
   verify both editor choices on the primary Wear OS 5 emulator and live
   converted Celsius output on the physical watch.
 - [ ] Live-test a stale state with real location/weather data.
-- [x] Formalize the approved one-cell-chamfered primary/display numerals and
-  complete project-owned secondary/text family; physical wearer optical review
-  remains open.
+- [x] Formalize the selected reviewed clean-chamfer primary/display numerals,
+  retain square and legacy fine-chamfer controls, and complete the project-owned
+  secondary/text family; physical wearer optical review remains open.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.

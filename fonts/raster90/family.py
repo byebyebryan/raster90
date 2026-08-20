@@ -1,11 +1,14 @@
 """Authoritative project-owned Raster 90 bitmap font family.
 
-The family has two optical cuts on the same solid source-cell grid:
+The family has two optical cuts on the same solid source-cell grid, plus a
+retained legacy control:
 
-* ``PRIMARY_DIGITS``/``PRIMARY_COLON`` are the dense fixed-width display cut.
-  They are derived once from the reviewed 7x9 time silhouettes, expanded into
-  their 26x32/10x32 boxes, then given the approved one-cell convex-corner
-  chamfer.
+* ``PRIMARY_SQUARE_DIGITS`` is the unmodified square construction from the
+  reviewed 7x9 time silhouettes.
+* ``PRIMARY_CLEAN_CHAMFER_DIGITS`` is the reviewed fine-raster optical cut.
+  ``PRIMARY_DIGITS`` aliases this mapping as the stable selected-runtime API.
+* ``PRIMARY_LEGACY_FINE_CHAMFER_DIGITS`` retains the earlier algorithmic
+  one-cell/global chamfer as a clearly named comparison control.
 * ``SECONDARY_GLYPHS`` is the complete 5x7 text cut.  Its runtime subset is
   deliberately selected by the asset generator; the source vocabulary stays
   complete here for review sheets and future source-only composition work.
@@ -24,6 +27,7 @@ from typing import Final, Mapping, Sequence
 
 
 Matrix = tuple[str, ...]
+Coordinate = tuple[int, int]
 
 SECONDARY_SYMBOLS: Final[tuple[str, ...]] = ("+", "-", "%", "°", "?")
 SECONDARY_PUNCTUATION: Final[tuple[str, ...]] = (
@@ -621,8 +625,15 @@ PRIMARY_DIGIT_CELLS: Final = 26
 PRIMARY_COLON_CELLS: Final = 10
 PRIMARY_LINE_CELLS: Final = 32
 PRIMARY_TIME_WIDTH_CELLS: Final = 4 * PRIMARY_DIGIT_CELLS + PRIMARY_COLON_CELLS
-PRIMARY_CHAMFER_PASSES: Final = 1
+# The old global algorithm remains available only as the named comparison
+# control below. Keep the historical constant as a compatibility alias.
+PRIMARY_LEGACY_CHAMFER_PASSES: Final = 1
+PRIMARY_CHAMFER_PASSES: Final = PRIMARY_LEGACY_CHAMFER_PASSES
 PRIMARY_COLON_DOT_CELLS: Final = 6
+PRIMARY_CONTENT_LEFT: Final = (PRIMARY_DIGIT_CELLS - 7 * 3) // 2
+PRIMARY_CONTENT_TOP: Final = (PRIMARY_LINE_CELLS - 9 * 3) // 2
+PRIMARY_CONTENT_WIDTH: Final = 7 * 3
+PRIMARY_CONTENT_HEIGHT: Final = 9 * 3
 
 
 def _expand_source_matrix(
@@ -689,13 +700,141 @@ def _primary_colon() -> Matrix:
     return tuple("".join(row) for row in rows)
 
 
-PRIMARY_DIGITS: Final[Mapping[str, Matrix]] = {
-    digit: _chamfer_one_cell(
-        _expand_source_matrix(rows, box_width=PRIMARY_DIGIT_CELLS)
-    )
+# The reviewed chamfer was authored against the 21x27 fine raster inside each
+# 26x32 digit box.  Keep these edits here with the canonical source matrices;
+# design studies import them rather than carrying a second source of truth.
+CLEAN_CHAMFER_ADDITIONS: Final[Mapping[str, tuple[Coordinate, ...]]] = {
+    "0": (
+        (2, 1), (18, 1),
+        (1, 2), (2, 2), (18, 2), (19, 2),
+        (1, 24), (2, 24), (18, 24), (19, 24),
+        (2, 25), (18, 25),
+    ),
+    "1": ((5, 1), (4, 2), (5, 2)),
+    "2": (
+        (2, 1), (18, 1),
+        (1, 2), (2, 2), (18, 2), (19, 2),
+        (14, 7), (13, 8), (14, 8),
+        (11, 10), (10, 11), (11, 11),
+        (8, 13), (7, 14), (8, 14),
+        (5, 16), (4, 17), (5, 17),
+        (2, 19), (1, 20), (2, 20),
+    ),
+    "3": (
+        (18, 1), (18, 2), (19, 2),
+        (18, 9), (19, 9), (18, 10),
+        (18, 13), (18, 14), (19, 14),
+        (18, 24), (19, 24), (18, 25),
+    ),
+    "4": (
+        (8, 1), (7, 2), (8, 2),
+        (5, 4), (4, 5), (5, 5),
+        (2, 7), (1, 8), (2, 8),
+    ),
+    "5": (
+        (18, 10), (18, 11), (19, 11),
+        (6, 22), (6, 23), (7, 23),
+        (1, 24), (2, 24), (18, 24), (19, 24),
+        (2, 25), (18, 25),
+    ),
+    "6": (
+        (5, 1), (4, 2), (5, 2),
+        (2, 4), (1, 5), (2, 5),
+        (18, 13), (18, 14), (19, 14),
+        (1, 24), (2, 24), (18, 24), (19, 24),
+        (2, 25), (18, 25),
+    ),
+    "7": (
+        (14, 4), (13, 5), (14, 5),
+        (11, 7), (10, 8), (11, 8),
+        (8, 10), (7, 11), (8, 11),
+        (5, 13), (4, 14), (5, 14),
+    ),
+    "8": (
+        (2, 1), (18, 1),
+        (1, 2), (2, 2), (18, 2), (19, 2),
+        (1, 9), (2, 9), (18, 9), (19, 9),
+        (2, 10), (18, 10),
+        (1, 11), (2, 11), (18, 11), (19, 11),
+        (1, 24), (2, 24), (18, 24), (19, 24),
+        (2, 25), (18, 25),
+    ),
+    "9": (
+        (2, 1), (18, 1),
+        (1, 2), (2, 2), (18, 2), (19, 2),
+        (1, 12), (2, 12), (2, 13),
+        (18, 21), (19, 21), (18, 22),
+        (15, 24), (16, 24), (15, 25),
+    ),
+}
+
+CLEAN_CHAMFER_REMOVALS: Final[Mapping[str, tuple[Coordinate, ...]]] = {
+    "2": (
+        (5, 4), (4, 5), (5, 5),
+        (20, 7), (19, 8), (20, 8),
+        (17, 10), (16, 11), (17, 11),
+        (14, 13), (13, 14), (14, 14),
+        (11, 16), (10, 17), (11, 17),
+        (8, 19), (7, 20), (8, 20),
+    ),
+    "3": ((12, 9), (13, 9), (12, 10)),
+    "6": ((8, 4), (7, 5), (8, 5)),
+    "7": (
+        (20, 4), (19, 5), (20, 5),
+        (17, 7), (16, 8), (17, 8),
+        (14, 10), (13, 11), (14, 11),
+        (11, 13), (10, 14), (11, 14),
+    ),
+    "9": ((12, 21), (13, 21), (12, 22)),
+}
+
+
+def _apply_clean_chamfer(square_digits: Mapping[str, Matrix]) -> Mapping[str, Matrix]:
+    """Apply the reviewed fine-raster edits without changing the skeleton."""
+
+    digits: dict[str, Matrix] = {}
+    for digit, square in square_digits.items():
+        rows = [list(row) for row in square]
+        for x, y in CLEAN_CHAMFER_ADDITIONS[digit]:
+            rows[PRIMARY_CONTENT_TOP + y][PRIMARY_CONTENT_LEFT + x] = "1"
+        for x, y in CLEAN_CHAMFER_REMOVALS.get(digit, ()):
+            rows[PRIMARY_CONTENT_TOP + y][PRIMARY_CONTENT_LEFT + x] = "0"
+        digits[digit] = tuple("".join(row) for row in rows)
+    return digits
+
+
+PRIMARY_SQUARE_DIGITS: Final[Mapping[str, Matrix]] = {
+    digit: _expand_source_matrix(rows, box_width=PRIMARY_DIGIT_CELLS)
     for digit, rows in PRIMARY_SOURCE_DIGITS.items()
 }
-PRIMARY_COLON: Final[Matrix] = _primary_colon()
+PRIMARY_CLEAN_CHAMFER_DIGITS: Final[Mapping[str, Matrix]] = _apply_clean_chamfer(
+    PRIMARY_SQUARE_DIGITS
+)
+PRIMARY_LEGACY_FINE_CHAMFER_DIGITS: Final[Mapping[str, Matrix]] = {
+    digit: _chamfer_one_cell(rows)
+    for digit, rows in PRIMARY_SQUARE_DIGITS.items()
+}
+
+PRIMARY_SQUARE_COLON: Final[Matrix] = _primary_colon()
+PRIMARY_CLEAN_CHAMFER_COLON: Final[Matrix] = PRIMARY_SQUARE_COLON
+PRIMARY_LEGACY_FINE_CHAMFER_COLON: Final[Matrix] = PRIMARY_SQUARE_COLON
+
+PRIMARY_DIGIT_VARIANTS: Final[Mapping[str, Mapping[str, Matrix]]] = {
+    "square": PRIMARY_SQUARE_DIGITS,
+    "clean-chamfer": PRIMARY_CLEAN_CHAMFER_DIGITS,
+    "legacy-fine-chamfer": PRIMARY_LEGACY_FINE_CHAMFER_DIGITS,
+}
+PRIMARY_COLON_VARIANTS: Final[Mapping[str, Matrix]] = {
+    "square": PRIMARY_SQUARE_COLON,
+    "clean-chamfer": PRIMARY_CLEAN_CHAMFER_COLON,
+    "legacy-fine-chamfer": PRIMARY_LEGACY_FINE_CHAMFER_COLON,
+}
+
+# Stable selected-runtime aliases.  Generator consumers intentionally import
+# these names directly so changing a review-only variant never changes the
+# WFF resource surface implicitly.
+PRIMARY_DIGITS: Final[Mapping[str, Matrix]] = PRIMARY_CLEAN_CHAMFER_DIGITS
+PRIMARY_COLON: Final[Matrix] = PRIMARY_CLEAN_CHAMFER_COLON
 
 
 def _validate_matrix(name: str, rows: Sequence[str], width: int, height: int) -> None:
@@ -737,17 +876,93 @@ def validate_font_family() -> None:
             7,
         )
 
-    if tuple(PRIMARY_DIGITS) != tuple("0123456789"):
-        raise ValueError("primary display cut must contain exactly digits 0-9")
-    for digit, rows in PRIMARY_DIGITS.items():
-        _validate_matrix(f"primary/{digit}", rows, PRIMARY_DIGIT_CELLS, PRIMARY_LINE_CELLS)
-    _validate_matrix("primary/colon", PRIMARY_COLON, PRIMARY_COLON_CELLS, PRIMARY_LINE_CELLS)
-    _validate_plain_zero(PRIMARY_DIGITS["0"])
+    expected_variants = ("square", "clean-chamfer", "legacy-fine-chamfer")
+    if tuple(PRIMARY_DIGIT_VARIANTS) != expected_variants:
+        raise ValueError("primary variant order drifted")
+    if tuple(PRIMARY_COLON_VARIANTS) != expected_variants:
+        raise ValueError("primary colon variant order drifted")
+    for variant, digits in PRIMARY_DIGIT_VARIANTS.items():
+        if tuple(digits) != tuple("0123456789"):
+            raise ValueError(f"primary/{variant} must contain exactly digits 0-9")
+        for digit, rows in digits.items():
+            _validate_matrix(
+                f"primary/{variant}/{digit}",
+                rows,
+                PRIMARY_DIGIT_CELLS,
+                PRIMARY_LINE_CELLS,
+            )
+        _validate_plain_zero(digits["0"])
+    for variant, rows in PRIMARY_COLON_VARIANTS.items():
+        _validate_matrix(
+            f"primary/{variant}/colon",
+            rows,
+            PRIMARY_COLON_CELLS,
+            PRIMARY_LINE_CELLS,
+        )
+
+    if PRIMARY_DIGITS is not PRIMARY_CLEAN_CHAMFER_DIGITS:
+        raise ValueError("PRIMARY_DIGITS must alias the reviewed clean chamfer")
+    if PRIMARY_COLON is not PRIMARY_CLEAN_CHAMFER_COLON:
+        raise ValueError("PRIMARY_COLON must alias the reviewed clean chamfer")
+
+    if tuple(CLEAN_CHAMFER_ADDITIONS) != tuple("0123456789"):
+        raise ValueError("clean chamfer additions must cover digits 0-9 in order")
+    if set(CLEAN_CHAMFER_REMOVALS) - set(CLEAN_CHAMFER_ADDITIONS):
+        raise ValueError("clean chamfer removals contain an unknown digit")
+    for digit, additions in CLEAN_CHAMFER_ADDITIONS.items():
+        removals = CLEAN_CHAMFER_REMOVALS.get(digit, ())
+        if len(set(additions)) != len(additions) or len(set(removals)) != len(removals):
+            raise ValueError(f"clean chamfer {digit}: duplicate edit coordinate")
+        if set(additions) & set(removals):
+            raise ValueError(f"clean chamfer {digit}: conflicting edit coordinate")
+        for value, coordinates in (("0", additions), ("1", removals)):
+            for x, y in coordinates:
+                if not (
+                    0 <= x < PRIMARY_CONTENT_WIDTH
+                    and 0 <= y < PRIMARY_CONTENT_HEIGHT
+                ):
+                    raise ValueError(f"clean chamfer {digit}: edit outside content")
+                if (
+                    PRIMARY_SQUARE_DIGITS[digit][PRIMARY_CONTENT_TOP + y][
+                        PRIMARY_CONTENT_LEFT + x
+                    ]
+                    != value
+                ):
+                    raise ValueError(
+                        f"clean chamfer {digit}: edit does not change square"
+                    )
+    if {
+        digit
+        for digit in PRIMARY_SQUARE_DIGITS
+        if PRIMARY_CLEAN_CHAMFER_DIGITS[digit] != PRIMARY_SQUARE_DIGITS[digit]
+    } != set("0123456789"):
+        raise ValueError("clean chamfer must contain the complete reviewed edit set")
+
+    # Legacy is intentionally a separate control, not an accidental runtime
+    # alias. It should retain at least one fine-cell corner cut.
+    if all(
+        all(
+            len(
+                {
+                    rows[PRIMARY_CONTENT_TOP + macro_y * 3 + y][
+                        PRIMARY_CONTENT_LEFT + macro_x * 3 + x
+                    ]
+                    for y in range(3)
+                    for x in range(3)
+                }
+            )
+            == 1
+            for macro_y in range(9)
+            for macro_x in range(7)
+        )
+        for rows in PRIMARY_LEGACY_FINE_CHAMFER_DIGITS.values()
+    ):
+        raise ValueError("legacy fine chamfer unexpectedly contains no fine-cell cuts")
 
     # Colon dots are intentionally exactly two 6x6 blocks, aligned to the
     # center of their 10x32 fixed box, with no stray lit cells.
     expected_colon = _primary_colon()
-    if PRIMARY_COLON != expected_colon:
+    if any(rows != expected_colon for rows in PRIMARY_COLON_VARIANTS.values()):
         raise ValueError("primary colon dots drifted from the numeral stroke weight")
     if PRIMARY_TIME_WIDTH_CELLS != 114:
         raise ValueError("primary time geometry must remain 114 source cells")

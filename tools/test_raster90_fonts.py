@@ -29,6 +29,17 @@ class Raster90FontFamilyTests(unittest.TestCase):
         self.assertEqual(len(fonts.RUNTIME_SECONDARY_GLYPHS), 40)
         self.assertEqual(set(fonts.RUNTIME_SECONDARY_GLYPHS), set(fonts.RUNTIME_SECONDARY_KEYS))
         self.assertEqual(set(fonts.PRIMARY_DIGITS), set("0123456789"))
+        self.assertEqual(
+            tuple(fonts.PRIMARY_DIGIT_VARIANTS),
+            ("square", "clean-chamfer", "legacy-fine-chamfer"),
+        )
+        self.assertIs(fonts.PRIMARY_DIGITS, fonts.PRIMARY_CLEAN_CHAMFER_DIGITS)
+        self.assertIs(fonts.PRIMARY_COLON, fonts.PRIMARY_CLEAN_CHAMFER_COLON)
+        self.assertNotEqual(fonts.PRIMARY_SQUARE_DIGITS, fonts.PRIMARY_DIGITS)
+        self.assertNotEqual(
+            fonts.PRIMARY_LEGACY_FINE_CHAMFER_DIGITS,
+            fonts.PRIMARY_DIGITS,
+        )
         self.assertEqual(fonts.PRIMARY_TIME_WIDTH_CELLS, 114)
         for rows in fonts.PRIMARY_DIGITS.values():
             self.assertEqual((len(rows), len(rows[0])), (32, 26))
@@ -81,7 +92,7 @@ class Raster90FontFamilyTests(unittest.TestCase):
                 elif cells == peak_cells:
                     peak_times.append(time)
 
-        self.assertEqual((peak_cells, peak_times), (1418, ["08:08"]))
+        self.assertEqual((peak_cells, peak_times), (1526, ["08:08"]))
         self.assertLess(peak_cells * 9, 159043 * 0.15)
 
     def test_presentation_outputs_are_deterministic_and_complete(self) -> None:
@@ -90,6 +101,7 @@ class Raster90FontFamilyTests(unittest.TestCase):
             set(expected),
             {
                 presentation.PRIMARY_SHEET_NAME,
+                presentation.PRIMARY_SQUARE_SHEET_NAME,
                 presentation.SECONDARY_SHEET_NAME,
                 presentation.FAMILY_SHEET_NAME,
                 presentation.NATIVE_FACE_NAME,

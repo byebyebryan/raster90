@@ -15,7 +15,8 @@ The solid-grid runtime is live-validated at native 466×466 on the physical
 OnePlus Watch 3 and at native 466×466 / scaled 454×454 on Wear OS emulators.
 Exact glyph and sprite resources are generated deterministically from
 reviewable cell matrices rather than rendered from a runtime TTF. Its primary
-time now uses the approved project-owned one-cell-chamfered cut; the complete
+time uses the reviewed project-owned clean-chamfer cut; the square construction
+and legacy fine-chamfer remain named source controls, while the complete
 secondary family remains source-only outside the current runtime subset.
 Physical wearer-distance and AMOLED optical judgment remain open.
 

@@ -6,9 +6,10 @@ It uses one 150×150 framebuffer, solid 3×3 cells, true 16×16 icons, icon-led
 single-row values, and centered date text without a calendar icon. Its
 unavailable-weather branch uses a neutral icon plus `--` on the same single-row
 baseline, while the physical watch proves a fresh available night-weather row.
-The project-owned two-cut bitmap family is now formalized: the primary time
-cut uses the approved one-source-cell convex-corner chamfer, while the complete
-secondary/text vocabulary remains available for source-only review. Wearer
+The project-owned primary variants are now formalized: the selected time cut is
+the reviewed clean chamfer, while the square construction and earlier global
+fine-chamfer remain named source-only controls. The complete secondary/text
+vocabulary remains available for source-only review. Wearer
 optical judgment, sustained AOD, stale weather, selected-unit physical
 rendering, and any animation or transient color event remain open work.
 
@@ -269,8 +270,9 @@ Selected compact-glyph contract:
   information band. The selected resting face does not stack a header above a
   value.
 - Primary/display digits use fixed 26×32 source-cell boxes and a 10×32 colon
-  box, with one convex-corner chamfer pass and a plain closed zero. Their total
-  342-unit WFF time geometry remains unchanged.
+  box, with the selected reviewed clean chamfer and a plain closed zero. The
+  retained square and legacy fine-chamfer controls share the same geometry;
+  total 342-unit WFF time geometry remains unchanged.
 - Secondary/text glyphs are project-owned 5×7 matrices: ordinary glyphs advance
   six source cells (18 WFF units), while the literal space advances two cells
   (6 units). The source-only vocabulary includes lowercase and common
@@ -578,7 +580,7 @@ For the historical 3/2 runtime, an intentionally pessimistic full-box bound was
 `114 × 32 × 4 = 14,592` lit units. For the packaged solid grid that same bound
 is too pessimistic at `114 × 32 × 9 = 32,832`, so ambient review uses actual
 glyph occupancy. Across every 24-hour `HH:MM` value, the approved primary cut
-peaks at `08:08`: 1,418 live source cells, or 12,762 solid units, about 8.02% of
+peaks at `08:08`: 1,526 live source cells, or 13,734 solid units, about 8.64% of
 the centered 225-radius active circle's 159,043 units. That is below the 15%
 design limit. For the packaged solid runtime, the official evaluator reports
 155,520 maximum ambient bytes conservatively; its optional optimization estimate
