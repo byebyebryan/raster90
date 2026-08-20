@@ -34,7 +34,7 @@ class Raster90AssetGeneratorTests(unittest.TestCase):
         )
 
         expected = generator._expected_pngs()
-        self.assertEqual(len(expected), 89)
+        self.assertEqual(len(expected), 87)
         self.assertFalse(any(name.startswith("raster_coarse_") for name in expected))
         self.assertEqual(
             sum(name.startswith("raster_weather_day_") for name in expected), 16

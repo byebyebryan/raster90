@@ -24,10 +24,10 @@ from typing import Iterable, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "design" / "raster90"))
 
 from matrices import (  # noqa: E402  (path is intentionally set above)
-    FINE_GLYPHS,
     PALETTE,
     SINGLE_GRID_LIT,
     SINGLE_GRID_PITCH,
@@ -38,6 +38,7 @@ from matrices import (  # noqa: E402  (path is intentionally set above)
     TIME_DIGITS,
     WEATHER_STALE,
 )
+from fonts.raster90.family import RUNTIME_SECONDARY_GLYPHS  # noqa: E402
 from icon_resolution_studies import (  # noqa: E402  (selected runtime matrices)
     SIXTEEN_WEATHER_DAY,
     SIXTEEN_WEATHER_NIGHT,
@@ -113,6 +114,11 @@ UTILITY_ASSETS = {
 OPAQUE_BLACK: RGBA = (0, 0, 0, 255)
 TRANSPARENT: RGBA = (0, 0, 0, 0)
 OPAQUE_WHITE: RGBA = PALETTE["W"]
+
+# Keep the APK surface limited to glyphs that current WFF expressions can
+# emit.  The complete family remains available to source-only presentation
+# tooling through fonts/raster90/family.py.
+FINE_GLYPHS = RUNTIME_SECONDARY_GLYPHS
 
 ASSET_DIR_REL = Path("watchfaces/raster90/src/main/res/drawable-nodpi")
 

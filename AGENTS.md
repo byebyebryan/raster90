@@ -64,10 +64,10 @@ general Wear OS app.
   monochrome time only.
 - The packaged face uses active-frame bands 45–93, 111–159, 177–273, 291–339,
   and 357–405. The solid
-  3×3 time remains vertically centered in one 342×96 `TimeText`, but its
-  mechanically expanded numeral silhouettes are still provisional. Keep
-  preview and runtime coordinates identical when implementing. Weather/date
-  spacing may receive a later optical pass; do not change it implicitly.
+  3×3 time remains vertically centered in one 342×96 `TimeText`, using the
+  approved one-cell-chamfered primary/display cut. Keep preview and runtime
+  coordinates identical when implementing. Weather/date spacing may receive a
+  later optical pass; do not change it implicitly.
 - Available/stale/unavailable weather must remain truthful. The packaged
   unavailable branch uses the neutral weather icon with `--` on the same
   single-line baseline as available weather; do not restore a `WX` header or
@@ -242,8 +242,11 @@ The `:watchfaces:raster90` scaffold follows the official WFF sample structure:
 - `res/raw/watchface.xml` contains the face definition.
 - `res/xml/watch_face_info.xml` declares preview/editability metadata.
 - Generated bitmap fonts, weather sprites, strings, and the picker preview live
-  in their normal `res/` directories. Source matrices live in
-  `design/raster90/`, outside the application module.
+  in their normal `res/` directories. Non-font source matrices live in
+  `design/raster90/`; the authoritative font component lives under
+  `fonts/raster90/`. Both remain outside the application module. The complete
+  secondary vocabulary is presentation/source-only while the generator packages
+  only current WFF expression glyphs.
 - The packaged runtime uses a 466×466 WFF canvas with a centered 450×450 active
   grid. The official 454×454 target scales that coordinate space cleanly; the
   physical watch remains authoritative.
@@ -262,6 +265,8 @@ exact asset surface:
 ```sh
 rtk python3 -B tools/generate_raster90_assets.py
 rtk python3 -B tools/generate_raster90_assets.py --check
+rtk python3 -B tools/render_raster90_font_family.py
+rtk python3 -B tools/render_raster90_font_family.py --check
 ```
 
 For a Wear emulator deployment, resolve the runtime serial and prove the exact
@@ -455,8 +460,9 @@ rtk adb -s <phone-serial> shell wm density
   verify both editor choices on the primary Wear OS 5 emulator and live
   converted Celsius output on the physical watch.
 - [ ] Live-test a stale state with real location/weather data.
-- [ ] Refine the provisional expanded time numerals; the solid 16×16 icon family
-  is selected but remains open to optical polish during implementation.
+- [x] Formalize the approved one-cell-chamfered primary/display numerals and
+  complete project-owned secondary/text family; physical wearer optical review
+  remains open.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.

@@ -14,8 +14,10 @@ information row. Weather, steps, and battery keep icons;
 The solid-grid runtime is live-validated at native 466×466 on the physical
 OnePlus Watch 3 and at native 466×466 / scaled 454×454 on Wear OS emulators.
 Exact glyph and sprite resources are generated deterministically from
-reviewable cell matrices rather than rendered from a runtime TTF. Its expanded
-time numerals remain provisional pending direct authorship and wearer review.
+reviewable cell matrices rather than rendered from a runtime TTF. Its primary
+time now uses the approved project-owned one-cell-chamfered cut; the complete
+secondary family remains source-only outside the current runtime subset.
+Physical wearer-distance and AMOLED optical judgment remain open.
 
 The resting face is intentionally monochrome except for the small weather
 sprite. Weather is Celsius by default with an explicit Fahrenheit override in
@@ -51,6 +53,11 @@ Generated mood and hierarchy studies are catalogued separately under
 [Concept Artwork](design/concepts/README.md); they are not production WFF
 resources or geometry references.
 
+The project-owned bitmap family is a first-class repository component under
+[`fonts/raster90/`](fonts/raster90/README.md). Its tracked
+[`preview/index.html`](fonts/raster90/preview/index.html) contains the complete
+matrix sheets and an interactive local specimen.
+
 Operational instructions for coding agents are in [AGENTS.md](AGENTS.md).
 
 ## Build
@@ -66,9 +73,9 @@ JAVA_HOME=/opt/android-studio/jbr rtk proxy ./gradlew \
 The debug APK is written to
 `watchfaces/raster90/build/outputs/apk/debug/raster90-debug.apk`. See
 [Device Setup](docs/device-setup.md) for explicit-target emulator deployment
-and the current validation record. Local screenshots, reports, and other
-reviewable generated artifacts belong in the Git-ignored root `outputs/`
-directory. Keep them namespaced: Raster 90 generators use
+and the current validation record. Disposable screenshots, reports, and design
+studies belong in the Git-ignored root `outputs/` directory. Keep them
+namespaced: Raster 90 generators use
 `outputs/raster90/studies/<study>/`, device evidence uses
 `outputs/raster90/captures/<checkpoint>/`, and external visual references use
 `outputs/references/`. Locally downloaded validation binaries and their licenses
@@ -79,4 +86,10 @@ Regenerate or verify the bitmap resources with:
 ```sh
 rtk python3 -B tools/generate_raster90_assets.py
 rtk python3 -B tools/generate_raster90_assets.py --check
+
+# Generate/check the complete tracked font-family presentation.
+rtk python3 -B tools/render_raster90_font_family.py
+rtk python3 -B tools/render_raster90_font_family.py --check
 ```
+The presentation writes complete primary and secondary sheets, native-scale
+specimens, and a self-contained `fonts/raster90/preview/index.html`.

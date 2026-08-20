@@ -2,12 +2,12 @@
 
 This is the reviewable source for the 450-unit active frame treated as one
 150x150 source framebuffer. A source pixel has a 3-unit pitch and a solid 3x3
-lit square. The selected true16 utility and weather tiles, plus expanded time
-boxes, are shared with the packaged resource generator.
+lit square. The selected true16 utility and weather tiles, plus the approved
+chamfered primary time boxes, are shared with the packaged resource generator.
 
-The utility and weather matrices are authored directly at true 16x16. The time
-expands the proven V1 silhouettes onto the finer source grid so pitch can be
-judged before new high-resolution numerals are authored.
+The utility and weather matrices are authored directly at true 16x16. The
+primary time cut expands the proven V1 silhouettes onto the same source grid
+and applies the approved one-cell convex-corner chamfer.
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ from matrices import (
     TIME_COLON,
     TIME_DIGITS,
 )
+from fonts.raster90.family import validate_font_family
 
 
 Matrix = tuple[str, ...]
@@ -86,6 +87,7 @@ TIME_COLON_CELLS: Final = SINGLE_GRID_TIME_COLON_CELLS
 
 
 def validate_single_grid_study() -> None:
+    validate_font_family()
     if ACTIVE_SIZE != SOURCE_SIZE * PIXEL_PITCH:
         raise ValueError("active frame is not an exact 150-cell source grid")
     if PIXEL_LIT != PIXEL_PITCH:

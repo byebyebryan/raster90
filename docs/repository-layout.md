@@ -26,8 +26,10 @@ wear-os/
 ├── wear-apps/          # Future; create only for required Wear application logic
 ├── mobile-apps/        # Future; create only for a required phone companion
 ├── tools/              # Deterministic asset generation; future validation helpers
+├── fonts/
+│   └── raster90/       # Project-owned family source and tracked presentation
 ├── design/
-│   ├── raster90/       # Reviewable glyph, icon, and palette matrices
+│   ├── raster90/       # Reviewable icon, palette, and legacy study matrices
 │   └── concepts/       # Exploratory artwork; not production resources
 └── third_party/        # Retained source material, licenses, and provenance
 ```
@@ -73,14 +75,19 @@ module.
 
 ## Current asset boundary
 
-- `design/raster90/matrices.py` is the human-reviewable source for compact
-  typography, provisional time silhouettes, palette, and legacy comparison
-  sprites.
+- `fonts/raster90/family.py` is the authoritative source for the complete
+  project-owned secondary vocabulary and approved one-cell-chamfered primary
+  display cut. `design/raster90/matrices.py` keeps compatibility aliases for
+  design studies alongside palette and legacy comparison sprites.
 - `design/raster90/icon_resolution_studies.py` is the authoritative reviewable
   source for the packaged true 16×16 weather, steps, and battery matrices while
   retaining the rejected resolution candidates as design evidence.
 - `tools/generate_raster90_assets.py` is the sole deterministic producer and
-  checker for the 89 packaged/preview PNGs.
+  checker for the 87 packaged/preview PNGs; it consumes only the secondary
+  runtime subset and the complete primary 0-9/colon surface.
+- `tools/render_raster90_font_family.py` produces and checks the tracked,
+  self-contained family overview and specimen sheets under
+  `fonts/raster90/preview/`.
 - `tools/render_raster90_icon_resolution_studies.py` produces ignored,
   deterministic comparison sheets and full-face mocks; it does not change the
   watch-face module.

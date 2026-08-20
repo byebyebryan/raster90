@@ -6,9 +6,11 @@ It uses one 150×150 framebuffer, solid 3×3 cells, true 16×16 icons, icon-led
 single-row values, and centered date text without a calendar icon. Its
 unavailable-weather branch uses a neutral icon plus `--` on the same single-row
 baseline, while the physical watch proves a fresh available night-weather row.
-Direct-authored time numerals, wearer optical judgment, sustained AOD, stale
-weather, selected-unit physical rendering, and any animation or transient color
-event remain open work.
+The project-owned two-cut bitmap family is now formalized: the primary time
+cut uses the approved one-source-cell convex-corner chamfer, while the complete
+secondary/text vocabulary remains available for source-only review. Wearer
+optical judgment, sustained AOD, stale weather, selected-unit physical
+rendering, and any animation or transient color event remain open work.
 
 ## Product identity
 
@@ -104,8 +106,10 @@ Regenerate or byte-check the runtime mirror and comparison specimens with:
 rtk python3 -B tools/render_raster90_single_grid_study.py
 rtk python3 -B tools/render_raster90_single_grid_study.py --check
 rtk python3 -B tools/render_raster90_icon_resolution_studies.py --check
+rtk python3 -B tools/render_raster90_font_family.py --check
 rtk python3 -B -m unittest \
   tools/test_generate_raster90_assets.py \
+  tools/test_raster90_fonts.py \
   tools/test_render_raster90_icon_resolution_studies.py \
   tools/test_render_raster90_single_grid_study.py
 ```
@@ -247,9 +251,11 @@ The historical calibration specimen compared:
 - `PixelOperatorMono8` and `PixelOperatorMonoHB8` as coarse-display alternatives
   for the oversized time.
 
-V1 deliberately takes the project-owned bitmap path. Human-reviewable matrices
-live in `design/raster90/matrices.py`; `tools/generate_raster90_assets.py`
-expands them into exact-size WFF bitmap-font and sprite resources. The four
+V1 deliberately takes the project-owned bitmap path. The authoritative family
+matrices live in `fonts/raster90/family.py`; compatibility aliases and non-font
+study matrices remain in `design/raster90/matrices.py`.
+`tools/generate_raster90_assets.py` expands the approved runtime subsets into
+exact-size WFF bitmap-font and sprite resources. The four
 approved Pixel Operator source files and their CC0 provenance remain under
 `third_party/pixel-operator/`, outside the packaged watch-face resources. The
 fictional hardware grid is the authority: the font conforms to the display,
@@ -262,13 +268,13 @@ Selected compact-glyph contract:
 - 5×7 compact matrices use one line vertically centered inside each 16-cell
   information band. The selected resting face does not stack a header above a
   value.
-- Approximately 26×30 live digit matrices inside a 32-pixel-high time line.
-  Time uses the same solid 3×3 source pixels as every other element; it does not
-  have a coarse physical pixel mode.
-- Uppercase Latin letters, digits, colon, percent, degree and temperature-unit
-  marks, basic punctuation, and a deliberately small set of symbols.
-- Compact ordinary glyphs provisionally advance six source pixels (18 WFF
-  units); the literal space is two source pixels (6 units).
+- Primary/display digits use fixed 26×32 source-cell boxes and a 10×32 colon
+  box, with one convex-corner chamfer pass and a plain closed zero. Their total
+  342-unit WFF time geometry remains unchanged.
+- Secondary/text glyphs are project-owned 5×7 matrices: ordinary glyphs advance
+  six source cells (18 WFF units), while the literal space advances two cells
+  (6 units). The source-only vocabulary includes lowercase and common
+  punctuation; the packaged subset is only what current WFF expressions emit.
 - The degree mark is a closed ring or box. The earlier open upper semicircle is
   a corrected V1 glyph defect, not part of the visual language.
 - Design fixtures and the watch-face setting default use Celsius. The editor
@@ -282,7 +288,15 @@ Selected compact-glyph contract:
 
 Each glyph cell resolves to exactly one solid 3×3 source pixel; it must not be
 smoothed into a conventional typeface. The source glyph matrices should remain
-human-reviewable so bitmap resources can be regenerated deterministically.
+human-reviewable so bitmap resources and the complete tracked font presentation
+can be regenerated deterministically:
+
+```sh
+rtk python3 -B tools/render_raster90_font_family.py
+rtk python3 -B tools/render_raster90_font_family.py --check
+```
+The generated overview and specimen sheets live under
+`fonts/raster90/preview/` and embed no external assets or runtime dependencies.
 
 ### Icon source and canvas roles
 
@@ -479,9 +493,8 @@ matrices and integer-normalized weather art are retained as comparison evidence.
 
 The packaged solid-grid runtime uses the following bands relative to the
 450×450 active framebuffer. They remain subject to physical-watch optical
-adjustment. For the provisional
-safe circle with radius `r = 210`, the usable chord at vertical coordinate `y`
-is:
+adjustment. For the provisional safe circle with radius `r = 210`, the usable
+chord at vertical coordinate `y` is:
 
 ```text
 usable width = 2 × sqrt(r² - (y - 225)²)
@@ -564,13 +577,13 @@ a full day and within the WFF ambient memory budget.
 For the historical 3/2 runtime, an intentionally pessimistic full-box bound was
 `114 × 32 × 4 = 14,592` lit units. For the packaged solid grid that same bound
 is too pessimistic at `114 × 32 × 9 = 32,832`, so ambient review uses actual
-glyph occupancy. Across every 24-hour `HH:MM` value, the current
-provisional matrices peak at `08:08`: 1,458 live source cells, or 13,122 solid
-units, about 8.25% of the centered 225-radius active circle's 159,043 units.
-That is below the 15% design limit. For the packaged solid runtime, the official
-evaluator reports 155,520 maximum ambient bytes conservatively; its optional
-optimization estimate reports 104,004 bytes. Final authored numerals require
-the same occupancy and evaluator checks again.
+glyph occupancy. Across every 24-hour `HH:MM` value, the approved primary cut
+peaks at `08:08`: 1,418 live source cells, or 12,762 solid units, about 8.02% of
+the centered 225-radius active circle's 159,043 units. That is below the 15%
+design limit. For the packaged solid runtime, the official evaluator reports
+155,520 maximum ambient bytes conservatively; its optional optimization estimate
+reports 104,004 bytes. Any later optical revision must repeat the occupancy and
+evaluator checks.
 
 ## WFF v2 feasibility boundaries
 
