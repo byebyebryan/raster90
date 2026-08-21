@@ -2,11 +2,14 @@
 
 ## Decision
 
-Use a product-focused Android monorepo rooted at `/home/bryan/code/wear-os`.
-Separate APK/AAB packaging requirements are module boundaries, not Git
-repository boundaries.
+Use the dedicated Raster 90 product repository rooted at
+`/home/bryan/code/raster90`. Separate APK/AAB packaging requirements remain
+module boundaries within this repository.
 
-The first product and display name are Raster 90. Its resource-only module is
+This repository may later contain Raster 90-specific Wear or phone companion
+modules, but it is not an umbrella for unrelated Android products.
+
+The product and display name are Raster 90. Its resource-only module is
 `:watchfaces:raster90`, using application ID
 `io.github.byebyebryan.raster90.watchface`. The active design contract remains
 in `docs/watchface-design.md`.
@@ -14,7 +17,7 @@ in `docs/watchface-design.md`.
 ## Current and reserved structure
 
 ```text
-wear-os/
+raster90/
 ├── AGENTS.md
 ├── README.md
 ├── docs/
@@ -22,9 +25,9 @@ wear-os/
 ├── settings.gradle.kts
 ├── build.gradle.kts
 ├── watchfaces/
-│   └── raster90/       # First module: standalone resource-only WFF bundle
-├── wear-apps/          # Future; create only for required Wear application logic
-├── mobile-apps/        # Future; create only for a required phone companion
+│   └── raster90/       # Current module: standalone resource-only WFF bundle
+├── wear-apps/          # Future; Raster 90-specific Wear application logic
+├── mobile-apps/        # Future; Raster 90-specific phone companion
 ├── tools/              # Deterministic asset generation; future validation helpers
 ├── fonts/
 │   └── raster90/       # Project-owned family source and tracked presentation
@@ -36,9 +39,9 @@ wear-os/
 └── third_party/        # Retained source material, licenses, and provenance
 ```
 
-Only `watchfaces/raster90` belongs in the initial Android scaffold. The other
-directories are reserved architecture, not empty modules to create
-preemptively.
+Only `watchfaces/raster90` is currently an Android module. The other
+directories are reserved Raster 90 product architecture, not empty modules to
+create preemptively.
 
 ## Module boundaries
 
@@ -52,17 +55,17 @@ preemptively.
 - Generated bitmap-font glyphs, weather sprites, and the picker preview live in
   `res/drawable-nodpi`; their source matrices do not live inside the module.
 
-### `wear-apps/<name>` (future)
+### `wear-apps/<name>` (future Raster 90 module)
 
 - Separate application ID and APK/AAB.
-- Owns any Wear OS application logic or complication data providers that WFF
-  cannot provide declaratively.
+- Owns Raster 90-specific Wear OS application logic or complication data
+  providers that WFF cannot provide declaratively.
 - Must not be packaged into the watch-face bundle.
 
-### `mobile-apps/<name>` (future)
+### `mobile-apps/<name>` (future Raster 90 module)
 
 - Separate application ID and APK/AAB targeting the phone platform.
-- Exists only if a concrete companion-phone workflow is required.
+- Exists only if a concrete Raster 90 companion-phone workflow is required.
 - The watch-face bootstrap and deployment flow must not depend on it.
 
 ## Shared build policy
@@ -111,4 +114,5 @@ module.
   licenses. Do not place new artifacts directly in the root.
 
 Physical-watch adjustment and post-V1 motion/color decisions remain tracked in
-`docs/watchface-design.md`; they do not change the monorepo boundary.
+`docs/watchface-design.md`; they do not change the Raster 90 repository
+boundary.

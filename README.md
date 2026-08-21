@@ -1,7 +1,6 @@
-# Wear OS
+# Raster 90
 
-Android monorepo for watch faces, Wear OS applications, and directly related
-Android components. The first product is the **Raster 90** watch face for the
+Dedicated Android product repository for the **Raster 90** watch face for the
 OnePlus Watch 3.
 
 Raster 90 is a standalone, resource-only Watch Face Format v2 watch face for
@@ -42,13 +41,17 @@ gates.
 
 ## Repository boundaries
 
-This is one Git repository with separate Android application modules. Each
-application module must produce its own APK/AAB and use its own application ID.
-The existing `:watchfaces:raster90` module uses
+This repository contains the Raster 90 product and its Android components. The
+current `:watchfaces:raster90` application module must produce its own APK/AAB
+and use its own application ID. It uses
 `io.github.byebyebryan.raster90.watchface`; it must remain resource-only and
 cannot contain or depend on Kotlin/Java application logic.
 
-Only modules with a concrete requirement will be created. See
+Future application modules must likewise be independently packaged and may
+provide Raster 90-specific Wear or phone companion functionality only. This
+repository is not an umbrella for unrelated Android products.
+
+Only modules with a concrete Raster 90 requirement will be created. See
 [Repository Layout](docs/repository-layout.md) for the repository structure and
 [Device Setup](docs/device-setup.md) for verified local targets. The
 visual and fictional-hardware contract is captured in

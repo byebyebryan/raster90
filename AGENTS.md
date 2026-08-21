@@ -1,8 +1,8 @@
-# Wear OS Monorepo — Project Context
+# Raster 90 — Project Context
 
-Wear OS development workspace. The first deliverable is **Raster 90**, a
-declarative Watch Face Format (WFF) watch face for the OnePlus Watch 3, not a
-general Wear OS app.
+Dedicated Raster 90 product repository. Raster 90 is a declarative Watch Face
+Format (WFF) watch face for the OnePlus Watch 3, not a general-purpose Wear OS
+app.
 
 ## Product and format decisions
 
@@ -417,7 +417,8 @@ rtk adb -s <phone-serial> shell wm density
 
 ## Next steps
 
-- [x] Initialize the Git monorepo and record module/package boundaries.
+- [x] Initialize the dedicated Raster 90 repository and record module/package
+  boundaries.
 - [x] Choose Raster 90 as the public watch-face name.
 - [x] Choose `io.github.byebyebryan.raster90.watchface` as the permanent
   application ID.

@@ -14,6 +14,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "wear-os"
+rootProject.name = "raster90"
 
 include(":watchfaces:raster90")
