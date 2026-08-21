@@ -21,6 +21,7 @@ raster90/
 ├── AGENTS.md
 ├── README.md
 ├── docs/
+│   └── media/          # Small tracked public subset of verified runtime captures
 ├── gradle/
 ├── settings.gradle.kts
 ├── build.gradle.kts
@@ -106,6 +107,9 @@ module.
   watch-face module.
 - `third_party/pixel-operator/` retains the four approved CC0 source fonts and
   license as design provenance; no TTF is packaged.
+- `docs/media/` contains only reviewed public presentation copies selected from
+  completed device-evidence checkpoints. Its files must retain provenance in
+  `docs/media/README.md`; the ignored evidence tree remains canonical.
 - `outputs/` is Git-ignored and namespaced by product and purpose:
   `outputs/raster90/studies/<study>/` holds generated design studies,
   `outputs/raster90/captures/<checkpoint>/` holds emulator or physical-device

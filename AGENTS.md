@@ -28,8 +28,10 @@ app.
   design provenance, never under the module's `res/font`.
 - The packaged single-grid runtime treats the centered 450×450 active frame as
   one fictional 150×150 framebuffer. Every source cell is a solid 3×3 square
-  with no gutter, and all elements use that one physical pixel scale. This
-  implementation is live-validated at native 466×466 and scaled 454×454. The
+  with no gutter, and all elements use that one physical pixel scale. Historical
+  checkpoints plus the 2026-08-21 simulated-weather capture validate this
+  implementation at native 466×466 and scaled 454×454; the current exact tree
+  is emulator-proven, while physical wearer validation remains open. The
   earlier 3-unit-pitch / 2×2-lit runtime remains historical comparison evidence,
   not the current visual design.
 - Compact text remains based on the project-owned 5×7 glyphs. In the selected
@@ -74,8 +76,10 @@ app.
 - Available/stale/unavailable weather must remain truthful. The packaged
   unavailable branch uses the neutral weather icon with `--` on the same
   single-line baseline as available weather; do not restore a `WX` header or
-  imply a condition or temperature. Available and stale data still require
-  live physical-device validation.
+  imply a condition or temperature. Available weather was physically proven on
+  the earlier deployed tree and is emulator-proven on the current tree through
+  a simulated location; stale data still requires live physical-device
+  validation.
 - Power Saver Mode support is not required for the custom face. On the physical
   watch, entering Power Saver with an unsupported third-party face displays a
   warning and substitutes a basic OnePlus face; that fallback is acceptable.
@@ -279,6 +283,9 @@ For a Wear emulator deployment, resolve the runtime serial and prove the exact
 chosen AVD name (`wear5-opw3` for pixel fidelity or the secondary `wear5`)
 before installing. Installation alone does not guarantee that the face becomes
 active; Android Studio's WFF run configuration deploys and selects it.
+For the emulator-only simulated-location weather procedure, follow
+`docs/device-setup.md`; never run its root, appops, or test-provider commands on
+a physical device.
 For local debug builds, the official codelab's debug surface also works:
 
 ```sh
@@ -320,6 +327,12 @@ emulator or physical-device evidence under
 `outputs/raster90/captures/<checkpoint>/`, and external visual references under
 `outputs/references/`. Do not restore a flat output dump. Use descriptive
 target-and-mode names when retaining multiple captures.
+
+Public README media is the narrow exception: `docs/media/` may contain a small
+tracked subset copied byte-for-byte from a completed capture checkpoint. Record
+its provenance in `docs/media/README.md`, keep the full evidence under
+`outputs/`, and never retouch a runtime capture or promote it beyond what the
+identity, window, power, and provider evidence proves.
 
 For renderer failures, first obtain the runtime PID with
 `rtk adb -s <serial> shell pidof -s com.google.wear.watchface.runtime`, then
@@ -435,19 +448,25 @@ rtk adb -s <phone-serial> shell wm density
   time-only ambient composition.
 - [x] Validate V1 interactive and ambient rendering on both the native 466×466
   and scaled 454×454 Wear OS 5 emulators.
-- [ ] Complete physical-watch validation of the selected solid-grid redesign.
-  Native interactive rendering and live available weather are proven; wearer
-  judgment of AMOLED appearance, bezel, wrist distance, sustained AOD, and
-  battery remains open. The earlier 3/2 runtime remains comparison evidence
-  only.
+- [ ] Complete physical-watch validation of the exact current solid-grid tree.
+  Current-tree interactive rendering and simulated available weather are proven
+  on `wear5-opw3`; the latest physical captures predate both the final
+  `four-toe-vertical` steps tile and clean-chamfer time cut. Wearer judgment of
+  AMOLED appearance, bezel, wrist distance, sustained AOD, and battery remains
+  open. The earlier 3/2 runtime remains comparison evidence only.
 - [x] Live-test available weather with real physical-watch data, including a
-  night-family condition icon and the WFF provider's Fahrenheit unit.
+  night-family condition icon and the WFF provider's Fahrenheit unit (historical
+  pre-final-art deployment; current emulator weather uses a documented simulated
+  GPS test provider).
 - [ ] Live-test stale weather with real data; emulator testing proves the
-  truthful icon-plus-`--` unavailable fallback.
+  truthful icon-plus-`--` unavailable fallback and the current simulated
+  available-weather route, but not stale data.
 - [x] Produce actual-size icon studies exposing the optical-weight and
   recognizability problems in the earlier 8×8/12×12 split.
 - [x] Package and validate the 150×150 single-grid system at native 466×466 and
-  scaled 454×454, including interactive, time-only ambient, and 12/24-hour sync.
+  scaled 454×454, including interactive, time-only ambient, and 12/24-hour sync
+  (historical plus current-tree emulator evidence; the current capture uses a
+  simulated GPS weather provider).
 - [x] Normalize and package all mapped WFF weather conditions plus steps and
   battery on uniform 16×16 icon tiles; the calendar icon was deliberately
   removed from the selected composition.
@@ -461,7 +480,8 @@ rtk adb -s <phone-serial> shell wm density
   treating the mocks as runtime evidence.
 - [x] Implement the header-free unavailable-weather presentation as a neutral
   icon plus `--` on one centered row.
-- [x] Live-test a fresh available state with real physical-watch weather data.
+- [x] Live-test a fresh available state with real physical-watch weather data
+  (historical pre-final-art deployment).
 - [x] Add an editable Celsius-default temperature-unit setting with an explicit
   Fahrenheit override and declarative conversion of the WFF provider value;
   verify both editor choices on the primary Wear OS 5 emulator and live
@@ -473,6 +493,10 @@ rtk adb -s <phone-serial> shell wm density
 - [x] Deploy the selected clean-chamfer runtime to the identity-proven
   `wear5-opw3` target and capture native 466×466 interactive and confirmed
   Dozing time-only evidence without clipping.
+- [x] Capture the current exact runtime tree on `wear5-opw3` with the documented
+  GPS test provider: available simulated weather, final footprints, clean-
+  chamfer time, and confirmed Dozing time-only behavior; physical and stale
+  weather gates remain open.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.

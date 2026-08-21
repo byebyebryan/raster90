@@ -15,7 +15,9 @@ Current studies:
 
 The images are 1254×1254 concept renders rather than the 466×466 target canvas.
 Their prompts and generated pixels are non-authoritative. The current design
-contract, provisional two-tier raster, mathematical fit budget, and calibration
-requirements live in [Watch Face Design Direction](../../docs/watchface-design.md).
-Production glyphs and sprites will be generated deterministically only after
-renderer calibration.
+contract, selected solid-grid geometry, mathematical fit budget, and validation
+boundaries live in [Watch Face Design Direction](../../docs/watchface-design.md).
+The provisional two-tier raster and calibration face are historical evidence;
+production glyphs and sprites are generated deterministically from the
+project-owned font and icon matrices. These concept images are not production
+resources or emulator/physical-runtime evidence.

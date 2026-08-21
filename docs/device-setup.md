@@ -1,8 +1,11 @@
 # Device Setup and Verification
 
 Live verification record for the physical OnePlus 13, physical OnePlus Watch 3,
-and local phone and Wear OS emulators. Physical devices were last checked
-2026-08-15; Raster 90 typography rendering was checked 2026-08-18.
+and local phone and Wear OS emulators. Physical-device pairing and identity
+baselines were checked 2026-08-15; the physical watch's Raster 90 runtime and
+weather checkpoint was 2026-08-19. The current tracked runtime tree received a
+fresh simulated-weather emulator checkpoint on 2026-08-21; physical and
+stale-weather evidence remain separate gates.
 
 ## Physical OnePlus 13
 
@@ -402,12 +405,90 @@ The emulator cannot represent OnePlus's BES2800/RTOS, Dual-Engine behavior,
 Power Saver fallback, or OEM watch-face picker. Those require the physical
 watch.
 
+### Simulated-location weather on a Wear emulator
+
+The available-weather emulator capture used Google's documented WFF weather-test
+route. This is an emulator-only procedure for a Wear target whose identity has
+already been proven as `wear5-opw3` or `wear5`; do not run root, appops, or test-
+provider commands on a physical watch or phone. Resolve the serial again after
+the ADB restart caused by `root`:
+
+```sh
+# <wear-emulator-serial> must already be proven as the intended Wear AVD.
+rtk adb -s <wear-emulator-serial> unroot
+rtk adb -s <wear-emulator-serial> shell cmd location set-location-enabled true
+rtk adb -s <wear-emulator-serial> root
+rtk adb -s <wear-emulator-serial> wait-for-device
+rtk adb devices -l
+rtk adb -s <wear-emulator-serial-after-root> shell getprop ro.boot.qemu.avd_name
+rtk adb -s <wear-emulator-serial-after-root> shell appops set 0 \
+  android:mock_location allow
+rtk adb -s <wear-emulator-serial-after-root> shell cmd location providers \
+  add-test-provider gps
+rtk adb -s <wear-emulator-serial-after-root> shell cmd location providers \
+  set-test-provider-enabled gps true
+rtk adb -s <wear-emulator-serial-after-root> shell cmd location providers \
+  set-test-provider-location gps --location 37.773972,-122.431297
+```
+
+Re-prove the AVD name after `root` before continuing with deployment or capture.
+The resulting weather is provider data for the simulated coordinates, not live
+local or physical weather; network access and the Wear weather provider still
+must be available. Label every resulting screenshot and evidence file as
+simulated. This procedure changes emulator state only and does not hard-code
+weather or location data into the watch-face bundle. This record documents the
+tested sequence; it does not claim idempotence or provide untested cleanup
+commands.
+
 ### End-to-end WFF v2 validation
+
+#### Raster 90 current HEAD simulated-weather emulator checkpoint — 2026-08-21
+
+Freshly validated the current tracked runtime tree at HEAD `cf597af` on the
+identity-proven native `wear5-opw3` target:
+
+- The deterministic surface contained 87 assets; font and icon presentations,
+  single-grid, icon-resolution, step-outline, and primary-refinement checks all
+  passed. Fifty Python tests, `xmllint`, WFF validator 1.7.0 for format v2,
+  fresh `--rerun-tasks` debug assembly, release assembly, lint, and the
+  official memory gate also passed.
+- The fresh debug APK SHA-256 was
+  `be0aa8428bbe9b41ec94abd4be7cf556dd46180af11ff54bfacaf7d12bc0a640`.
+- The target reported Wear OS 5 / Android 14 / API 34, circular 466×466 at
+  320 dpi, with the watch and WFF runtime features. The unobscured WFF window
+  was `com.google.wear.watchface.runtime.DeclarativeWatchFaceRuntime0`, and
+  the interactive capture was Awake.
+- Following Google's documented WFF weather-test route, a GPS test provider
+  supplied simulated coordinates `37.773972,-122.431297`. Android location and
+  fused providers recorded the mock location; the Wear weather provider fetched
+  server data at `tempF=59`, notified the WFF runtime, and the Celsius-default
+  face rendered a day-family weather icon with `15°C`.
+- The fresh interactive capture proves clean-chamfer time, final
+  `four-toe-vertical` footprints, current date, `00000` steps, `100%` battery,
+  simulated available weather, complete rows, and no clipping. Confirmed
+  `mWakefulness=Dozing` reduced the face to monochrome time only.
+
+Ignored evidence is retained under
+`outputs/raster90/captures/current-head-simulated-weather/`, including
+`interactive-wear5-opw3-simulated-sf-466.png`,
+`ambient-wear5-opw3-466.png`, `simulated-location-dumpsys.txt`,
+`weather-provider-log.txt`, power/window dumps, and the APK hash.
+
+This closes the current exact-tree emulator capture gap and proves available
+weather presentation through a simulated location. It is not live local or
+physical weather, does not prove stale weather, and does not replace physical
+current-art deployment, wearer review, sustained AOD, or battery validation.
 
 #### Raster 90 clean-chamfer emulator checkpoint — 2026-08-20
 
 Promoted the reviewed primary numeral cut into the packaged runtime and
 freshly validated it on the native-size Wear OS 5 target:
+
+This checkpoint was captured after `b7ffa65` and before `33e2912`. The later
+commit promoted the canonical icon family, changed the packaged steps PNG, and
+updated tracked previews. Consequently, this is not a capture of the current
+exact tree: it remains authoritative for the clean-chamfer time and the
+pre-promotion runtime behavior only.
 
 - Commit `b7ffa65` keeps square and clean-chamfer digits as first-class
   canonical matrices, retains the earlier global fine-chamfer as a named
@@ -430,10 +511,10 @@ freshly validated it on the native-size Wear OS 5 target:
   `io.github.byebyebryan.raster90.watchface`. Window/display evidence identified
   `DeclarativeWatchFaceRuntime0` as the obscuring watch-face surface.
 - The native interactive capture shows the clean-chamfer time, centered date,
-  truthful neutral weather icon plus `--`, footprints with `00000`, and battery
-  at `100%`, with complete rows and no circular-edge clipping. Emulator weather
-  remained unavailable; the runtime log records provider error code 4 rather
-  than implying a condition or temperature.
+  truthful neutral weather icon plus `--`, the pre-promotion step tile with
+  `00000`, and battery at `100%`, with complete rows and no circular-edge
+  clipping. Emulator weather remained unavailable; the runtime log records
+  provider error code 4 rather than implying a condition or temperature.
 - Confirmed `mWakefulness=Dozing` reduced the face to dimmed monochrome time
   only. The emulator was woken, its AVD name was re-proven, and only that target
   was stopped; the final ADB device list was empty.
@@ -442,9 +523,10 @@ Ignored screenshots, hierarchy dumps, power/display state, APK identity, and
 runtime logs are retained under
 `outputs/raster90/captures/clean-chamfer-runtime/`. This checkpoint supersedes
 earlier emulator records for the selected primary numeral art and native
-466×466 appearance only. The earlier 454×454 scaling evidence remains valid;
-physical clean-chamfer appearance, sustained AOD, and battery impact remain
-separate gates.
+466×466 appearance only. The later current-HEAD checkpoint above supersedes it
+for the final steps tile and simulated available-weather presentation. The
+earlier 454×454 scaling evidence remains valid; physical clean-chamfer
+appearance, sustained AOD, and battery impact remain separate gates.
 
 #### Raster 90 temperature-unit editor checkpoint — 2026-08-19
 
@@ -482,6 +564,10 @@ The emulator was stopped only after re-proving the `wear5-opw3` AVD name.
 After the watch re-advertised Wireless debugging, the temperature-unit build
 was deployed and checked on the physical OnePlus Watch 3:
 
+This physical record predates both `b7ffa65`'s clean-chamfer runtime and
+`33e2912`'s final `four-toe-vertical` icon promotion. It proves live converted
+Celsius weather on that earlier deployment, not the current exact packaged art.
+
 - The selected ADB endpoint was independently identity-proven as `OPWWE251`,
   Android 14 / API 34, 466×466 at 320 dpi, with `armeabi-v7a,armeabi` and the
   watch/WFF runtime features before installation. No transient endpoint is
@@ -504,6 +590,11 @@ was deployed and checked on the physical OnePlus Watch 3:
 Deployed the committed solid-grid runtime to the paired OnePlus Watch 3 and
 validated the physical WFF renderer without changing the watch's time, weather,
 or always-on-display preferences:
+
+This is the latest physical capture, but it predates both the clean-chamfer time
+cut and the final `four-toe-vertical` footprint tile. Treat it as physical WFF,
+live-weather, and device-behavior evidence for the earlier solid-grid tree only;
+it is not current exact-tree visual evidence.
 
 - The sole ADB target was identity-proven before installation as `OPWWE251`,
   Android 14 / API 34, 466×466 at 320 dpi, with `armeabi-v7a,armeabi` and the
@@ -604,10 +695,12 @@ Local review artifacts are retained under the Git-ignored
 The header-free follow-up captures and matching window/log evidence are under
 `outputs/raster90/captures/header-free-weather/`.
 
-This checkpoint supersedes the icon-weight and 3/2 single-grid runtime records
-below for current packaged geometry, resource count, memory, and emulator
-appearance. Physical-watch rendering, live available/stale weather, and final
-time-numeral authorship remain open.
+This historical checkpoint supersedes the icon-weight and 3/2 single-grid
+runtime records below for its then-current packaged geometry, resource count,
+memory, and emulator appearance. Later clean-chamfer and icon-family commits
+supersede its current-art claims. Physical-watch rendering of the exact current
+tree, live available/stale weather on that tree, and final wearer judgment
+remain open.
 
 #### Raster 90 icon stroke-weight correction — 2026-08-18
 

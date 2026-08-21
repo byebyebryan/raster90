@@ -1,35 +1,89 @@
 # Raster 90
 
-Dedicated Android product repository for the **Raster 90** watch face for the
-OnePlus Watch 3.
+<p align="center">
+  <strong>A fictional 150×150 bitmap watch, built as a real Watch Face Format v2 face for Wear OS 5.</strong>
+</p>
 
-Raster 90 is a standalone, resource-only Watch Face Format v2 watch face for
-Wear OS 5. Its packaged runtime uses one fictional 150×150 framebuffer with
-solid 3×3 source pixels, true 16×16 icons, and one icon-led value per
-information row. Weather, steps, and battery keep icons;
-`SAT 15 AUG` is centered without a calendar icon, and the redundant `WX`,
-`STP`, and `BAT` headers are removed. Ambient mode remains time-only.
+<p align="center">
+  <a href="docs/watchface-design.md">Design direction</a> ·
+  <a href="docs/device-setup.md">Device evidence</a> ·
+  <a href="fonts/raster90/README.md">Bitmap type</a> ·
+  <a href="icons/raster90/README.md">Icon family</a>
+</p>
 
-The solid-grid runtime is live-validated at native 466×466 on the physical
-OnePlus Watch 3 and at native 466×466 / scaled 454×454 on Wear OS emulators.
-Exact glyph and sprite resources are generated deterministically from
-reviewable cell matrices rather than rendered from a runtime TTF. Its primary
-time uses the reviewed project-owned clean-chamfer cut; the square construction
-and legacy fine-chamfer remain named source controls, while the complete
-secondary family remains source-only outside the current runtime subset.
-The selected cut is freshly renderer-validated in interactive and confirmed
-Dozing states on the native 466×466 `wear5-opw3` target. No physical deployment
-of this selected cut is recorded yet; wearer-distance and AMOLED optical
-judgment remain open.
+<table>
+  <thead>
+    <tr>
+      <th>Interactive</th>
+      <th>Ambient</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <img src="docs/media/raster90-interactive-wear5-opw3-466.png" width="466" alt="Raster 90 interactive watch face with weather, date, clean-chamfer time, footprints, and battery">
+      </td>
+      <td align="center">
+        <img src="docs/media/raster90-ambient-wear5-opw3-466.png" width="466" alt="Raster 90 ambient watch face showing monochrome time only">
+      </td>
+    </tr>
+    <tr>
+      <td>Current 466×466 WFF runtime; provider weather for a simulated location renders as 15°C.</td>
+      <td>Confirmed <code>Dozing</code>; every non-time field is removed.</td>
+    </tr>
+  </tbody>
+</table>
 
-The resting face is intentionally monochrome except for the small weather
-sprite. Weather is Celsius by default with an explicit Fahrenheit override in
-the watch-face editor; mismatched WFF provider units are converted before the
-selected unit is shown. When weather is unavailable, the runtime keeps the row
-and time fixed while showing a neutral weather icon plus `--` on one line. The
-physical watch has also proven a live available night-weather row. Sustained
-AOD, stale weather, wrist-distance, and battery validation remain separate
-gates.
+<p align="center">
+  <sub>Native 466×466 WFF captures from <code>wear5-opw3</code> · <a href="docs/media/README.md">capture provenance</a></sub>
+</p>
+
+Raster 90 is the impossible schoolyard watch: a small, earnest device trying
+to deliver graphics, color, and useful information beyond what its fictional
+hardware should be able to do. It is not a modern smartwatch wearing a retro
+skin. The constraints are the product.
+
+## What makes it Raster 90
+
+- **One physical grid.** A centered 450×450 active frame behaves as one
+  fictional 150×150 framebuffer made from solid 3×3 cells with no gutter.
+- **Authored pixels.** The time, compact text, and true 16×16 icons come from
+  project-owned matrices rather than runtime TTF rasterization or resampled
+  source art.
+- **Truthful data.** Weather has distinct fresh, stale, and unavailable states;
+  Celsius is the editable default, Fahrenheit is explicit, and provider values
+  are converted rather than merely relabeled.
+- **A restrained resting face.** Weather owns the only persistent color plane.
+  Date, time, steps, and battery remain white; ambient mode is time only.
+
+## Current state
+
+The exact current runtime is validated on the native 466×466 `wear5-opw3`
+Wear OS 5 emulator with clean-chamfer time, final `four-toe-vertical`
+footprints, available provider weather for a simulated location, and confirmed
+Dozing. Earlier physical-watch evidence proves native rendering and live
+night-weather/Celsius conversion, but it predates the final time and footprint
+art. Physical current-art review, sustained AOD, battery impact, and a real
+stale-weather state remain open. See [Device Setup](docs/device-setup.md) for
+the evidence and exact limitations.
+
+## Authored display system
+
+The watch-face APK packages only the glyphs and sprites its WFF expressions can
+emit. The complete project-owned families remain reviewable outside the module.
+
+<p align="center">
+  <img src="fonts/raster90/preview/family-specimen.png" width="954" alt="Raster 90 clean-chamfer primary numerals and complete compact bitmap type specimen">
+</p>
+
+<p align="center">
+  <img src="icons/raster90/preview/icon-family-weather-day-night-sheet.png" width="1248" alt="Raster 90 day and night weather icon family covering all 16 WFF conditions">
+</p>
+
+The weather sheet covers all 16 WFF conditions in day and night families. The
+selected utility family adds the paired-footprint steps tile, battery, neutral
+unavailable weather, and a compact stale marker. Every selected icon is authored
+directly at 16×16 and rendered as solid 3×3 cells.
 
 ## Current targets
 
@@ -39,38 +93,24 @@ gates.
 - OnePlus 13 and `phone16`: optional future companion targets, not required for
   watch-face development
 
-## Repository boundaries
+## Project map
 
-This repository contains the Raster 90 product and its Android components. The
-current `:watchfaces:raster90` application module must produce its own APK/AAB
-and use its own application ID. It uses
-`io.github.byebyebryan.raster90.watchface`; it must remain resource-only and
-cannot contain or depend on Kotlin/Java application logic.
+| Area | Authority |
+|---|---|
+| Packaged WFF runtime | [`watchfaces/raster90/`](watchfaces/raster90/) |
+| Bitmap type source and preview | [`fonts/raster90/`](fonts/raster90/README.md) |
+| Icon source and preview | [`icons/raster90/`](icons/raster90/README.md) |
+| Product and visual contract | [Watch Face Design Direction](docs/watchface-design.md) |
+| Devices, deployment, and validation | [Device Setup](docs/device-setup.md) |
+| Module and evidence boundaries | [Repository Layout](docs/repository-layout.md) |
+| Exploratory mood artwork | [Concept Artwork](design/concepts/README.md) |
 
-Future application modules must likewise be independently packaged and may
-provide Raster 90-specific Wear or phone companion functionality only. This
-repository is not an umbrella for unrelated Android products.
-
-Only modules with a concrete Raster 90 requirement will be created. See
-[Repository Layout](docs/repository-layout.md) for the repository structure and
-[Device Setup](docs/device-setup.md) for verified local targets. The
-visual and fictional-hardware contract is captured in
-[Watch Face Design Direction](docs/watchface-design.md).
-Generated mood and hierarchy studies are catalogued separately under
-[Concept Artwork](design/concepts/README.md); they are not production WFF
-resources or geometry references.
-
-The project-owned bitmap families are first-class repository components under
-[`fonts/raster90/`](fonts/raster90/README.md) and
-[`icons/raster90/`](icons/raster90/README.md). Their tracked
-[font preview](fonts/raster90/preview/index.html) contains the complete font
-matrix sheets and an interactive local specimen; the [icon
-preview](icons/raster90/preview/index.html) contains selected utility/weather
-matrices, truthful weather-state treatment, and native/magnified face views.
-The runtime icon generator imports selected surfaces directly from
-`icons/raster90/family.py`.
-
-Operational instructions for coding agents are in [AGENTS.md](AGENTS.md).
+The only current Android module is `:watchfaces:raster90`, application ID
+`io.github.byebyebryan.raster90.watchface`. It is a standalone resource-only
+bundle with `android:hasCode="false"` and no Kotlin/Java logic. Any future Wear
+or phone application logic must remain in a separately packaged Raster 90
+module. Operational instructions for coding agents are in
+[AGENTS.md](AGENTS.md).
 
 ## Build
 
@@ -91,7 +131,9 @@ namespaced: Raster 90 generators use
 `outputs/raster90/studies/<study>/`, device evidence uses
 `outputs/raster90/captures/<checkpoint>/`, and external visual references use
 `outputs/references/`. Locally downloaded validation binaries and their licenses
-use `outputs/tooling/<tool>/`.
+use `outputs/tooling/<tool>/`. The small public gallery under `docs/media/`
+contains reviewed byte-for-byte copies with recorded provenance; it does not
+replace the full evidence checkpoint.
 
 Regenerate or verify the bitmap resources with:
 
