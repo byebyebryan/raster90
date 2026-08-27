@@ -16,6 +16,16 @@ Android resources or a replacement for the historical design studies.
 - Every matrix is authored directly at 16×16 source-cell resolution. The WFF
   generator renders each lit cell as one solid 3×3 square into a 48×48 tile;
   it never integer-expands an old 8×8 source or uses fractional resampling.
+- The selected weather refresh uses a centered, star-free cyan outline for
+  clear night and a smaller open half-circle behind the partly-night cloud.
+  Fog keeps the common white cloud cap above straight haze bars; mist is the
+  cloud-free three-bar form; windy uses two upward terminal curls and one
+  shorter straight run.
+- Rain conditions use identical two-cell `/` strokes in a 2 / 4 / 6
+  progression for light / normal / heavy. Snow uses complete five-cell plus
+  flakes in a staggered 2 / 3 / 5 progression. Sleet alternates two of those
+  rain strokes with two flakes. IDs 11–13 resolve to distinct `light_snow`,
+  `light_rain`, and `mist` sprites rather than aliases of the normal families.
 - Weather is the only persistent indexed-color plane. Utility resources remain
   monochrome: steps stay white, while the battery icon receives the canonical
   coarse state tint (`>50%` white, `>25%` yellow, `>10%` orange, `0–10%` red).

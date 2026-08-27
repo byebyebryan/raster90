@@ -204,11 +204,69 @@ class Raster90IconFamilyTests(unittest.TestCase):
         self.assertIsNone(condition.find("Variant"))
 
     def test_weather_maps_are_complete_and_aliases_stable(self) -> None:
+        expected_day_resolution = (
+            "unknown",
+            "clear_day",
+            "cloudy",
+            "fog",
+            "heavy_rain",
+            "heavy_snow",
+            "rain",
+            "snow",
+            "clear_day",
+            "thunderstorm",
+            "sleet",
+            "light_snow",
+            "light_rain",
+            "mist",
+            "partly_day",
+            "windy",
+        )
+        expected_night_resolution = (
+            "unknown",
+            "clear_night",
+            "cloudy",
+            "fog",
+            "heavy_rain",
+            "heavy_snow",
+            "rain",
+            "snow",
+            "clear_night",
+            "thunderstorm",
+            "sleet",
+            "light_snow",
+            "light_rain",
+            "mist",
+            "partly_night",
+            "windy",
+        )
         self.assertEqual(len(family.WEATHER_CONDITIONS), 16)
         self.assertEqual(set(family.WEATHER_DAY), set(range(16)))
         self.assertEqual(set(family.WEATHER_NIGHT), set(range(16)))
-        self.assertEqual(len(family.WEATHER_DAY_RESOLUTION), 16)
-        self.assertEqual(len(family.WEATHER_NIGHT_RESOLUTION), 16)
+        self.assertEqual(family.WEATHER_DAY_RESOLUTION, expected_day_resolution)
+        self.assertEqual(family.WEATHER_NIGHT_RESOLUTION, expected_night_resolution)
+        self.assertEqual(
+            set(family.WEATHER_SPRITES),
+            {
+                "unknown",
+                "clear_day",
+                "clear_night",
+                "partly_day",
+                "partly_night",
+                "cloudy",
+                "fog",
+                "mist",
+                "light_rain",
+                "rain",
+                "heavy_rain",
+                "light_snow",
+                "snow",
+                "heavy_snow",
+                "thunderstorm",
+                "sleet",
+                "windy",
+            },
+        )
         for rows in (*family.WEATHER_DAY.values(), *family.WEATHER_NIGHT.values()):
             self.assertEqual((len(rows), len(rows[0])), (16, 16))
             self.assertFalse(set("".join(rows)) - {".", *family.PALETTE})
@@ -222,6 +280,62 @@ class Raster90IconFamilyTests(unittest.TestCase):
                 "B": (36, 116, 255, 255),
                 "W": (255, 255, 255, 255),
             },
+        )
+
+        def cells(rows: tuple[str, ...], symbol: str) -> set[tuple[int, int]]:
+            return {
+                (x, y)
+                for y, row in enumerate(rows)
+                for x, cell in enumerate(row)
+                if cell == symbol
+            }
+
+        clear_night = cells(family.WEATHER_SPRITES["clear_night"], "C")
+        self.assertEqual(len(clear_night), 34)
+        self.assertEqual(
+            (
+                min(x for x, _y in clear_night),
+                max(x for x, _y in clear_night),
+                min(y for _x, y in clear_night),
+                max(y for _x, y in clear_night),
+            ),
+            (3, 12, 0, 12),
+        )
+        self.assertEqual(len(cells(family.WEATHER_SPRITES["partly_night"], "C")), 9)
+
+        cloud_cap = family.WEATHER_SPRITES["cloudy"][:9]
+        for name in (
+            "fog",
+            "light_rain",
+            "rain",
+            "heavy_rain",
+            "light_snow",
+            "snow",
+            "heavy_snow",
+            "sleet",
+        ):
+            self.assertEqual(family.WEATHER_SPRITES[name][:9], cloud_cap, name)
+        self.assertNotIn("W", "".join(family.WEATHER_SPRITES["mist"]))
+        self.assertNotIn("W", "".join(family.WEATHER_SPRITES["windy"]))
+        self.assertEqual(
+            [
+                len(cells(family.WEATHER_SPRITES[name], "B"))
+                for name in ("light_rain", "rain", "heavy_rain")
+            ],
+            [4, 8, 12],
+        )
+        self.assertEqual(
+            [
+                len(cells(family.WEATHER_SPRITES[name], "C"))
+                for name in ("light_snow", "snow", "heavy_snow")
+            ],
+            [10, 15, 25],
+        )
+        self.assertEqual(len(cells(family.WEATHER_SPRITES["sleet"], "B")), 4)
+        self.assertEqual(len(cells(family.WEATHER_SPRITES["sleet"], "C")), 10)
+        self.assertEqual(
+            cells(family.WEATHER_SPRITES["sleet"], "C"),
+            cells(family.WEATHER_SPRITES["light_snow"], "C"),
         )
 
     def test_runtime_binds_canonical_sources_and_surface_is_87_pngs(self) -> None:
