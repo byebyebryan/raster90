@@ -255,9 +255,39 @@
 
         <!-- 357..405 active-frame band: battery tile and centered percentage. -->
         <Group x="171" y="357" width="126" height="48" name="battery_region">
-          <PartImage x="0" y="0" width="48" height="48" name="battery_icon">
-            <Image resource="raster_icon_battery"/>
-          </PartImage>
+          <!--
+            Mutually-exclusive range branches keep the percentage white while
+            tinting only this one existing battery resource.  The final
+            Default is the 0..10% red state, so the exact boundaries are 50
+            yellow, 25 orange, and 10 red.
+          -->
+          <Condition>
+            <Expressions>
+              <Expression name="battery_white">[BATTERY_PERCENT] &gt; 50</Expression>
+              <Expression name="battery_yellow">[BATTERY_PERCENT] &gt; 25 &amp;&amp; [BATTERY_PERCENT] &lt;= 50</Expression>
+              <Expression name="battery_orange">[BATTERY_PERCENT] &gt; 10 &amp;&amp; [BATTERY_PERCENT] &lt;= 25</Expression>
+            </Expressions>
+            <Compare expression="battery_white">
+              <PartImage x="0" y="0" width="48" height="48" name="battery_icon" tintColor="#ffffffff">
+                <Image resource="raster_icon_battery"/>
+              </PartImage>
+            </Compare>
+            <Compare expression="battery_yellow">
+              <PartImage x="0" y="0" width="48" height="48" name="battery_icon" tintColor="#ffffd800">
+                <Image resource="raster_icon_battery"/>
+              </PartImage>
+            </Compare>
+            <Compare expression="battery_orange">
+              <PartImage x="0" y="0" width="48" height="48" name="battery_icon" tintColor="#ffff8500">
+                <Image resource="raster_icon_battery"/>
+              </PartImage>
+            </Compare>
+            <Default>
+              <PartImage x="0" y="0" width="48" height="48" name="battery_icon" tintColor="#ffff3030">
+                <Image resource="raster_icon_battery"/>
+              </PartImage>
+            </Default>
+          </Condition>
           <PartText x="54" y="13" width="72" height="21" name="battery_value">
             <Text align="START">
               <BitmapFont family="raster_fine" size="21" color="#ffffffff">

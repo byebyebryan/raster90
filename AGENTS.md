@@ -63,7 +63,8 @@ app.
   The available-weather resting rows are `[weather] 21°C`, centered `SAT 15 AUG`,
   `[steps] 03642`, and `[battery] 82%`; do not restore the redundant `WX`,
   `STP`, or `BAT` headers. Weather uses at most four flat visible palette
-  entries; all other information remains white. Ambient mode reduces this to
+  entries; ordinary text and steps remain white, while the battery icon uses
+  its separate coarse state tint contract. Ambient mode reduces this to
   monochrome time only.
 - The packaged face uses active-frame bands 45–93, 111–159, 177–273, 291–339,
   and 357–405. The solid

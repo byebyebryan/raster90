@@ -19,7 +19,8 @@ family and changed the packaged steps PNG and tracked previews. A fresh
 `four-toe-vertical` tile and clean-chamfer time together, including simulated
 available weather at `15°C` and time-only Dozing. Physical clean-chamfer optical
 judgment, sustained AOD, stale weather, and any animation or transient color
-event remain open work.
+event remain open work; physical review of the new battery-state tint is also
+open.
 
 ## Product identity
 
@@ -205,17 +206,19 @@ fiction rather than the current visual target:
   from their authored matrices rather than different pixel sizes.
 - Persistent icons are authored directly at true 16×16 resolution. Weather,
   steps, and battery use icons; the centered date is text-only. A single weather
-  tile may use the indexed-color plane; all other resting content remains
-  monochrome.
-- At most four flat visible palette entries can be active in that region in one
-  frame, including white.
+  tile may use the indexed-color plane; steps and ordinary text remain
+  monochrome, while the battery icon may receive one coarse state tint.
+- The weather sprite uses at most four flat visible palette entries in one
+  frame, including white. Battery tinting is a separate declarative status
+  accent and does not add resources to the indexed weather plane.
 - No alpha blending, antialiasing, gradients, or partial cell brightness as a
   design technique.
 - A preferred animation rate of 2 fps and a hard creative ceiling of 4 fps.
 - No more than four frames or two seconds for an ordinary animation.
 - One animated region at a time.
 - No continuous animation in the resting state.
-- The indexed-color plane and all animation are disabled in ambient mode.
+- The indexed-color plane, battery state tint, and all animation are disabled in
+  ambient mode because the existing interactive-information group is hidden.
 
 These are creative constraints, not claims about the real AMOLED hardware.
 They should remain stable even if the implementation platform can do more.
@@ -226,9 +229,26 @@ They should remain stable even if the implementation platform can do more.
 
 The normal base plane is strictly white on black. Information hierarchy is
 created with position, glyph scale, spacing, and density rather than color. The
-weather icon is the one exception: it owns the tiny indexed-color plane while
-fresh weather is available. Temperature, date, time, steps, and battery remain
-white.
+weather icon owns the tiny indexed-color plane while fresh weather is available.
+The battery icon is a deliberate coarse status exception: it is white above
+50%, yellow above 25%, orange above 10%, and red from 0–10%. Its percentage,
+like temperature, date, time, and steps, remains white.
+
+### Battery state tint
+
+The battery resource remains one project-owned 16×16 matrix and one packaged
+48×48 PNG. WFF v2 selects only the icon tint with mutually-exclusive range
+predicates; the percentage stays outside that condition and uses the existing
+clamp and geometry:
+
+| Battery percentage | Icon tint |
+| --- | --- |
+| `>50%` | white `#FFFFFF` |
+| `>25%` through `50%` | yellow `#FFD800` |
+| `>10%` through `25%` | orange `#FF8500` |
+| `0–10%` | red `#FF3030` |
+
+There is no charging-specific tint, animation, or ambient battery field.
 
 ### Indexed-color plane
 
@@ -239,7 +259,8 @@ palette, with at most four flat visible entries in one weather sprite: yellow
 AMOLED judgment can refine these values later without changing the indexed
 color contract.
 
-Outside the weather icon, color remains an event rather than a theme. It may
+Outside the weather icon, the battery state tint is the one deliberate static
+status exception. Other color remains an event rather than a theme: it may
 appear briefly and locally, then return to the normal monochrome base plus the
 truthful weather sprite. Candidate transient colors include cyan, magenta,
 amber, and red.
@@ -249,7 +270,7 @@ Suitable events include:
 - a short color cursor during the on-visible reveal;
 - a one- or two-frame write marker at a minute boundary;
 - a rare top-of-hour sprite;
-- a small red low-battery state; and
+- a coarse red low-battery tint on the battery icon; and
 - a future complication update that can be represented honestly by WFF data.
 
 Do not assign permanent colors to the date, temperature, labels, or individual
@@ -497,7 +518,8 @@ rectangular device casing:
   steps and battery occupy the lower status region.
 - `[weather]` is a uniform 16×16 indexed-color condition sprite, not a literal
   label. It uses at most four flat palette entries; the adjacent temperature
-  remains white. Calendar, walker, and battery use monochrome 16×16 tiles.
+  remains white. Calendar, walker, and the battery resource use monochrome
+  16×16 tiles; the selected runtime may tint only the battery icon by state.
 - Temperature follows the user's unit and includes the degree mark.
 - Step counts through 99,999 use the fixed-width `STP 03642` treatment. Six
   digits use the same narrow separator as `STP 123456`; values above 999,999

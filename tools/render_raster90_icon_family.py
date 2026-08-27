@@ -34,6 +34,7 @@ from fonts.raster90.family import SECONDARY_GLYPHS  # noqa: E402
 from icons.raster90.family import (  # noqa: E402
     APPROVED_STEP_ICON,
     BATTERY_ICON,
+    BATTERY_COLOR_BANDS,
     PALETTE,
     SELECTED_UTILITY_ICONS,
     STALE_MARKER,
@@ -151,6 +152,12 @@ def _utility_color(_symbol: str) -> RGBA:
     return WHITE
 
 
+def _rgb_hex(color: RGBA) -> str:
+    """Format a canonical RGBA color using the review palette's RGB spelling."""
+
+    return "#%02X%02X%02X" % color[:3]
+
+
 def _scale_nearest(source: PixelGrid, factor: int) -> PixelGrid:
     if factor < 1:
         raise ValueError("scale factor must be positive")
@@ -162,7 +169,7 @@ def _scale_nearest(source: PixelGrid, factor: int) -> PixelGrid:
 
 
 def render_utility_sheet() -> PixelGrid:
-    """Show selected utility matrices at source and solid 3x3 review scales."""
+    """Show selected utility matrices and all declarative battery tint states."""
 
     width, height = 980, 420
     pixels = _blank(width, height)
@@ -182,16 +189,34 @@ def render_utility_sheet() -> PixelGrid:
             color_for=_utility_color,
         )
         _draw_text(pixels, "16X16 SOURCE", x=card_x, y=350)
-        _draw_matrix(
-            pixels,
-            rows,
-            x=card_x + 250,
-            y=150,
-            pitch=3,
-            lit=3,
-            color_for=_utility_color,
-        )
-        _draw_text(pixels, "48X48 RUNTIME TILE", x=card_x + 250, y=350, scale=2)
+        if name == "battery":
+            _draw_text(pixels, "ICON TINT STATES", x=card_x + 250, y=110, scale=1)
+            for state_index, (state_name, _minimum, _maximum, state_color) in enumerate(
+                BATTERY_COLOR_BANDS
+            ):
+                state_x = card_x + 250 + state_index * 54
+                _draw_matrix(
+                    pixels,
+                    rows,
+                    x=state_x,
+                    y=150,
+                    pitch=3,
+                    lit=3,
+                    color_for=lambda _symbol, color=state_color: color,
+                )
+                label_x = state_x + (48 - len(state_name) * 6) // 2
+                _draw_text(pixels, state_name.upper(), x=label_x, y=350, scale=1)
+        else:
+            _draw_matrix(
+                pixels,
+                rows,
+                x=card_x + 250,
+                y=150,
+                pitch=3,
+                lit=3,
+                color_for=_utility_color,
+            )
+            _draw_text(pixels, "48X48 RUNTIME TILE", x=card_x + 250, y=350, scale=2)
     return pixels
 
 
@@ -336,13 +361,26 @@ def _html_document(images: Mapping[str, bytes]) -> bytes:
     matrix_data = {
         "steps": list(APPROVED_STEP_ICON),
         "battery": list(BATTERY_ICON),
+        "battery_color_bands": [
+            {
+                "name": name,
+                "minimum_exclusive": minimum,
+                "maximum_inclusive": maximum,
+                "rgba": list(color),
+            }
+            for name, minimum, maximum, color in BATTERY_COLOR_BANDS
+        ],
         "unavailable": list(UNAVAILABLE_WEATHER_ICON),
         "weather_day": {str(index): list(rows) for index, rows in WEATHER_DAY.items()},
         "weather_night": {str(index): list(rows) for index, rows in WEATHER_NIGHT.items()},
     }
     matrix_json = json.dumps(matrix_data, indent=2, sort_keys=True)
+    battery_contract = ", ".join(
+        f"{name} ({'0-10%' if minimum is None else f'>{minimum}%' if maximum is None else f'>{minimum}% through {maximum}%'}) {_rgb_hex(color)}"
+        for name, minimum, maximum, color in BATTERY_COLOR_BANDS
+    )
     sections = [
-        (UTILITY_SHEET_NAME, "Selected utility icons", "steps and battery are the only persistent utility tiles."),
+        (UTILITY_SHEET_NAME, "Selected utility icons", "steps and battery are the only persistent utility tiles; battery shows all four icon tint states."),
         (WEATHER_SHEET_NAME, "Complete weather resolution", "Every WFF condition ID has a day and night mapping."),
         (STATE_SHEET_NAME, "Truthful weather states", "Unavailable uses the neutral icon plus --; stale keeps a marker distinct from an unavailable value."),
         (MATRIX_SHEET_NAME, "True 16x16 / solid 3x3 inspection", "The matrix views expose project-owned source cells and their physical tile expansion."),
@@ -376,6 +414,8 @@ code {{ display:block; font:13px ui-monospace,monospace; line-height:1.2; white-
 <code>icons/raster90/family.py</code> directly; historical calendar, 8x8/12x12,
 and rejected step alternatives remain design-only controls.</p>
 <p class="note">Palette: {html.escape(json.dumps(dict(PALETTE), sort_keys=True))}</p>
+<p class="note">Battery icon tint contract: {html.escape(battery_contract)}. The
+percentage remains white and every state reuses the one existing battery resource.</p>
 {cards}
 <h2>Embedded source matrices</h2>
 <div class="matrix">

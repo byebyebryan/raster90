@@ -53,8 +53,9 @@ skin. The constraints are the product.
 - **Truthful data.** Weather has distinct fresh, stale, and unavailable states;
   Celsius is the editable default, Fahrenheit is explicit, and provider values
   are converted rather than merely relabeled.
-- **A restrained resting face.** Weather owns the only persistent color plane.
-  Date, time, steps, and battery remain white; ambient mode is time only.
+- **A restrained resting face.** Weather remains the indexed-color plane, while
+  the battery icon gains a coarse state tint below 51%. Date, time, steps, and
+  healthy battery remain white; ambient mode is time only.
 
 ## Current state
 

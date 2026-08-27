@@ -9,6 +9,9 @@ The public aliases intentionally keep the runtime/study boundary explicit:
 
 ``SELECTED_UTILITY_ICONS``
     The only persistent utility tiles currently packaged (steps and battery).
+``BATTERY_COLOR_BANDS``
+    Mutually-exclusive lower-exclusive/upper-inclusive ranges and RGBA tints
+    for the existing battery resource; the final row is the low range.
 ``WEATHER_DAY`` / ``WEATHER_NIGHT``
     Complete condition-ID mappings for the 16 WFF weather values.
 ``UNAVAILABLE_WEATHER_ICON``
@@ -30,7 +33,9 @@ Matrix = tuple[str, ...]
 RGBA = tuple[int, int, int, int]
 
 # This is the exact indexed weather palette used by the WFF assets.  The four
-# opaque entries are intentionally flat and stable; utility tiles use white.
+# opaque entries are intentionally flat and stable; utility tiles use white
+# as their resource color.  The battery icon's state tints are declared below
+# so the runtime and review presentation share one explicit contract.
 PALETTE: Final[Mapping[str, RGBA]] = {
     "Y": (255, 216, 0, 255),    # #FFD800 yellow
     "C": (73, 223, 255, 255),   # #49DFFF pale cyan
@@ -38,6 +43,19 @@ PALETTE: Final[Mapping[str, RGBA]] = {
     "W": (255, 255, 255, 255),  # white
 }
 WEATHER_PALETTE = PALETTE
+
+# Mutually-exclusive battery tint ranges.  Each row is
+# ``(name, minimum_exclusive, maximum_inclusive, RGBA)``; ``None`` denotes an
+# open bound, and the final row is the 0..10% red range for the valid battery
+# source domain.  Keeping these bounds and RGBA values here lets XML checks
+# and deterministic presentation derive their expectations from one source.
+BatteryColorBand = tuple[str, int | None, int | None, RGBA]
+BATTERY_COLOR_BANDS: Final[tuple[BatteryColorBand, ...]] = (
+    ("white", 50, None, PALETTE["W"]),
+    ("yellow", 25, 50, PALETTE["Y"]),
+    ("orange", 10, 25, (255, 133, 0, 255)),    # #FF8500 orange
+    ("red", None, 10, (255, 48, 48, 255)),     # #FF3030 red
+)
 
 # WFF weather condition IDs, in the order consumed by the declarative data
 # source.  Day/night resolution is complete even where the selected artwork
@@ -577,6 +595,13 @@ def validate_icon_family() -> None:
         "W": (255, 255, 255, 255),
     }:
         raise ValueError("indexed weather palette drifted")
+    if BATTERY_COLOR_BANDS != (
+        ("white", 50, None, PALETTE["W"]),
+        ("yellow", 25, 50, PALETTE["Y"]),
+        ("orange", 10, 25, (255, 133, 0, 255)),
+        ("red", None, 10, (255, 48, 48, 255)),
+    ):
+        raise ValueError("battery color-state contract drifted")
 
 
 validate_icon_family()

@@ -16,8 +16,10 @@ Android resources or a replacement for the historical design studies.
 - Every matrix is authored directly at 16×16 source-cell resolution. The WFF
   generator renders each lit cell as one solid 3×3 square into a 48×48 tile;
   it never integer-expands an old 8×8 source or uses fractional resampling.
-- Weather is the only persistent indexed-color plane. Utility tiles are white;
-  stale is a monochrome marker; unavailable weather is the neutral icon plus
+- Weather is the only persistent indexed-color plane. Utility resources remain
+  monochrome: steps stay white, while the battery icon receives the canonical
+  coarse state tint (`>50%` white, `>25%` yellow, `>10%` orange, `0–10%` red).
+  Stale is a monochrome marker; unavailable weather is the neutral icon plus
   the truthful `--` value in the WFF branch.
 
 Calendar art, old 8×8/12×12 controls, the historical solid Footprints B step
@@ -28,9 +30,10 @@ the packaged resource surface.
 ## Stable API and regeneration
 
 Runtime and study code should import the stable aliases from `family.py`:
-`PALETTE`, `SELECTED_UTILITY_ICONS`, `APPROVED_STEP_ICON`, `BATTERY_ICON`,
-`WEATHER_DAY`, `WEATHER_NIGHT`, `UNAVAILABLE_WEATHER_ICON`, and
-`STALE_MARKER`. The runtime asset generator imports these mappings directly;
+`PALETTE`, `BATTERY_COLOR_BANDS`, `SELECTED_UTILITY_ICONS`,
+`APPROVED_STEP_ICON`, `BATTERY_ICON`, `WEATHER_DAY`, `WEATHER_NIGHT`,
+`UNAVAILABLE_WEATHER_ICON`, and `STALE_MARKER`. The runtime asset generator
+imports these mappings directly;
 the design modules retain compatibility aliases only for historical renderers.
 
 Regenerate and byte-check both the tracked icon presentation and the 87 PNG
