@@ -338,6 +338,46 @@ class Raster90IconFamilyTests(unittest.TestCase):
             cells(family.WEATHER_SPRITES["light_snow"], "C"),
         )
 
+    def test_cloud_bases_are_closed_and_inherited(self) -> None:
+        expected_base = "..WWWWWWWWWWWWW."
+        source_bases = (
+            ("_CLOUD", family._CLOUD, 8),
+            ("_PARTLY_CLOUD", family._PARTLY_CLOUD, 11),
+            ("_PARTLY_CLOUD_OCCLUSION", family._PARTLY_CLOUD_OCCLUSION, 11),
+        )
+        for name, rows, base_y in source_bases:
+            with self.subTest(name=name):
+                self.assertEqual(rows[base_y], expected_base)
+                self.assertEqual(
+                    tuple(x for x, cell in enumerate(rows[base_y]) if cell == "W"),
+                    tuple(range(2, 15)),
+                )
+                # The two side walls and the first base cells form mirrored
+                # diagonal corners, including the newly closed right corner.
+                self.assertEqual(rows[base_y - 1][1], "W")
+                self.assertEqual(rows[base_y - 1][15], "W")
+                self.assertEqual(rows[base_y - 1][1:3], rows[base_y - 1][14:16][::-1])
+                self.assertEqual(rows[base_y][2], rows[base_y][14])
+
+        common_cloud_sprites = (
+            "cloudy",
+            "fog",
+            "light_rain",
+            "rain",
+            "heavy_rain",
+            "light_snow",
+            "snow",
+            "heavy_snow",
+            "thunderstorm",
+            "sleet",
+        )
+        for name in common_cloud_sprites:
+            with self.subTest(name=name):
+                self.assertEqual(family.WEATHER_SPRITES[name][8], expected_base)
+        for name in ("partly_day", "partly_night"):
+            with self.subTest(name=name):
+                self.assertEqual(family.WEATHER_SPRITES[name][11], expected_base)
+
     def test_runtime_binds_canonical_sources_and_surface_is_87_pngs(self) -> None:
         self.assertIs(generator.ICONS["steps"], family.APPROVED_STEP_ICON)
         self.assertIs(generator.ICONS["battery"], family.BATTERY_ICON)
