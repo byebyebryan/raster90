@@ -1,13 +1,13 @@
 # Raster 90 — Watch Face Design Direction
 
-Status: the solid single-grid design is implemented. Historical runtime
-checkpoints cover native 466×466 physical rendering and native 466×466 /
-454×454 Wear OS emulation, using one 150×150 framebuffer, solid 3×3 cells, true
-16×16 icons, icon-led single-row values, and centered date text without a
-calendar icon. The unavailable-weather branch uses a neutral icon plus `--` on
-the same single-row baseline. The physical watch also proves a fresh available
-night-weather row, but that deployment predates the final footprint tile and
-clean-chamfer time cut.
+Status: the solid single-grid design is implemented. Runtime checkpoints cover
+native 466×466 physical rendering and native 466×466 / 454×454 Wear OS
+emulation, using one 150×150 framebuffer, solid 3×3 cells, true 16×16 icons,
+icon-led single-row values, and centered date text without a calendar icon. The
+unavailable-weather branch uses a neutral icon plus `--` on the same single-row
+baseline. The 2026-08-26 physical checkpoint now proves the exact packaged
+tree's interactive composition with the final footprint tile, clean-chamfer
+time, refreshed clear-night crescent, and live available weather at `18°C`.
 
 The project-owned primary variants are formalized: the selected time cut is the
 reviewed clean chamfer, while the square construction and earlier global
@@ -15,12 +15,13 @@ fine-chamfer remain named source-only controls. The 2026-08-20 native
 `wear5-opw3` checkpoint freshly proved clean-chamfer interactive and Dozing
 rendering after `b7ffa65`. Commit `33e2912` then promoted the canonical icon
 family and changed the packaged steps PNG and tracked previews. A fresh
-2026-08-21 capture of current HEAD `cf597af` now proves the final
+2026-08-21 capture of then-current HEAD `cf597af` proves the final
 `four-toe-vertical` tile and clean-chamfer time together, including simulated
-available weather at `15°C` and time-only Dozing. Physical clean-chamfer optical
-judgment, sustained AOD, stale weather, and any animation or transient color
-event remain open work; physical review of the new battery-state tint is also
-open.
+available weather at `15°C` and time-only Dozing. The later physical checkpoint
+at packaged runtime `4a90116` proves the refreshed static weather art and full
+interactive composition on the watch. Sustained physical AOD, perceived AMOLED
+and wrist-distance judgment, stale weather, low-battery tint branches, battery
+impact, and any animation or transient color event remain open work.
 
 ## Product identity
 
@@ -66,9 +67,11 @@ Its limitations are visible, but the result remains dependable and glanceable.
 
 The primary hardware target is the 466×466 OnePlus Watch 3. The current WFF
 canvas is also 466×466 so the primary target can be evaluated at 1:1 geometry.
-The current-tree emulator result is clean, but the exact current tree must also
-be deployed and judged on the physical watch before the geometry becomes an
-implementation invariant.
+The current tree renders cleanly on the physical watch as well as the native
+emulator. The physical screenshot closes the renderer-geometry gap, while
+wearer judgment of the AMOLED panel, bezel, low brightness, and wrist distance
+remains required before treating every optical choice as an implementation
+invariant.
 
 The packaged runtime places a centered 450×450 fictional framebuffer at `(8,
 8)` and treats it as one 150×150 source-pixel display:
@@ -102,11 +105,13 @@ true 16×16 tile geometry, centered/unclipped interactive rows, 12/24-hour time,
 and time-only ambient reduction. The 2026-08-20 follow-up promoted the reviewed
 clean-chamfer numerals into the runtime and freshly proved the same unclipped
 composition in native 466×466 interactive and confirmed Dozing states. Those
-two checkpoints predate `33e2912`'s final icon-family promotion. The current
-2026-08-21 checkpoint closes that exact-tree emulator gap: it proves the final
+two checkpoints predate `33e2912`'s final icon-family promotion. The
+2026-08-21 checkpoint closed that tree's emulator gap: it proves the final
 steps tile, clean-chamfer time, complete rows, simulated available weather, and
-Dozing time-only behavior. The remaining geometry gate is physical-watch
-wrist-distance, AMOLED, bezel, AOD, and low-brightness behavior. Icon
+Dozing time-only behavior. The 2026-08-26 physical checkpoint then proved the
+refreshed packaged tree's interactive geometry, live clear-night weather, and
+complete rows without clipping. The remaining gates are sustained physical
+AOD, wrist-distance, AMOLED, bezel, and low-brightness behavior. Icon
 recognizability and any later clean-chamfer optical adjustment remain design
 judgments rather than runtime geometry blockers.
 
@@ -159,11 +164,13 @@ rtk python3 -B tools/render_raster90_icon_family.py --check
 The approved steps source is the project-owned `four-toe-vertical` matrix:
 closed tapered soles, one vertical 1×2 big-toe line, and three separate 1×1
 toe marks per footprint. The `33e2912` promotion replaced only the runtime steps
-tile and derived previews; weather and battery runtime PNG bytes remain stable.
-That promotion followed the earlier clean-chamfer emulator capture. The
-2026-08-21 current-HEAD capture now proves the promoted steps tile in WFF; the
-weather value in that capture came from a simulated GPS test provider rather
-than a physical or live-local source.
+tile and derived previews at that checkpoint. It followed the earlier clean-
+chamfer emulator capture, and the 2026-08-21 checkpoint then proved the promoted
+steps tile in WFF with weather from a simulated GPS test provider. The later
+`fccd4ef` / `4a90116` refresh changed the authored weather matrices and their
+packaged PNGs while preserving the WFF mapping and behavior. The 2026-08-26
+physical capture proves the final footprints and refreshed outlined clear-night
+crescent together with live provider weather.
 
 The earlier two-tier V1 used a 90×90 5/4 fine raster and aligned 45×45 10/8
 coarse time tier. It is now historical implementation evidence; the packaged
@@ -181,17 +188,20 @@ The historical calibration face established the raster before V1. It contained:
 - marks at the active-framebuffer and circular-safe-area boundaries.
 
 The historical original-resolution single-grid captures prove crisp cell edges
-at native 466×466 and clean, unclipped WFF scaling at 454×454. The physical
-watch remains authoritative for AMOLED appearance, bezel clearance, brightness,
-AOD, and wrist-distance judgment of the exact current tree.
+at native 466×466 and clean, unclipped WFF scaling at 454×454. The current
+physical checkpoint proves native interactive renderer geometry; the watch
+remains authoritative for perceived AMOLED appearance, bezel clearance,
+brightness, sustained AOD, and wrist-distance judgment.
 
 The current composition lives in `:watchfaces:raster90`, application ID
 `io.github.byebyebryan.raster90.watchface`. The 2026-08-18 live native 466×466
 and scaled 454×454 renders preserved the intended hierarchy and reduced ambient
 mode to time alone; the 2026-08-20 checkpoint additionally proved the selected
-clean-chamfer time. The 2026-08-21 current-HEAD capture proves the exact final
-466×466 composition with simulated available weather and confirms time-only
-Dozing. Physical-watch validation of the exact current tree remains open.
+clean-chamfer time. The 2026-08-21 emulator capture proves that checkpoint's
+complete 466×466 composition with simulated available weather and confirms
+time-only Dozing. The 2026-08-26 checkpoint proves packaged runtime `4a90116`
+physically in interactive mode; sustained physical AOD and wearer judgment
+remain open.
 
 ## Fictional hardware contract
 
@@ -388,6 +398,14 @@ overlay within it. There is no utility-versus-feature size split. The calendar
 icon is intentionally absent because `SAT 15 AUG` is already semantically
 complete.
 
+The selected static weather refresh uses a centered, star-free outlined
+crescent for clear night and a smaller open half-circle behind the partly-night
+cloud. Fog combines the common cloud cap with straight haze bars; mist is the
+cloud-free three-bar form; windy uses upward curls. Identical two-cell rain
+strokes progress 2 / 4 / 6 for light / normal / heavy, complete staggered
+snowflakes progress 2 / 3 / 5, and sleet alternates two rain strokes with two
+flakes. WFF IDs 11–13 resolve distinctly to light snow, light rain, and mist.
+
 The art should occupy broadly comparable optical bounds instead of forcing
 every shape into an identical square silhouette. A wide battery and the paired
 footprints may have different bounding rectangles, but neither should read as
@@ -413,9 +431,9 @@ After review of the earlier walking-figure study, a focused native-size study
 selected direct-authored paired footprints. Their separated toe pads and
 vertically offset, tapered soles remain recognizable beside the count at the
 native 3×3-cell scale. The final `four-toe-vertical` asset was promoted after
-the earlier clean-chamfer emulator capture. The 2026-08-21 current-HEAD
-checkpoint now proves it in the packaged WFF; physical wearer review remains
-pending.
+the earlier clean-chamfer emulator capture. The 2026-08-21 emulator checkpoint
+and 2026-08-26 physical checkpoint prove it in the packaged WFF; physical
+wearer review remains pending.
 
 The selected project-owned matrices in `icons/raster90/family.py` are consumed
 directly by the packaged generator so selected runtime and icon-family preview
@@ -609,11 +627,11 @@ Current weather has explicit states:
 - unknown condition: show a neutral, truthful icon rather than guessing.
 
 The available-state generated preview is deterministic. Emulator testing proves
-the unavailable branch at 466×466 and 454×454, while the 2026-08-21 current-HEAD
-checkpoint proves the available branch using provider weather for a simulated
-location. Earlier physical evidence proves live available night weather; a real
-stale state remains open. A future event or storyboard must preserve this
-resting layout.
+the unavailable branch at 466×466 and 454×454, while the 2026-08-21 checkpoint
+proves the available branch using provider weather for a simulated location.
+The 2026-08-26 exact-tree physical checkpoint proves fresh live available night
+weather with the refreshed clear-night crescent; a real stale state remains
+open. A future event or storyboard must preserve this resting layout.
 
 ## Exploratory concept mockups
 
@@ -698,8 +716,9 @@ Review every serious design on:
 
 The implementation has reached these slices; the evidence qualifier on each
 slice matters. The earlier 2026-08-18 and 2026-08-20 checkpoints predated the
-icon-family promotion; the current 2026-08-21 checkpoint closes that capture
-gap for the final icon tile and clean-chamfer time.
+icon-family promotion; the 2026-08-21 emulator checkpoint closed that gap for
+the final steps tile and clean-chamfer time. The 2026-08-26 physical checkpoint
+adds exact-tree interactive proof after the static weather refresh.
 
 1. Historical fine/coarse renderer and Pixel Operator specimen calibration.
 2. Deterministic glyph and sprite asset pipeline.
@@ -712,9 +731,10 @@ gap for the final icon tile and clean-chamfer time.
    validator, and memory-footprint gates.
 8. Packaged solid 3×3 cells, direct true 16×16 icons, icon-led one-line values,
    text-only date, deterministic preview parity, and historical live 466×466 /
-   454×454 interactive and ambient validation. The 2026-08-21 current-HEAD
-   capture adds native WFF proof for the final steps tile and clean-chamfer time;
-   its available weather is simulated rather than physical/live-local.
+   454×454 interactive and ambient validation. The 2026-08-21 emulator capture
+   adds native WFF proof for the final steps tile and clean-chamfer time with
+   simulated available weather; the 2026-08-26 physical capture proves the
+   refreshed packaged tree interactively with live available night weather.
 9. Canonical project-owned square and clean-chamfer primary cuts, with the
    reviewed clean chamfer selected and freshly renderer-validated in native
    466×466 interactive and confirmed Dozing states.
@@ -733,8 +753,9 @@ Later slices remain separately gated:
 ## Open decisions
 
 - Wearer confirmation of the exact current solid 3×3 cells, AMOLED appearance,
-  and wrist-distance legibility; native physical-device rendering is proven only
-  for the earlier pre-promotion tree.
+  and wrist-distance legibility. Native physical-device rendering is now proven
+  for the current packaged tree, but an ADB screenshot cannot close those
+  perceived-quality gates.
 - Whether weather/date spacing needs an explicit optical adjustment after the
   calendar icon is removed.
 - Physical-watch adjustment of the single-grid bands, optical time position,
@@ -743,8 +764,9 @@ Later slices remain separately gated:
   the selected cut is already directly authored and emulator-proven.
 - Optical refinement of the selected true 16×16 icon family.
 - Live verification of stale, day-family, explicit-Fahrenheit-selection, and
-  extreme-value weather branches; fresh available, night-family, and the
-  provider's Fahrenheit surface are proven on the earlier physical deployment.
+  extreme-value weather branches. Fresh available night-family weather is
+  proven on the exact 2026-08-26 physical tree; the provider's Fahrenheit
+  surface remains proven on the earlier physical deployment.
   The emulator editor proves the Celsius
   default and both choices are reachable; resource tests cover both conversion
   directions, and the physical watch proves a live converted `17°C` default.

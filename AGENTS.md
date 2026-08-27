@@ -30,10 +30,11 @@ app.
   one fictional 150×150 framebuffer. Every source cell is a solid 3×3 square
   with no gutter, and all elements use that one physical pixel scale. Historical
   checkpoints plus the 2026-08-21 simulated-weather capture validate this
-  implementation at native 466×466 and scaled 454×454; the current exact tree
-  is emulator-proven, while physical wearer validation remains open. The
-  earlier 3-unit-pitch / 2×2-lit runtime remains historical comparison evidence,
-  not the current visual design.
+  implementation at native 466×466 and scaled 454×454. The 2026-08-26 physical
+  checkpoint validates the exact packaged tree interactively at native 466×466;
+  sustained physical AOD and wearer judgment remain open. The earlier 3-unit-
+  pitch / 2×2-lit runtime remains historical comparison evidence, not the
+  current visual design.
 - Compact text remains based on the project-owned 5×7 glyphs. In the selected
   interactive composition, each 16-cell information band contains one
   vertically centered text line rather than two stacked 8-cell lines. The
@@ -57,7 +58,11 @@ app.
   The weather tile remains the only persistent indexed-color plane. Do not
   integer-expand 8×8 art or use fractional nearest-neighbour resampling in the
   selected family; structural lines must be authored cell-by-cell with balanced
-  optical weight.
+  optical weight. The selected static refresh uses a star-free outlined clear-
+  night crescent, a smaller open partly-night half-circle behind the cloud,
+  straight fog/mist bars, upward wind curls, 2/4/6 identical rain strokes,
+  2/3/5 complete staggered snowflakes, and alternating two-rain/two-snow sleet.
+  WFF IDs 11–13 resolve distinctly to light snow, light rain, and mist.
 - The interactive composition omits seconds and uses a static colon. Its
   fixed information set is time, date, current weather, step count, and battery.
   The available-weather resting rows are `[weather] 21°C`, centered `SAT 15 AUG`,
@@ -77,10 +82,10 @@ app.
 - Available/stale/unavailable weather must remain truthful. The packaged
   unavailable branch uses the neutral weather icon with `--` on the same
   single-line baseline as available weather; do not restore a `WX` header or
-  imply a condition or temperature. Available weather was physically proven on
-  the earlier deployed tree and is emulator-proven on the current tree through
-  a simulated location; stale data still requires live physical-device
-  validation.
+  imply a condition or temperature. Available weather is emulator-proven
+  through a simulated location and physically proven on the exact 2026-08-26
+  packaged tree with a live clear-night icon and `18°C`; stale data still
+  requires live physical-device validation.
 - Power Saver Mode support is not required for the custom face. On the physical
   watch, entering Power Saver with an unsupported third-party face displays a
   warning and substitutes a basic OnePlus face; that fallback is acceptable.
@@ -450,11 +455,11 @@ rtk adb -s <phone-serial> shell wm density
 - [x] Validate V1 interactive and ambient rendering on both the native 466×466
   and scaled 454×454 Wear OS 5 emulators.
 - [ ] Complete physical-watch validation of the exact current solid-grid tree.
-  Current-tree interactive rendering and simulated available weather are proven
-  on `wear5-opw3`; the latest physical captures predate both the final
-  `four-toe-vertical` steps tile and clean-chamfer time cut. Wearer judgment of
-  AMOLED appearance, bezel, wrist distance, sustained AOD, and battery remains
-  open. The earlier 3/2 runtime remains comparison evidence only.
+  Current-tree interactive rendering is now proven on the physical watch with
+  the final `four-toe-vertical` steps tile, clean-chamfer time, refreshed clear-
+  night crescent, and live `18°C` weather. Wearer judgment of AMOLED appearance,
+  bezel, wrist distance, sustained AOD, low-battery tint branches, and battery
+  impact remains open. The earlier 3/2 runtime remains comparison evidence only.
 - [x] Live-test available weather with real physical-watch data, including a
   night-family condition icon and the WFF provider's Fahrenheit unit (historical
   pre-final-art deployment; current emulator weather uses a documented simulated
@@ -469,8 +474,9 @@ rtk adb -s <phone-serial> shell wm density
   (historical plus current-tree emulator evidence; the current capture uses a
   simulated GPS weather provider).
 - [x] Normalize and package all mapped WFF weather conditions plus steps and
-  battery on uniform 16×16 icon tiles; the calendar icon was deliberately
-  removed from the selected composition.
+  battery on uniform 16×16 icon tiles, including the reviewed static weather
+  refresh; the calendar icon was deliberately removed from the selected
+  composition.
 - [x] Recalculate and implement the single-grid row bands and circular fit.
 - [x] Select the next visual direction from deterministic mocks: solid 3×3 base
   cells, true 16×16 weather/steps/battery icons, one icon-led value per row,
@@ -497,7 +503,9 @@ rtk adb -s <phone-serial> shell wm density
 - [x] Capture the current exact runtime tree on `wear5-opw3` with the documented
   GPS test provider: available simulated weather, final footprints, clean-
   chamfer time, and confirmed Dozing time-only behavior; physical and stale
-  weather gates remain open.
+  weather were separate gates at that checkpoint. The later 2026-08-26 physical
+  checkpoint proves the refreshed exact tree interactively; stale weather and
+  sustained physical AOD remain open.
 - [ ] Design post-V1 animation and rare color events separately from the stable
   resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.

@@ -28,14 +28,14 @@
       </td>
     </tr>
     <tr>
-      <td>Current 466×466 WFF runtime; provider weather for a simulated location renders as 15°C.</td>
+      <td>2026-08-21 native emulator checkpoint; provider weather for a simulated location renders as 15°C.</td>
       <td>Confirmed <code>Dozing</code>; every non-time field is removed.</td>
     </tr>
   </tbody>
 </table>
 
 <p align="center">
-  <sub>Native 466×466 WFF captures from <code>wear5-opw3</code> · <a href="docs/media/README.md">capture provenance</a></sub>
+  <sub>Native 466×466 WFF emulator checkpoint from <code>wear5-opw3</code> · <a href="docs/media/README.md">capture provenance</a></sub>
 </p>
 
 Raster 90 is the impossible schoolyard watch: a small, earnest device trying
@@ -59,14 +59,16 @@ skin. The constraints are the product.
 
 ## Current state
 
-The exact current runtime is validated on the native 466×466 `wear5-opw3`
-Wear OS 5 emulator with clean-chamfer time, final `four-toe-vertical`
-footprints, available provider weather for a simulated location, and confirmed
-Dozing. Earlier physical-watch evidence proves native rendering and live
-night-weather/Celsius conversion, but it predates the final time and footprint
-art. Physical current-art review, sustained AOD, battery impact, and a real
-stale-weather state remain open. See [Device Setup](docs/device-setup.md) for
-the evidence and exact limitations.
+The packaged runtime at `4a90116` is physically proven in an interactive state
+on the native 466×466 OnePlus Watch 3. A fresh 2026-08-26 deployment rendered
+the clean-chamfer time, final `four-toe-vertical` footprints, refreshed outlined
+clear-night crescent, live provider weather at `18°C`, and the healthy white
+battery branch without clipping. The tracked emulator gallery above remains the
+2026-08-21 checkpoint that proves native/scaled emulation and confirmed Dozing;
+it predates the later battery tint and weather-icon refresh. Sustained physical
+AOD, low-battery color branches, battery impact, wearer-distance judgment, and
+a real stale-weather state remain open. See [Device Setup](docs/device-setup.md)
+for the evidence and exact limitations.
 
 ## Authored display system
 
@@ -82,9 +84,12 @@ emit. The complete project-owned families remain reviewable outside the module.
 </p>
 
 The weather sheet covers all 16 WFF conditions in day and night families. The
-selected utility family adds the paired-footprint steps tile, battery, neutral
-unavailable weather, and a compact stale marker. Every selected icon is authored
-directly at 16×16 and rendered as solid 3×3 cells.
+refreshed static family uses outlined crescents, distinct fog and mist bars,
+upward wind curls, stepped rain density, complete staggered snowflakes, and a
+balanced rain/snow sleet pattern. The selected utility family adds the paired-
+footprint steps tile, battery, neutral unavailable weather, and a compact stale
+marker. Every selected icon is authored directly at 16×16 and rendered as solid
+3×3 cells.
 
 ## Current targets
 

@@ -6,11 +6,14 @@ the canonical validation archive.
 
 | File | Provenance | Supported claim |
 |---|---|---|
-| `raster90-interactive-wear5-opw3-466.png` | Exact byte copy from `outputs/raster90/captures/current-head-simulated-weather/interactive-wear5-opw3-simulated-sf-466.png` | Current WFF runtime at native 466×466 with provider weather for a simulated location |
-| `raster90-ambient-wear5-opw3-466.png` | Exact byte copy from `outputs/raster90/captures/current-head-simulated-weather/ambient-wear5-opw3-466.png` | Current WFF runtime in confirmed `Dozing`, reduced to time only |
+| `raster90-interactive-wear5-opw3-466.png` | Exact byte copy from `outputs/raster90/captures/current-head-simulated-weather/interactive-wear5-opw3-simulated-sf-466.png` | 2026-08-21 WFF checkpoint at native 466×466 with provider weather for a simulated location |
+| `raster90-ambient-wear5-opw3-466.png` | Exact byte copy from `outputs/raster90/captures/current-head-simulated-weather/ambient-wear5-opw3-466.png` | 2026-08-21 WFF checkpoint in confirmed `Dozing`, reduced to time only |
 
 The ignored `outputs/raster90/captures/` tree retains the associated APK hash,
-AVD identity, location, window, power, and runtime-log evidence. When a public
-image is refreshed, select it from a completed checkpoint, copy its bytes here,
-update its provenance above, and keep presentation claims narrower than the
-underlying evidence. Do not retouch runtime captures.
+AVD identity, location, window, power, and runtime-log evidence. The later
+2026-08-26 physical interactive checkpoint for packaged runtime `4a90116`
+remains in that ignored evidence tree; it has not replaced this paired
+interactive/ambient public set because sustained physical AOD remains open.
+When a public image is refreshed, select it from a completed checkpoint, copy
+its bytes here, update its provenance above, and keep presentation claims
+narrower than the underlying evidence. Do not retouch runtime captures.

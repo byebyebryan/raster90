@@ -2,9 +2,10 @@
 
 Live verification record for the physical OnePlus 13, physical OnePlus Watch 3,
 and local phone and Wear OS emulators. Physical-device pairing and identity
-baselines were checked 2026-08-15; the physical watch's Raster 90 runtime and
-weather checkpoint was 2026-08-19. The current tracked runtime tree received a
-fresh simulated-weather emulator checkpoint on 2026-08-21; physical and
+baselines were checked 2026-08-15. The tracked runtime received a simulated-
+weather emulator checkpoint on 2026-08-21 and a fresh physical interactive
+checkpoint on 2026-08-26 after the static weather-icon refresh. Sustained
+physical AOD, low-battery color branches, wearer judgment, battery impact, and
 stale-weather evidence remain separate gates.
 
 ## Physical OnePlus 13
@@ -442,6 +443,38 @@ commands.
 
 ### End-to-end WFF v2 validation
 
+#### Raster 90 refreshed-icon physical checkpoint — 2026-08-26
+
+Freshly deployed packaged runtime `4a90116` to the identity-proven physical
+OnePlus Watch 3 after promoting the refreshed static weather family:
+
+- The exact generated surface contained 87 PNGs. Asset, font-presentation, and
+  icon-presentation checks passed with 51 Python tests, `xmllint`, JBR 25 debug
+  assembly and lint, WFF validator 1.7.0 for format v2, and the official memory
+  gate. The evaluator reported 684,000 active bytes and 155,520 ambient bytes.
+- Before installation, the explicit ADB target reported model `OPWWE251`,
+  Android 14 / API 34, 466×466 at 320 dpi, `armeabi-v7a,armeabi`, and the watch
+  and WFF runtime features. The target was physical rather than an emulator.
+- The freshly built APK and its installed `base.apk` both had SHA-256
+  `d435df22dbe9bcc7ebc4a0cec768212115fac65853aee50bad2222a0a93d6aef`.
+  Installation succeeded, and the WFF debug surface selected
+  `io.github.byebyebryan.raster90.watchface` with runtime version 2.
+- In an `Awake` state, `mObscuringWindow` identified
+  `com.google.wear.watchface.runtime.DeclarativeWatchFaceRuntime0`. The settled
+  native capture rendered the refreshed outlined clear-night crescent with live
+  provider weather at `18°C`, centered `WED 26 AUG`, clean-chamfer time, final
+  `four-toe-vertical` footprints with `03591` steps, and the healthy white
+  battery branch at `86%`, with complete rows and no clipping.
+- This checkpoint proves the exact packaged tree's physical interactive
+  renderer, current static icon integration, and a fresh available night-
+  weather state. It does not prove sustained physical AOD, the yellow/orange/red
+  battery branches, a stale-weather state, battery impact, perceived AMOLED
+  quality, bezel appearance, or wrist-distance legibility.
+
+The settled unretouched capture is retained at
+`outputs/raster90/captures/physical-latest-weather-icons-20260826/interactive-power-wake.png`.
+Transient pairing credentials and endpoints are not retained.
+
 #### Raster 90 current HEAD simulated-weather emulator checkpoint — 2026-08-21
 
 Freshly validated the current tracked runtime tree at HEAD `cf597af` on the
@@ -591,10 +624,11 @@ Deployed the committed solid-grid runtime to the paired OnePlus Watch 3 and
 validated the physical WFF renderer without changing the watch's time, weather,
 or always-on-display preferences:
 
-This is the latest physical capture, but it predates both the clean-chamfer time
-cut and the final `four-toe-vertical` footprint tile. Treat it as physical WFF,
-live-weather, and device-behavior evidence for the earlier solid-grid tree only;
-it is not current exact-tree visual evidence.
+This was the latest physical capture at that checkpoint, but it predates both
+the clean-chamfer time cut and the final `four-toe-vertical` footprint tile.
+Treat it as physical WFF, live-weather, and device-behavior evidence for the
+earlier solid-grid tree only; the 2026-08-26 checkpoint above supersedes it for
+current exact-tree interactive rendering.
 
 - The sole ADB target was identity-proven before installation as `OPWWE251`,
   Android 14 / API 34, 466×466 at 320 dpi, with `armeabi-v7a,armeabi` and the
