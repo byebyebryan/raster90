@@ -32,6 +32,8 @@ from matrices import (  # noqa: E402  (path is intentionally set above)
     SINGLE_GRID_PITCH,
 )
 from icons.raster90.family import (  # noqa: E402  (canonical icon source)
+    LAST_DRAWABLE_CELL,
+    MATRIX_CELLS,
     PALETTE,
     SELECTED_UTILITY_ICONS,
     STALE_MARKER,
@@ -87,7 +89,7 @@ TIME_WIDTH = 4 * TIME_DIGIT_WIDTH + TIME_COLON_WIDTH
 
 ICON_PITCH = SINGLE_GRID_PITCH
 ICON_LIT = SINGLE_GRID_LIT
-ICON_CELLS = 16
+ICON_CELLS = MATRIX_CELLS
 ICON_SIZE = ICON_CELLS * ICON_PITCH
 WEATHER_SIZE = ICON_SIZE
 
@@ -275,6 +277,18 @@ def _validate_rows(
             raise ValueError(f"{name}: unexpected cell symbols {sorted(unexpected)}")
 
 
+def _validate_icon_drawable_field(name: str, rows: Sequence[str]) -> None:
+    """Keep the serialized 16x16 tile's final row/column as a gutter."""
+
+    if len(rows) != MATRIX_CELLS or any(len(row) != MATRIX_CELLS for row in rows):
+        raise ValueError(f"{name}: expected {MATRIX_CELLS}x{MATRIX_CELLS} matrix")
+    trailing = LAST_DRAWABLE_CELL + 1
+    if any(rows[trailing][x] != "." for x in range(MATRIX_CELLS)):
+        raise ValueError(f"{name}: trailing row {trailing} must be empty")
+    if any(row[trailing] != "." for row in rows):
+        raise ValueError(f"{name}: trailing column {trailing} must be empty")
+
+
 def _blank(width: int, height: int, fill: RGBA = TRANSPARENT) -> PixelGrid:
     return [[fill for _ in range(width)] for _ in range(height)]
 
@@ -348,6 +362,7 @@ def _weather_pixels(rows: Sequence[str]) -> PixelGrid:
         set(PALETTE) | {"."},
         expected_height=ICON_CELLS,
     )
+    _validate_icon_drawable_field("weather sprite", rows)
     return _paint_cells(
         rows,
         pitch=ICON_PITCH,
@@ -365,6 +380,7 @@ def _utility_pixels(rows: Sequence[str]) -> PixelGrid:
         {".", "0", "1"},
         expected_height=ICON_CELLS,
     )
+    _validate_icon_drawable_field("utility icon", rows)
     return _paint_cells(
         rows,
         pitch=ICON_PITCH,
@@ -625,6 +641,14 @@ def _check_palette(name: str, width: int, height: int, pixels: PixelGrid) -> Non
     }[role]
     if (width, height) != expected_size:
         raise ValueError(f"{name}: expected {expected_size[0]}x{expected_size[1]}, got {width}x{height}")
+    if role in {"icon", "weather"}:
+        gutter_start = (LAST_DRAWABLE_CELL + 1) * ICON_PITCH
+        gutter_pixels = (
+            [pixels[y][x] for y in range(height) for x in range(gutter_start, width)]
+            + [pixels[y][x] for y in range(gutter_start, height) for x in range(width)]
+        )
+        if any(pixel != TRANSPARENT for pixel in gutter_pixels):
+            raise ValueError(f"{name}: trailing 3-pixel gutter is not empty")
 
 
 def _validate_expected(root: Path, expected: dict[str, bytes]) -> None:

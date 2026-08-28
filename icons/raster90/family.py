@@ -32,6 +32,16 @@ from typing import Final, Mapping, Sequence
 Matrix = tuple[str, ...]
 RGBA = tuple[int, int, int, int]
 
+# Source matrices retain a trailing serialization row/column so the runtime
+# tile stays a stable 16x16, 48x48 resource. Only the first 15x15 cells are
+# drawable; the final row and column are a deliberate transparent gutter.
+MATRIX_CELLS: Final[int] = 16
+DRAWABLE_CELLS: Final[int] = 15
+LAST_DRAWABLE_CELL: Final[int] = DRAWABLE_CELLS - 1
+# Descriptive aliases for generators and studies that speak in icon terms.
+ICON_MATRIX_CELLS: Final[int] = MATRIX_CELLS
+ICON_DRAWABLE_CELLS: Final[int] = DRAWABLE_CELLS
+
 # This is the exact indexed weather palette used by the WFF assets.  The four
 # opaque entries are intentionally flat and stable; utility tiles use white
 # as their resource color.  The battery icon's state tints are declared below
@@ -127,7 +137,7 @@ APPROVED_STEP_NAME: Final[str] = "four-toe-vertical"
 APPROVED_STEP_ICON: Final[Matrix] = (
     ".........1..1...",
     ".........1....1.",
-    "...1..1........1",
+    "...1..1.......1.",
     ".1....1..11111..",
     "1........1....1.",
     "..11111..1....1.",
@@ -175,14 +185,31 @@ STEPS_ICON = APPROVED_STEP_ICON
 ICON_MATRICES = SELECTED_UTILITY_ICONS
 
 
+def _validate_drawable_field(name: str, rows: Sequence[str]) -> None:
+    """Fail fast when a 16x16 source uses the reserved gutter cells."""
+
+    if len(rows) != MATRIX_CELLS or any(len(row) != MATRIX_CELLS for row in rows):
+        raise ValueError(f"{name}: expected {MATRIX_CELLS}x{MATRIX_CELLS} matrix")
+    if any(rows[LAST_DRAWABLE_CELL + 1][x] != "." for x in range(MATRIX_CELLS)):
+        raise ValueError(f"{name}: trailing row {LAST_DRAWABLE_CELL + 1} must be empty")
+    trailing_column = LAST_DRAWABLE_CELL + 1
+    if any(row[trailing_column] != "." for row in rows):
+        raise ValueError(f"{name}: trailing column {trailing_column} must be empty")
+
+
+def validate_drawable_matrix(name: str, rows: Sequence[str]) -> None:
+    """Public source-boundary check for the 15x15 drawable field."""
+
+    _validate_drawable_field(name, rows)
+
+
 def _overlay(*layers: Sequence[str]) -> Matrix:
     """Combine same-sized direct-authored layers without resampling."""
 
-    size = 16
+    size = MATRIX_CELLS
     output = [["." for _x in range(size)] for _y in range(size)]
     for layer in layers:
-        if len(layer) != size or any(len(row) != size for row in layer):
-            raise ValueError("16x16 weather layer has invalid dimensions")
+        _validate_drawable_field("overlay layer", layer)
         for y, row in enumerate(layer):
             for x, symbol in enumerate(row):
                 if symbol != ".":
@@ -193,11 +220,9 @@ def _overlay(*layers: Sequence[str]) -> Matrix:
 def _subtract_mask(layer: Sequence[str], mask: Sequence[str]) -> Matrix:
     """Remove source cells hidden behind an opaque composition silhouette."""
 
-    size = 16
-    if len(layer) != size or any(len(row) != size for row in layer):
-        raise ValueError("16x16 weather layer has invalid dimensions")
-    if len(mask) != size or any(len(row) != size for row in mask):
-        raise ValueError("16x16 weather mask has invalid dimensions")
+    size = MATRIX_CELLS
+    _validate_drawable_field("masked layer", layer)
+    _validate_drawable_field("occlusion mask", mask)
     return tuple(
         "".join("." if mask[y][x] != "." else layer[y][x] for x in range(size))
         for y in range(size)
@@ -206,16 +231,34 @@ def _subtract_mask(layer: Sequence[str], mask: Sequence[str]) -> Matrix:
 
 _CLOUD: Final[Matrix] = (
     "................",
-    "......WWW.......",
-    "....WW...WW.....",
-    "...W.......W....",
-    "...W........WW..",
-    "..W...........W.",
-    ".W.............W",
-    ".W.............W",
-    "..WWWWWWWWWWWWW.",
+    ".....WWW........",
+    "...WW...WW......",
+    "..W.......W.....",
+    "..W........WW...",
+    ".W...........W..",
+    "W.............W.",
+    "W.............W.",
+    ".WWWWWWWWWWWWW..",
     "................",
     "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+)
+_CENTERED_CLOUD: Final[Matrix] = (
+    "................",
+    "................",
+    "................",
+    ".....WWW........",
+    "...WW...WW......",
+    "..W.......W.....",
+    "..W........WW...",
+    ".W...........W..",
+    "W.............W.",
+    "W.............W.",
+    ".WWWWWWWWWWWWW..",
     "................",
     "................",
     "................",
@@ -228,13 +271,13 @@ _PARTLY_CLOUD: Final[Matrix] = (
     "................",
     "................",
     "................",
-    "........WWW.....",
-    "......WW...WW...",
-    ".....W.......W..",
-    "..WWW.........W.",
-    ".W.............W",
-    ".W.............W",
-    "..WWWWWWWWWWWWW.",
+    ".......WWW......",
+    ".....WW...WW....",
+    "....W.......W...",
+    ".WWW.........W..",
+    "W.............W.",
+    "W.............W.",
+    ".WWWWWWWWWWWWW..",
     "................",
     "................",
     "................",
@@ -246,44 +289,62 @@ _PARTLY_CLOUD_OCCLUSION: Final[Matrix] = (
     "................",
     "................",
     "................",
-    "........WWW.....",
-    "......WWWWWWW...",
-    ".....WWWWWWWWW..",
-    "..WWWWWWWWWWWWW.",
-    ".WWWWWWWWWWWWWWW",
-    ".WWWWWWWWWWWWWWW",
-    "..WWWWWWWWWWWWW.",
+    ".......WWW......",
+    ".....WWWWWWW....",
+    "....WWWWWWWWW...",
+    ".WWWWWWWWWWWWW..",
+    "WWWWWWWWWWWWWWW.",
+    "WWWWWWWWWWWWWWW.",
+    ".WWWWWWWWWWWWW..",
     "................",
     "................",
     "................",
     "................",
 )
-_CLEAR_NIGHT: Final[Matrix] = (
-    "........CCCC....",
-    "......CC...CC...",
-    ".....C.....C....",
-    "....C.....C.....",
-    "....C....C......",
-    "...C.....C......",
-    "...C.....C......",
-    "...C.....C......",
-    "....C....C......",
-    "....C.....C.....",
-    ".....C.....C....",
-    "......CC...CC...",
-    "........CCCC....",
+_CLEAR_DAY: Final[Matrix] = (
+    ".......Y........",
+    ".Y.....Y.....Y..",
+    "..Y....Y....Y...",
+    "...Y.......Y....",
+    "......YYY.......",
+    ".....Y...Y......",
+    "....Y.....Y.....",
+    "YYY.Y.....Y.YYY.",
+    "....Y.....Y.....",
+    ".....Y...Y......",
+    "......YYY.......",
+    "...Y.......Y....",
+    "..Y....Y....Y...",
+    ".Y.....Y.....Y..",
+    ".......Y........",
     "................",
+)
+_CLEAR_NIGHT: Final[Matrix] = (
+    "................",
+    "........CCCC....",
+    "......CC...C....",
+    ".....C....C.....",
+    "....C.....C.....",
+    "....C....C......",
+    "...C.....C......",
+    "...C.....C......",
+    "...C.....C......",
+    "....C....C......",
+    "....C.....C.....",
+    ".....C....C.....",
+    "......CC...C....",
+    "........CCCC....",
     "................",
     "................",
 )
 _PARTLY_MOON_SEMICIRCLE: Final[Matrix] = (
-    "....CC..........",
+    "....CCC.........",
     "...C............",
     "..C.............",
     "..C.............",
     "..C.............",
     "...C............",
-    "....CC..........",
+    "....CCC.........",
     "................",
     "................",
     "................",
@@ -360,8 +421,8 @@ _LIGHT_RAIN: Final[Matrix] = (
     "................",
     "................",
     "................",
-    ".....B.....B....",
     "....B.....B.....",
+    "...B.....B......",
     "................",
     "................",
     "................",
@@ -377,11 +438,11 @@ _RAIN: Final[Matrix] = (
     "................",
     "................",
     "................",
-    "....B.....B.....",
     "...B.....B......",
+    "..B.....B.......",
     "................",
-    "......B.....B...",
     ".....B.....B....",
+    "....B.....B.....",
     "................",
 )
 _HEAVY_RAIN: Final[Matrix] = (
@@ -395,11 +456,11 @@ _HEAVY_RAIN: Final[Matrix] = (
     "................",
     "................",
     "................",
-    "..B....B....B...",
     ".B....B....B....",
+    "B....B....B.....",
     "................",
-    "....B....B....B.",
     "...B....B....B..",
+    "..B....B....B...",
     "................",
 )
 _LIGHT_SNOW: Final[Matrix] = (
@@ -412,16 +473,15 @@ _LIGHT_SNOW: Final[Matrix] = (
     "................",
     "................",
     "................",
+    ".........C......",
+    "........CCC.....",
+    ".........C......",
+    ".....C..........",
+    "....CCC.........",
+    ".....C..........",
     "................",
-    "..........C.....",
-    ".........CCC....",
-    "..........C.....",
-    "......C.........",
-    ".....CCC........",
-    "......C.........",
 )
 _SNOW: Final[Matrix] = (
-    "................",
     "................",
     "................",
     "................",
@@ -437,9 +497,9 @@ _SNOW: Final[Matrix] = (
     ".......C........",
     "......CCC.......",
     ".......C........",
+    "................",
 )
 _HEAVY_SNOW: Final[Matrix] = (
-    "................",
     "................",
     "................",
     "................",
@@ -455,6 +515,7 @@ _HEAVY_SNOW: Final[Matrix] = (
     "....C.....C.....",
     "...CCC...CCC....",
     "....C.....C.....",
+    "................",
 )
 _SLEET_RAIN: Final[Matrix] = (
     "................",
@@ -466,12 +527,12 @@ _SLEET_RAIN: Final[Matrix] = (
     "................",
     "................",
     "................",
-    "................",
-    "....B...........",
     "...B............",
+    "..B.............",
     "................",
-    ".............B..",
-    "............B...",
+    "................",
+    "...........B....",
+    "..........B.....",
     "................",
 )
 _SLEET_SNOW: Final[Matrix] = (
@@ -484,13 +545,13 @@ _SLEET_SNOW: Final[Matrix] = (
     "................",
     "................",
     "................",
+    ".........C......",
+    "........CCC.....",
+    ".........C......",
+    ".....C..........",
+    "....CCC.........",
+    ".....C..........",
     "................",
-    "..........C.....",
-    ".........CCC....",
-    "..........C.....",
-    "......C.........",
-    ".....CCC........",
-    "......C.........",
 )
 _THUNDER: Final[Matrix] = (
     "................",
@@ -513,41 +574,24 @@ _THUNDER: Final[Matrix] = (
 
 WEATHER_SPRITES: Final[Mapping[str, Matrix]] = {
     "unknown": (
-        "....WWWWWWWW....",
-        "..WW........WW..",
-        ".W............W.",
-        ".W....WWW.....W.",
-        ".W...W...W....W.",
-        ".W.......W....W.",
-        ".W......W.....W.",
-        ".W.....W......W.",
-        ".W.....W......W.",
-        ".W............W.",
-        ".W.....W......W.",
-        ".W............W.",
-        ".W............W.",
-        "..WW........WW..",
-        "....WWWWWWWW....",
+        "....WWWWWWW.....",
+        "..WW.......WW...",
+        ".W...........W..",
+        ".W....WWW....W..",
+        ".W...W...W...W..",
+        ".W.......W...W..",
+        ".W......W....W..",
+        ".W.....W.....W..",
+        ".W.....W.....W..",
+        ".W...........W..",
+        ".W.....W.....W..",
+        ".W...........W..",
+        ".W...........W..",
+        "..WW.......WW...",
+        "....WWWWWWW.....",
         "................",
     ),
-    "clear_day": (
-        ".......Y........",
-        "..Y....Y....Y...",
-        "...Y...Y...Y....",
-        ".....YYYYY......",
-        "....Y.....Y.....",
-        "....Y.....Y.....",
-        "YYY.Y.....Y.YYY.",
-        "....Y.....Y.....",
-        "....Y.....Y.....",
-        ".....YYYYY......",
-        "...Y...Y...Y....",
-        "..Y....Y....Y...",
-        ".......Y........",
-        "................",
-        "................",
-        "................",
-    ),
+    "clear_day": _CLEAR_DAY,
     "clear_night": _CLEAR_NIGHT,
     "partly_day": _overlay(
         (
@@ -574,7 +618,7 @@ WEATHER_SPRITES: Final[Mapping[str, Matrix]] = {
         _subtract_mask(_PARTLY_MOON_SEMICIRCLE, _PARTLY_CLOUD_OCCLUSION),
         _PARTLY_CLOUD,
     ),
-    "cloudy": _CLOUD,
+    "cloudy": _CENTERED_CLOUD,
     "fog": _overlay(_CLOUD, _FOG_HAZE),
     "mist": _MIST,
     "light_rain": _overlay(_CLOUD, _LIGHT_RAIN),
@@ -619,6 +663,8 @@ def _validate_matrix(
 ) -> None:
     if len(rows) != height or any(len(row) != width for row in rows):
         raise ValueError(f"{name}: expected {width}x{height} matrix")
+    if width == MATRIX_CELLS and height == MATRIX_CELLS:
+        _validate_drawable_field(name, rows)
     used = set("".join(rows))
     if not used <= symbols:
         raise ValueError(f"{name}: unexpected symbols {sorted(used - symbols)}")
@@ -629,12 +675,12 @@ def _validate_matrix(
 def _is_doubled_8x8(rows: Sequence[str]) -> bool:
     """Return whether a 16x16 matrix is only an integer-expanded 8x8 grid."""
 
-    if len(rows) != 16 or any(len(row) != 16 for row in rows):
+    if len(rows) != MATRIX_CELLS or any(len(row) != MATRIX_CELLS for row in rows):
         return False
     return all(
         len({rows[y][x], rows[y][x + 1], rows[y + 1][x], rows[y + 1][x + 1]}) == 1
-        for y in range(0, 16, 2)
-        for x in range(0, 16, 2)
+        for y in range(0, MATRIX_CELLS, 2)
+        for x in range(0, MATRIX_CELLS, 2)
     )
 
 

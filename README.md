@@ -47,9 +47,11 @@ skin. The constraints are the product.
 
 - **One physical grid.** A centered 450×450 active frame behaves as one
   fictional 150×150 framebuffer made from solid 3×3 cells with no gutter.
-- **Authored pixels.** The time, compact text, and true 16×16 icons come from
-  project-owned matrices rather than runtime TTF rasterization or resampled
-  source art.
+- **Authored pixels.** The time, compact text, and icons come from project-owned
+  matrices rather than runtime TTF rasterization or resampled source art. Icon
+  resources keep a stable 16×16 storage tile while reserving the final row and
+  column as a transparent gutter after a 15×15 drawable field centered on cell
+  `(7,7)`.
 - **Truthful data.** Weather has distinct fresh, stale, and unavailable states;
   Celsius is the editable default, Fahrenheit is explicit, and provider values
   are converted rather than merely relabeled.
@@ -88,8 +90,9 @@ refreshed static family uses outlined crescents, distinct fog and mist bars,
 upward wind curls, stepped rain density, complete staggered snowflakes, and a
 balanced rain/snow sleet pattern. The selected utility family adds the paired-
 footprint steps tile, battery, neutral unavailable weather, and a compact stale
-marker. Every selected icon is authored directly at 16×16 and rendered as solid
-3×3 cells.
+marker. Every selected icon is authored in a 15×15 drawable field centered on
+cell `(7,7)` inside its 16×16 storage matrix, then rendered as solid 3×3 cells in a stable
+48×48 resource tile.
 
 ## Current targets
 

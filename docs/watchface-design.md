@@ -2,7 +2,8 @@
 
 Status: the solid single-grid design is implemented. Runtime checkpoints cover
 native 466×466 physical rendering and native 466×466 / 454×454 Wear OS
-emulation, using one 150×150 framebuffer, solid 3×3 cells, true 16×16 icons,
+emulation, using one 150×150 framebuffer, solid 3×3 cells, 16×16 icon storage
+tiles with 15×15 drawable fields centered on cell `(7,7)`,
 icon-led single-row values, and centered date text without a calendar icon. The
 unavailable-weather branch uses a neutral icon plus `--` on the same single-row
 baseline. The 2026-08-26 physical checkpoint now proves the exact packaged
@@ -81,12 +82,14 @@ physical / WFF canvas: 466×466
 active framebuffer:   450×450 at x=8, y=8
 source framebuffer:      150×150 pixels
 source pixel:                 3×3 solid units
-gutter:                       none
+cell gutter:                  none
+icon registration gutter:    empty source row 15 and column 15
 ```
 
 Every element uses that one physical source pixel. Hierarchy comes from
-logical artwork size rather than another pixel tier: 5×7 compact text, true
-16×16 icons, and a 32-cell time box. The packaged high-resolution time uses
+logical artwork size rather than another pixel tier: 5×7 compact text, icons
+with a 15×15 drawable field centered on cell `(7,7)` inside stable 16×16
+storage tiles, and a 32-cell time box. The packaged high-resolution time uses
 the directly authored, reviewed clean-chamfer matrices; square and legacy
 fine-chamfer variants remain canonical comparison controls with identical box
 geometry.
@@ -145,7 +148,8 @@ Runtime review PNGs and geometry reports remain under the ignored
 `outputs/raster90/studies/single-grid/` directory. Solid-grid icon sheets and
 full-face decision mocks remain under
 `outputs/raster90/studies/icon-resolution/`. The single-grid runtime mirror and
-selected true 16×16 matrices correspond to packaged WFF assets. The
+selected 16×16 storage matrices with 15×15 drawable fields correspond to
+packaged WFF assets. The
 authoritative selected icon source is `icons/raster90/family.py`; rejected icon
 comparisons, the historical solid step control, and calendar art remain design
 evidence only.
@@ -214,8 +218,10 @@ fiction rather than the current visual target:
 - Black is unlit; white is the normal illuminated state.
 - Text, icons, and time use the same physical source pixels. They gain hierarchy
   from their authored matrices rather than different pixel sizes.
-- Persistent icons are authored directly at true 16×16 resolution. Weather,
-  steps, and battery use icons; the centered date is text-only. A single weather
+- Persistent icons are authored in a 15×15 drawable field centered on cell
+  `(7,7)` inside a stable 16×16 storage tile. The mandatory final empty row and column provide
+  deterministic registration without changing the solid 3×3 cell scale.
+  Weather, steps, and battery use icons; the centered date is text-only. A single weather
   tile may use the indexed-color plane; steps and ordinary text remain
   monochrome, while the battery icon may receive one coarse state tint.
 - The weather sprite uses at most four flat visible palette entries in one
@@ -360,8 +366,9 @@ Selected compact-glyph contract:
   output (using rounded `F -> C` or `C -> F` arithmetic) and always labels the
   selected output unit.
 - One-source-pixel minimum spacing between glyphs.
-- Weather icons must cover every WFF condition on uniform 16×16 tiles and be
-  judged at actual wrist distance.
+- Weather icons must cover every WFF condition on uniform 16×16 storage tiles,
+  remain inside the shared 15×15 drawable field, and be judged at actual wrist
+  distance.
 
 Each glyph cell resolves to exactly one solid 3×3 source pixel; it must not be
 smoothed into a conventional typeface. The source glyph matrices should remain
@@ -391,8 +398,9 @@ density through two-unit marks. For the current design pass:
   human-reviewable matrices. If direct reuse is proposed later, pin the exact
   upstream revision and review the license of every selected asset first.
 
-The selected direction has one icon resource class: a true 16×16 source matrix
-rendered with solid 3×3 cells as a 48×48 WFF tile. Weather, steps, battery,
+The selected direction has one icon resource class: a 16×16 source/storage
+matrix with a centered 15×15 drawable field and mandatory empty final row and
+column, rendered with solid 3×3 cells as a 48×48 WFF tile. Weather, steps, battery,
 unknown, stale-state, and event art use that canvas or an explicitly registered
 overlay within it. There is no utility-versus-feature size split. The calendar
 icon is intentionally absent because `SAT 15 AUG` is already semantically
@@ -409,9 +417,10 @@ flakes. WFF IDs 11–13 resolve distinctly to light snow, light rain, and mist.
 The art should occupy broadly comparable optical bounds instead of forcing
 every shape into an identical square silhouette. A wide battery and the paired
 footprints may have different bounding rectangles, but neither should read as
-a small marker beside a dominant weather illustration. Transparent edge cells
-remain available for centering, animation registration, and condition-to-
-condition stability.
+a small marker beside a dominant weather illustration. Transparent cells within
+the 15×15 field remain available for optical centering; the final storage row
+and column are reserved for registration and must remain empty in resting and
+rendered animation frames.
 
 The historical 3/2 runtime exposed why this redesign was required: its weather
 art was integer-expanded from 8×8 and much of its utility geometry followed
@@ -438,8 +447,9 @@ wearer review remains pending.
 The selected project-owned matrices in `icons/raster90/family.py` are consumed
 directly by the packaged generator so selected runtime and icon-family preview
 art cannot drift. `design/raster90/icon_resolution_studies.py` retains
-historical controls and aliases for comparison renderers. A validator rejects
-16×16 candidates that are merely duplicated 8×8 blocks. Opposing structural
+historical controls and aliases for comparison renderers. Validators reject a
+lit trailing storage cell and reject 16×16 candidates that are merely duplicated
+8×8 blocks. Opposing structural
 edges must retain balanced source-cell weight before whole-face WFF scaling is
 considered.
 
@@ -534,10 +544,11 @@ rectangular device casing:
 - The time occupies the optical center and largest glyph scale.
 - Weather is the top status row, with the quieter date immediately below it;
   steps and battery occupy the lower status region.
-- `[weather]` is a uniform 16×16 indexed-color condition sprite, not a literal
+- `[weather]` is a uniform 16×16 storage tile with a 15×15 indexed-color
+  condition sprite centered on cell `(7,7)`, not a literal
   label. It uses at most four flat palette entries; the adjacent temperature
-  remains white. Calendar, walker, and the battery resource use monochrome
-  16×16 tiles; the selected runtime may tint only the battery icon by state.
+  remains white. Steps and battery use monochrome 16×16 storage tiles; the
+  selected runtime may tint only the battery icon by state.
 - Temperature follows the user's unit and includes the degree mark.
 - Step counts through 99,999 use the fixed-width `STP 03642` treatment. Six
   digits use the same narrow separator as `STP 123456`; values above 999,999
@@ -606,7 +617,8 @@ plus a 30-unit colon separator in one low-cost `TimeText`.
 
 This calculation exposes real constraints:
 
-- Weather, steps, and battery use the same true 16×16 tile; date is text-only.
+- Weather, steps, and battery use the same 16×16 storage tile and 15×15 drawable
+  field; date is text-only.
 - Integrate stale/error state into the weather sprite instead of appending a
   new field.
 - The current `%d°%s` formatter fits the documented `-100°F` width budget;
@@ -762,7 +774,7 @@ Later slices remain separately gated:
   safe radius, solid cells, and indexed weather palette.
 - Whether physical wear calls for a further clean-chamfer optical adjustment;
   the selected cut is already directly authored and emulator-proven.
-- Optical refinement of the selected true 16×16 icon family.
+- Optical refinement of the selected 15×15 drawable icon family.
 - Live verification of stale, day-family, explicit-Fahrenheit-selection, and
   extreme-value weather branches. Fresh available night-family weather is
   proven on the exact 2026-08-26 physical tree; the provider's Fahrenheit

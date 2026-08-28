@@ -7,24 +7,32 @@ Android resources or a replacement for the historical design studies.
 ## Ownership and dimensions
 
 - `family.py` is authoritative for the exact indexed weather palette, all 16
-  WFF condition IDs with day/night resolution maps, the selected 16×16 steps
-  and battery tiles, the neutral unavailable-weather icon, and the 2×2 stale
+  WFF condition IDs with day/night resolution maps, the selected steps and
+  battery tiles, the neutral unavailable-weather icon, and the 2×2 stale
   marker.
 - The approved steps alias is `four-toe-vertical`: each footprint has a closed
   tapered sole, one 1×2 vertical big-toe mark, and three separated 1×1 toe
   marks. `SELECTED_UTILITY_ICONS` contains only `steps` and `battery`.
-- Every matrix is authored directly at 16×16 source-cell resolution. The WFF
-  generator renders each lit cell as one solid 3×3 square into a 48×48 tile;
-  it never integer-expands an old 8×8 source or uses fractional resampling.
+- Every selected icon uses a 16×16 storage matrix with a 15×15 drawable field
+  centered on cell `(7,7)`. Row 15 and column 15 must remain empty as the trailing
+  registration gutter, making source cell `(7,7)` the visual center. The WFF
+  generator renders each lit cell as one solid 3×3 square into a stable 48×48
+  tile and verifies the corresponding final three-pixel row and column are
+  transparent; it never integer-expands an old 8×8 source or uses fractional
+  resampling.
 - The selected weather refresh uses a centered, star-free cyan outline for
   clear night and a smaller open half-circle behind the partly-night cloud.
   Fog keeps the common white cloud cap above straight haze bars; mist is the
   cloud-free three-bar form; windy uses two upward terminal curls and one
-  shorter straight run.
+  shorter straight run. Bare cloudy uses a separate y=3–10 centered cloud;
+  cloud-bearing fog and precipitation retain the shared y=1–8 top anchor.
 - Rain conditions use identical two-cell `/` strokes in a 2 / 4 / 6
-  progression for light / normal / heavy. Snow uses complete five-cell plus
-  flakes in a staggered 2 / 3 / 5 progression. Sleet alternates two of those
-  rain strokes with two flakes. IDs 11–13 resolve to distinct `light_snow`,
+  progression for light / normal / heavy; all three rain fields use the
+  reviewed one-cell-left placement. Snow uses complete five-cell plus flakes
+  in a staggered 2 / 3 / 5 progression; normal and heavy snow use the reviewed
+  one-cell-right placement while light snow remains unchanged. Sleet alternates
+  two rain strokes with two flakes, with its upper-left rain stroke raised one
+  cell and pulled two cells left. IDs 11–13 resolve to distinct `light_snow`,
   `light_rain`, and `mist` sprites rather than aliases of the normal families.
 - Weather is the only persistent indexed-color plane. Utility resources remain
   monochrome: steps stay white, while the battery icon receives the canonical
@@ -58,6 +66,9 @@ rtk python3 -B tools/generate_raster90_assets.py --check
 
 `preview/index.html` is self-contained: it embeds the generated sheets, native
 466×466 face, 2× magnified face, source matrices, and palette without external
-URLs. The PNG sheets are deterministic and should be regenerated rather than
-edited by hand. Their presentation is review evidence; it does not claim a
-fresh emulator or physical-watch validation.
+URLs. Presentation-only matrix views use a visible blue-gray fill behind the
+15×15 drawable field while leaving the trailing storage row and column black;
+this tint is not packaged into runtime assets. The PNG sheets are deterministic
+and should be regenerated rather than edited by hand. Their presentation is
+review evidence; it does not claim a fresh emulator or physical-watch
+validation.

@@ -47,9 +47,14 @@ app.
   it as a dependency, vendor its SVGs, or mechanically trace/downsample them.
   Raster 90 icons remain independently authored, project-owned matrices unless
   a later explicit decision pins and licenses selected upstream assets.
-- The packaged icon family is authored directly at true 16×16 resolution and
-  rendered with solid 3×3 cells into 48×48 WFF tiles. The persistent resting
-  icons are weather, steps, and battery. The calendar icon is intentionally
+- The packaged icon family uses direct-authored 16×16 storage matrices with a
+  15×15 drawable field centered on source cell `(7,7)`. Source row 15 and column
+  15 are a mandatory
+  trailing transparent gutter, so the visual center is cell `(7,7)` and no
+  resting or animated lit cell may enter that final row or column. The generator
+  still renders solid 3×3 cells into stable 48×48 WFF tiles; the source gutter
+  becomes the final transparent three-pixel row and column. The persistent
+  resting icons are weather, steps, and battery. The calendar icon is intentionally
   removed; `SAT 15 AUG` is centered as text because it is already unambiguous.
   The selected step icon is the direct-authored `four-toe-vertical` pair of
   closed footprints with separated toe pads, one vertical 1×2 big-toe mark,
@@ -62,7 +67,12 @@ app.
   night crescent, a smaller open partly-night half-circle behind the cloud,
   straight fog/mist bars, upward wind curls, 2/4/6 identical rain strokes,
   2/3/5 complete staggered snowflakes, and alternating two-rain/two-snow sleet.
-  WFF IDs 11–13 resolve distinctly to light snow, light rain, and mist.
+  Bare cloudy uses its own vertically centered cloud while fog and precipitation
+  retain the shared top anchor. The light/normal/heavy rain fields sit one cell
+  left of their earlier positions; normal/heavy snow sit one cell right. Sleet's
+  upper-left rain stroke is deliberately raised one cell and pulled two cells
+  left while the lower-right stroke remains low/right. WFF IDs 11–13 resolve
+  distinctly to light snow, light rain, and mist.
 - The interactive composition omits seconds and uses a static colon. Its
   fixed information set is time, date, current weather, step count, and battery.
   The available-weather resting rows are `[weather] 21°C`, centered `SAT 15 AUG`,
@@ -474,7 +484,8 @@ rtk adb -s <phone-serial> shell wm density
   (historical plus current-tree emulator evidence; the current capture uses a
   simulated GPS weather provider).
 - [x] Normalize and package all mapped WFF weather conditions plus steps and
-  battery on uniform 16×16 icon tiles, including the reviewed static weather
+  battery on uniform 16×16 storage tiles with a 15×15 drawable field and
+  trailing transparent gutter, including the reviewed static weather
   refresh; the calendar icon was deliberately removed from the selected
   composition.
 - [x] Recalculate and implement the single-grid row bands and circular fit.

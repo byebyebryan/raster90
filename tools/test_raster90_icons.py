@@ -29,7 +29,7 @@ from step_icon_outline_study import (  # noqa: E402
 APPROVED_STEP_ROWS = (
     ".........1..1...",
     ".........1....1.",
-    "...1..1........1",
+    "...1..1.......1.",
     ".1....1..11111..",
     "1........1....1.",
     "..11111..1....1.",
@@ -75,7 +75,8 @@ class Raster90IconFamilyTests(unittest.TestCase):
         self.assertEqual(family.APPROVED_STEP_ICON, APPROVED_STEP_ROWS)
         self.assertEqual(family.BATTERY_ICON, BATTERY_ROWS)
         for name, rows in family.SELECTED_UTILITY_ICONS.items():
-            self.assertEqual((len(rows), len(rows[0])), (16, 16), name)
+            self.assertEqual((len(rows), len(rows[0])), (family.MATRIX_CELLS, family.MATRIX_CELLS), name)
+            family.validate_drawable_matrix(name, rows)
             self.assertFalse(set("".join(rows)) - {".", "1"}, name)
 
         # The approved large toe is one vertical 1x2 line, and the canonical
@@ -267,8 +268,14 @@ class Raster90IconFamilyTests(unittest.TestCase):
                 "windy",
             },
         )
+        for name, rows in family.WEATHER_SPRITES.items():
+            with self.subTest(sprite=name):
+                self.assertEqual((len(rows), len(rows[0])), (family.MATRIX_CELLS, family.MATRIX_CELLS))
+                family.validate_drawable_matrix(name, rows)
+                self.assertTrue(all(cell == "." for cell in rows[family.LAST_DRAWABLE_CELL + 1]))
+                self.assertTrue(all(row[family.LAST_DRAWABLE_CELL + 1] == "." for row in rows))
         for rows in (*family.WEATHER_DAY.values(), *family.WEATHER_NIGHT.values()):
-            self.assertEqual((len(rows), len(rows[0])), (16, 16))
+            self.assertEqual((len(rows), len(rows[0])), (family.MATRIX_CELLS, family.MATRIX_CELLS))
             self.assertFalse(set("".join(rows)) - {".", *family.PALETTE})
         self.assertIs(family.UNAVAILABLE_WEATHER_ICON, family.WEATHER_SPRITES["unknown"])
         self.assertEqual(family.STALE_MARKER, ("10", "01"))
@@ -291,7 +298,7 @@ class Raster90IconFamilyTests(unittest.TestCase):
             }
 
         clear_night = cells(family.WEATHER_SPRITES["clear_night"], "C")
-        self.assertEqual(len(clear_night), 34)
+        self.assertEqual(len(clear_night), 32)
         self.assertEqual(
             (
                 min(x for x, _y in clear_night),
@@ -299,11 +306,26 @@ class Raster90IconFamilyTests(unittest.TestCase):
                 min(y for _x, y in clear_night),
                 max(y for _x, y in clear_night),
             ),
-            (3, 12, 0, 12),
+            (3, 11, 1, 13),
         )
+        # Two lower crescent cells are correctly hidden by the opaque cloud
+        # mask at rest; the visible source sprite therefore has nine cells.
         self.assertEqual(len(cells(family.WEATHER_SPRITES["partly_night"], "C")), 9)
 
-        cloud_cap = family.WEATHER_SPRITES["cloudy"][:9]
+        unknown = family.WEATHER_SPRITES["unknown"]
+        self.assertTrue(all(row[0] == "." and row[14] == "." for row in unknown))
+        unknown_cells = cells(unknown, "W")
+        self.assertEqual(
+            (
+                min(x for x, _y in unknown_cells),
+                max(x for x, _y in unknown_cells),
+                min(y for _x, y in unknown_cells),
+                max(y for _x, y in unknown_cells),
+            ),
+            (1, 13, 0, 14),
+        )
+
+        cloud_cap = family._CLOUD[:9]
         for name in (
             "fog",
             "light_rain",
@@ -324,6 +346,18 @@ class Raster90IconFamilyTests(unittest.TestCase):
             ],
             [4, 8, 12],
         )
+        for name, expected_x_bounds in (
+            ("light_rain", (3, 10)),
+            ("rain", (2, 11)),
+            ("heavy_rain", (0, 13)),
+        ):
+            rain_cells = cells(family.WEATHER_SPRITES[name], "B")
+            self.assertEqual(
+                (min(x for x, _y in rain_cells), max(x for x, _y in rain_cells)),
+                expected_x_bounds,
+                name,
+            )
+            self.assertEqual(sum(x for x, _y in rain_cells) / len(rain_cells), 6.5, name)
         self.assertEqual(
             [
                 len(cells(family.WEATHER_SPRITES[name], "C"))
@@ -331,15 +365,27 @@ class Raster90IconFamilyTests(unittest.TestCase):
             ],
             [10, 15, 25],
         )
+        for name, expected_x_bounds in (("snow", (2, 12)), ("heavy_snow", (1, 13))):
+            snow_cells = cells(family.WEATHER_SPRITES[name], "C")
+            self.assertEqual(
+                (min(x for x, _y in snow_cells), max(x for x, _y in snow_cells)),
+                expected_x_bounds,
+                name,
+            )
+            self.assertEqual(sum(x for x, _y in snow_cells) / len(snow_cells), 7.0, name)
         self.assertEqual(len(cells(family.WEATHER_SPRITES["sleet"], "B")), 4)
         self.assertEqual(len(cells(family.WEATHER_SPRITES["sleet"], "C")), 10)
+        self.assertEqual(
+            cells(family.WEATHER_SPRITES["sleet"], "B"),
+            {(3, 9), (2, 10), (11, 13), (10, 14)},
+        )
         self.assertEqual(
             cells(family.WEATHER_SPRITES["sleet"], "C"),
             cells(family.WEATHER_SPRITES["light_snow"], "C"),
         )
 
     def test_cloud_bases_are_closed_and_inherited(self) -> None:
-        expected_base = "..WWWWWWWWWWWWW."
+        expected_base = ".WWWWWWWWWWWWW.."
         source_bases = (
             ("_CLOUD", family._CLOUD, 8),
             ("_PARTLY_CLOUD", family._PARTLY_CLOUD, 11),
@@ -350,17 +396,17 @@ class Raster90IconFamilyTests(unittest.TestCase):
                 self.assertEqual(rows[base_y], expected_base)
                 self.assertEqual(
                     tuple(x for x, cell in enumerate(rows[base_y]) if cell == "W"),
-                    tuple(range(2, 15)),
+                    tuple(range(1, 14)),
                 )
-                # The two side walls and the first base cells form mirrored
-                # diagonal corners, including the newly closed right corner.
-                self.assertEqual(rows[base_y - 1][1], "W")
-                self.assertEqual(rows[base_y - 1][15], "W")
-                self.assertEqual(rows[base_y - 1][1:3], rows[base_y - 1][14:16][::-1])
-                self.assertEqual(rows[base_y][2], rows[base_y][14])
+                # The side walls form mirrored, closed corners around the
+                # true x=7 center; x=15 is reserved for the gutter.
+                self.assertEqual(rows[base_y - 1][0], "W")
+                self.assertEqual(rows[base_y - 1][14], "W")
+                if name != "_PARTLY_CLOUD_OCCLUSION":
+                    self.assertEqual(rows[base_y - 1][1:14], "." * 13)
+                self.assertEqual(rows[base_y][1], rows[base_y][13])
 
         common_cloud_sprites = (
-            "cloudy",
             "fog",
             "light_rain",
             "rain",
@@ -374,6 +420,24 @@ class Raster90IconFamilyTests(unittest.TestCase):
         for name in common_cloud_sprites:
             with self.subTest(name=name):
                 self.assertEqual(family.WEATHER_SPRITES[name][8], expected_base)
+        centered_cloud = family.WEATHER_SPRITES["cloudy"]
+        self.assertEqual(centered_cloud[10], expected_base)
+        self.assertTrue(all(row == "." * family.MATRIX_CELLS for row in centered_cloud[:3]))
+        centered_cells = {
+            (x, y)
+            for y, row in enumerate(centered_cloud)
+            for x, symbol in enumerate(row)
+            if symbol == "W"
+        }
+        self.assertEqual(
+            (
+                min(x for x, _y in centered_cells),
+                max(x for x, _y in centered_cells),
+                min(y for _x, y in centered_cells),
+                max(y for _x, y in centered_cells),
+            ),
+            (0, 14, 3, 10),
+        )
         for name in ("partly_day", "partly_night"):
             with self.subTest(name=name):
                 self.assertEqual(family.WEATHER_SPRITES[name][11], expected_base)
@@ -407,6 +471,30 @@ class Raster90IconFamilyTests(unittest.TestCase):
             self.assertEqual(
                 expected[f"raster_weather_night_{condition:02d}.png"],
                 generator.encode_png(generator._weather_pixels(family.WEATHER_NIGHT[condition])),
+            )
+        for name, data in expected.items():
+            if name == "raster_weather_stale.png" or not (
+                name.startswith("raster_icon_") or name.startswith("raster_weather_")
+            ):
+                continue
+            width, height, pixels = generator.decode_png(data)
+            self.assertEqual((width, height), (generator.ICON_SIZE, generator.ICON_SIZE), name)
+            gutter_start = (family.LAST_DRAWABLE_CELL + 1) * generator.ICON_PITCH
+            self.assertTrue(
+                all(
+                    pixels[y][x] == generator.TRANSPARENT
+                    for y in range(height)
+                    for x in range(gutter_start, width)
+                ),
+                name,
+            )
+            self.assertTrue(
+                all(
+                    pixels[y][x] == generator.TRANSPARENT
+                    for y in range(gutter_start, height)
+                    for x in range(width)
+                ),
+                name,
             )
 
     def test_study_imports_use_canonical_selected_surfaces(self) -> None:
@@ -446,8 +534,22 @@ class Raster90IconFamilyTests(unittest.TestCase):
 
         utility_pixels = generator.decode_png(expected[presentation.UTILITY_SHEET_NAME])[2]
         utility_colors = {pixel for row in utility_pixels for pixel in row}
+        self.assertIn(presentation.DRAWABLE_FIELD_BG, utility_colors)
         for _state_name, _minimum, _maximum, color in family.BATTERY_COLOR_BANDS:
             self.assertIn(color, utility_colors)
+
+        weather_pixels = generator.decode_png(expected[presentation.WEATHER_SHEET_NAME])[2]
+        day_x = 24 + 18
+        icon_y = 92 + 36
+        self.assertEqual(weather_pixels[icon_y][day_x], presentation.DRAWABLE_FIELD_BG)
+        self.assertEqual(
+            weather_pixels[icon_y][day_x + family.DRAWABLE_CELLS * 4],
+            presentation.BLACK,
+        )
+        self.assertEqual(
+            weather_pixels[icon_y + family.DRAWABLE_CELLS * 4][day_x],
+            presentation.BLACK,
+        )
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)

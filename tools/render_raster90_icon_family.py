@@ -35,6 +35,7 @@ from icons.raster90.family import (  # noqa: E402
     APPROVED_STEP_ICON,
     BATTERY_ICON,
     BATTERY_COLOR_BANDS,
+    DRAWABLE_CELLS,
     PALETTE,
     SELECTED_UTILITY_ICONS,
     STALE_MARKER,
@@ -53,6 +54,7 @@ ColorFor = Callable[[str], RGBA]
 BLACK: RGBA = (0, 0, 0, 255)
 WHITE: RGBA = (255, 255, 255, 255)
 TRANSPARENT: RGBA = (0, 0, 0, 0)
+DRAWABLE_FIELD_BG: RGBA = (22, 48, 64, 255)
 OUTPUT_DIR_REL = Path("icons/raster90/preview")
 
 UTILITY_SHEET_NAME = "icon-family-utility-sheet.png"
@@ -120,6 +122,33 @@ def _draw_matrix(
                     _set_pixel(pixels, target_x, target_y, color)
 
 
+def _draw_icon_matrix(
+    pixels: PixelGrid,
+    rows: Sequence[str],
+    *,
+    x: int,
+    y: int,
+    pitch: int,
+    lit: int,
+    color_for: ColorFor,
+) -> None:
+    """Draw one icon over a presentation-only 15x15 field tint."""
+
+    field_size = DRAWABLE_CELLS * pitch
+    for target_y in range(y, y + field_size):
+        for target_x in range(x, x + field_size):
+            _set_pixel(pixels, target_x, target_y, DRAWABLE_FIELD_BG)
+    _draw_matrix(
+        pixels,
+        rows,
+        x=x,
+        y=y,
+        pitch=pitch,
+        lit=lit,
+        color_for=color_for,
+    )
+
+
 def _draw_text(pixels: PixelGrid, text: str, *, x: int, y: int, scale: int = 3) -> None:
     """Draw compact labels from the project-owned 5x7 text family."""
 
@@ -174,12 +203,12 @@ def render_utility_sheet() -> PixelGrid:
     width, height = 980, 420
     pixels = _blank(width, height)
     _draw_text(pixels, "RASTER 90 SELECTED UTILITY ICONS", x=24, y=24)
-    _draw_text(pixels, "PROJECT-OWNED 16X16 MATRICES / SOLID 3X3 CELLS", x=24, y=54)
+    _draw_text(pixels, "16X16 STORAGE / 15X15 DRAWABLE / SOLID 3X3", x=24, y=54)
     for index, name in enumerate(("steps", "battery")):
         card_x = 24 + index * 470
         _draw_text(pixels, UTILITY_LABELS[name], x=card_x, y=110)
         rows = SELECTED_UTILITY_ICONS[name]
-        _draw_matrix(
+        _draw_icon_matrix(
             pixels,
             rows,
             x=card_x,
@@ -188,14 +217,14 @@ def render_utility_sheet() -> PixelGrid:
             lit=12,
             color_for=_utility_color,
         )
-        _draw_text(pixels, "16X16 SOURCE", x=card_x, y=350)
+        _draw_text(pixels, "15X15 FIELD / 16X16 TILE", x=card_x, y=350, scale=2)
         if name == "battery":
             _draw_text(pixels, "ICON TINT STATES", x=card_x + 250, y=110, scale=1)
             for state_index, (state_name, _minimum, _maximum, state_color) in enumerate(
                 BATTERY_COLOR_BANDS
             ):
                 state_x = card_x + 250 + state_index * 54
-                _draw_matrix(
+                _draw_icon_matrix(
                     pixels,
                     rows,
                     x=state_x,
@@ -205,9 +234,9 @@ def render_utility_sheet() -> PixelGrid:
                     color_for=lambda _symbol, color=state_color: color,
                 )
                 label_x = state_x + (48 - len(state_name) * 6) // 2
-                _draw_text(pixels, state_name.upper(), x=label_x, y=350, scale=1)
+                _draw_text(pixels, state_name.upper(), x=label_x, y=210, scale=1)
         else:
-            _draw_matrix(
+            _draw_icon_matrix(
                 pixels,
                 rows,
                 x=card_x + 250,
@@ -216,7 +245,7 @@ def render_utility_sheet() -> PixelGrid:
                 lit=3,
                 color_for=_utility_color,
             )
-            _draw_text(pixels, "48X48 RUNTIME TILE", x=card_x + 250, y=350, scale=2)
+            _draw_text(pixels, "48X48 RUNTIME TILE", x=card_x + 250, y=210, scale=2)
     return pixels
 
 
@@ -231,7 +260,7 @@ def render_weather_sheet() -> PixelGrid:
     height = title_height + card_height * rows_per_column
     pixels = _blank(width, height)
     _draw_text(pixels, "RASTER 90 WEATHER FAMILY", x=24, y=18)
-    _draw_text(pixels, "ALL 16 WFF CONDITIONS / DAY + NIGHT / TRUE 16X16", x=24, y=48)
+    _draw_text(pixels, "ALL 16 WFF CONDITIONS / DAY + NIGHT / 16X16 STORAGE / 15X15 DRAWABLE", x=24, y=48)
     for condition, condition_name in enumerate(WEATHER_CONDITIONS):
         column = condition % 4
         row = condition // 4
@@ -246,7 +275,7 @@ def render_weather_sheet() -> PixelGrid:
         day_x = card_x + 18
         night_x = card_x + 170
         icon_y = card_y + 36
-        _draw_matrix(
+        _draw_icon_matrix(
             pixels,
             WEATHER_DAY[condition],
             x=day_x,
@@ -255,7 +284,7 @@ def render_weather_sheet() -> PixelGrid:
             lit=4,
             color_for=_weather_color,
         )
-        _draw_matrix(
+        _draw_icon_matrix(
             pixels,
             WEATHER_NIGHT[condition],
             x=night_x,
@@ -284,7 +313,7 @@ def render_state_sheet() -> PixelGrid:
     for index, (label, rows, value, stale) in enumerate(cards):
         card_x = 24 + index * 320
         _draw_text(pixels, label, x=card_x, y=118)
-        _draw_matrix(
+        _draw_icon_matrix(
             pixels,
             rows,
             x=card_x,
@@ -308,12 +337,12 @@ def render_state_sheet() -> PixelGrid:
 
 
 def render_matrix_sheet() -> PixelGrid:
-    """Expose exact 16x16 cells beside their 3x3 physical rendering."""
+    """Expose 16x16 storage cells and the 15x15 drawable field beside 3x3 rendering."""
 
     width, height = 1100, 520
     pixels = _blank(width, height)
     _draw_text(pixels, "MATRIX / PHYSICAL CELL INSPECTION", x=24, y=20)
-    _draw_text(pixels, "SOURCE GRID IS 16X16; EVERY LIT CELL IS A SOLID 3X3", x=24, y=50)
+    _draw_text(pixels, "16X16 STORAGE / 15X15 DRAWABLE; EVERY LIT CELL IS A SOLID 3X3", x=24, y=50)
     entries = (
         ("STEPS", APPROVED_STEP_ICON, _utility_color),
         ("BATTERY", BATTERY_ICON, _utility_color),
@@ -322,9 +351,9 @@ def render_matrix_sheet() -> PixelGrid:
     for index, (label, rows, color_for) in enumerate(entries):
         x = 24 + index * 350
         _draw_text(pixels, label, x=x, y=112)
-        _draw_matrix(pixels, rows, x=x, y=154, pitch=12, lit=12, color_for=color_for)
-        _draw_text(pixels, "16X16 / 12X REVIEW", x=x, y=362)
-        _draw_matrix(pixels, rows, x=x + 196, y=154, pitch=3, lit=3, color_for=color_for)
+        _draw_icon_matrix(pixels, rows, x=x, y=154, pitch=12, lit=12, color_for=color_for)
+        _draw_text(pixels, "15X15 ART / 12X REVIEW", x=x, y=362, scale=2)
+        _draw_icon_matrix(pixels, rows, x=x + 196, y=154, pitch=3, lit=3, color_for=color_for)
         _draw_text(pixels, "3X3 CELLS", x=x + 196, y=220)
     # An isolated calibration strip makes solid-cell boundaries unambiguous.
     _draw_text(pixels, "CELL CALIBRATION", x=24, y=424)
@@ -383,7 +412,7 @@ def _html_document(images: Mapping[str, bytes]) -> bytes:
         (UTILITY_SHEET_NAME, "Selected utility icons", "steps and battery are the only persistent utility tiles; battery shows all four icon tint states."),
         (WEATHER_SHEET_NAME, "Complete weather resolution", "Every WFF condition ID has a day and night mapping."),
         (STATE_SHEET_NAME, "Truthful weather states", "Unavailable uses the neutral icon plus --; stale keeps a marker distinct from an unavailable value."),
-        (MATRIX_SHEET_NAME, "True 16x16 / solid 3x3 inspection", "The matrix views expose project-owned source cells and their physical tile expansion."),
+        (MATRIX_SHEET_NAME, "16x16 storage / 15x15 drawable / solid 3x3 inspection", "The matrix views expose project-owned storage cells, the drawable field, and their physical tile expansion."),
         (NATIVE_FACE_NAME, "Native 466x466 face", "This is the deterministic runtime preview, not fresh emulator or physical-watch evidence."),
         (MAGNIFIED_FACE_NAME, "Magnified face", "A 2x nearest-neighbour view for inspecting cell edges and placement."),
     ]

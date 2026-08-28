@@ -88,8 +88,10 @@ module.
   `design/raster90/matrices.py` keeps compatibility aliases for design studies
   alongside palette and legacy comparison sprites.
 - `icons/raster90/family.py` is the authoritative source for the selected
-  true 16×16 weather, steps, and battery matrices, the ordered battery tint
-  bands, complete day/night WFF condition maps, the exact palette, neutral
+  weather, steps, and battery art: stable 16×16 storage matrices with a 15×15
+  drawable field centered on cell `(7,7)` and a mandatory trailing empty
+  row/column; the ordered battery tint bands; complete day/night WFF condition
+  maps; the exact palette; neutral
   unavailable icon, and stale marker. `design/raster90/icon_resolution_studies.py`
   retains calendar,
   resolution, and other historical controls while rebinding selected aliases

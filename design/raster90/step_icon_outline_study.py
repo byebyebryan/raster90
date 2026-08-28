@@ -363,7 +363,9 @@ def validate_step_icon_outline_study() -> None:
             else (0, 0, 15, 14)
             if name == "four-line-toes"
             else (0, 0, 15, 13)
-            if name in ("four-toe-arc", "four-toe-vertical")
+            if name == "four-toe-arc"
+            else (0, 0, 14, 13)
+            if name == "four-toe-vertical"
             else (0, 0, 15, 13)
             if name == "three-line-toes"
             else (1, 0, 14, 13)
