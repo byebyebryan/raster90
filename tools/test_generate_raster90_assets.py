@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import generate_raster90_assets as generator  # noqa: E402
+from icons.raster90 import animation as weather_animation  # noqa: E402
 from fonts.raster90 import family as font_family  # noqa: E402
 from icon_resolution_studies import (  # noqa: E402
     SIXTEEN_UTILITY_ICONS,
@@ -35,13 +36,23 @@ class Raster90AssetGeneratorTests(unittest.TestCase):
         )
 
         expected = generator._expected_pngs()
-        self.assertEqual(len(expected), 87)
+        self.assertEqual(
+            len(expected),
+            87
+            + len(weather_animation.WEATHER_ANIMATION_FAMILIES)
+            * weather_animation.FRAME_COUNT,
+        )
         self.assertFalse(any(name.startswith("raster_coarse_") for name in expected))
         self.assertEqual(
             sum(name.startswith("raster_weather_day_") for name in expected), 16
         )
         self.assertEqual(
             sum(name.startswith("raster_weather_night_") for name in expected), 16
+        )
+        self.assertEqual(
+            sum(name.startswith("raster_weather_anim_") for name in expected),
+            len(weather_animation.WEATHER_ANIMATION_FAMILIES)
+            * weather_animation.FRAME_COUNT,
         )
         self.assertEqual(
             {name for name in expected if name.startswith("raster_icon_")},

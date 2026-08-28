@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate and check the tracked Raster 90 icon-family presentation.
 
-The canonical matrices live in ``icons/raster90/family.py``. This tool writes
+The canonical matrices live in ``icons/raster90/family.py`` and
+``icons/raster90/animation.py``. This tool writes
 only the reviewable presentation beneath ``icons/raster90/preview/``:
 
     python3 -B tools/render_raster90_icon_family.py
@@ -31,6 +32,11 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 
 from fonts.raster90.family import SECONDARY_GLYPHS  # noqa: E402
+from icons.raster90.animation import (  # noqa: E402
+    FRAME_COUNT,
+    FRAME_RATE,
+    WEATHER_ANIMATION_FRAMES,
+)
 from icons.raster90.family import (  # noqa: E402
     APPROVED_STEP_ICON,
     BATTERY_ICON,
@@ -59,6 +65,8 @@ OUTPUT_DIR_REL = Path("icons/raster90/preview")
 
 UTILITY_SHEET_NAME = "icon-family-utility-sheet.png"
 WEATHER_SHEET_NAME = "icon-family-weather-day-night-sheet.png"
+ANIMATION_SHEET_NAME = "icon-family-weather-animation-sheet.png"
+ANIMATION_PREVIEW_NAME = "icon-family-weather-animation-preview.gif"
 STATE_SHEET_NAME = "icon-family-unavailable-stale-sheet.png"
 MATRIX_SHEET_NAME = "icon-family-matrix-3x3-inspection.png"
 NATIVE_FACE_NAME = "icon-family-native-face-466.png"
@@ -66,6 +74,39 @@ MAGNIFIED_FACE_NAME = "icon-family-magnified-face-932.png"
 HTML_NAME = "index.html"
 
 UTILITY_LABELS = {"steps": "STEPS", "battery": "BATTERY"}
+
+ANIMATION_PREVIEW_PHASES: tuple[int, ...] = tuple(range(FRAME_COUNT)) + (0, 0, 0)
+ANIMATION_PREVIEW_DELAYS: tuple[int, ...] = (25,) * len(ANIMATION_PREVIEW_PHASES)
+ANIMATION_PREVIEW_COLUMNS = 4
+ANIMATION_PREVIEW_ROWS = (
+    len(WEATHER_ANIMATION_FRAMES) + ANIMATION_PREVIEW_COLUMNS - 1
+) // ANIMATION_PREVIEW_COLUMNS
+ANIMATION_PREVIEW_MARGIN = 24
+ANIMATION_PREVIEW_HEADER = 76
+ANIMATION_PREVIEW_CELL_WIDTH = 174
+ANIMATION_PREVIEW_CELL_HEIGHT = 184
+ANIMATION_PREVIEW_WIDTH = (
+    2 * ANIMATION_PREVIEW_MARGIN
+    + ANIMATION_PREVIEW_COLUMNS * ANIMATION_PREVIEW_CELL_WIDTH
+)
+ANIMATION_PREVIEW_HEIGHT = (
+    ANIMATION_PREVIEW_HEADER
+    + ANIMATION_PREVIEW_ROWS * ANIMATION_PREVIEW_CELL_HEIGHT
+    + ANIMATION_PREVIEW_MARGIN
+)
+
+GIF_PALETTE: tuple[RGBA, ...] = (
+    BLACK,
+    WHITE,
+    PALETTE["Y"],
+    PALETTE["C"],
+    PALETTE["B"],
+    DRAWABLE_FIELD_BG,
+    BLACK,
+    BLACK,
+)
+GIF_COLOR_INDEX = {color: index for index, color in enumerate(GIF_PALETTE[:6])}
+GIF_INFINITE_LOOP_EXTENSION = b"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00"
 
 
 def _png_chunk(kind: bytes, payload: bytes) -> bytes:
@@ -91,6 +132,168 @@ def encode_png(pixels: PixelGrid) -> bytes:
     return b"\x89PNG\r\n\x1a\n" + _png_chunk(b"IHDR", ihdr) + _png_chunk(
         b"IDAT", zlib.compress(bytes(raw), level=9)
     ) + _png_chunk(b"IEND", b"")
+
+
+def _gif_lzw(indices: Sequence[int], minimum_code_size: int = 3) -> bytes:
+    """Emit the deterministic bounded-dictionary GIF stream used by previews."""
+
+    if not indices:
+        raise ValueError("cannot encode an empty GIF frame")
+    clear_code = 1 << minimum_code_size
+    end_code = clear_code + 1
+    code_size = minimum_code_size + 1
+    next_code = end_code + 1
+    dictionary = {(index,): index for index in range(clear_code)}
+    if any(value < 0 or value >= clear_code for value in indices):
+        raise ValueError("GIF pixel index exceeds code space")
+    codes: list[tuple[int, int]] = [(clear_code, code_size)]
+    phrase = (indices[0],)
+    for value in indices[1:]:
+        extended = phrase + (value,)
+        if extended in dictionary:
+            phrase = extended
+            continue
+        codes.append((dictionary[phrase], code_size))
+        if next_code < 4096:
+            dictionary[extended] = next_code
+            next_code += 1
+            if next_code > (1 << code_size) and code_size < 12:
+                code_size += 1
+        else:
+            codes.append((clear_code, code_size))
+            dictionary = {(index,): index for index in range(clear_code)}
+            next_code = end_code + 1
+            code_size = minimum_code_size + 1
+        phrase = (value,)
+    codes.extend(((dictionary[phrase], code_size), (end_code, code_size)))
+
+    packed = bytearray()
+    bit_buffer = 0
+    bit_count = 0
+    for code, width in codes:
+        bit_buffer |= code << bit_count
+        bit_count += width
+        while bit_count >= 8:
+            packed.append(bit_buffer & 0xFF)
+            bit_buffer >>= 8
+            bit_count -= 8
+    if bit_count:
+        packed.append(bit_buffer & 0xFF)
+    return bytes(packed)
+
+
+def encode_gif(frames: Sequence[PixelGrid], delays: Sequence[int]) -> bytes:
+    """Encode a deterministic infinitely looping, full-frame presentation GIF."""
+
+    if not frames or len(frames) != len(delays):
+        raise ValueError("GIF requires matching non-empty frames and delays")
+    height = len(frames[0])
+    width = len(frames[0][0]) if height else 0
+    if not width or not height:
+        raise ValueError("GIF frames cannot be empty")
+    indexed_frames: list[list[int]] = []
+    for frame_index, frame in enumerate(frames):
+        if len(frame) != height or any(len(row) != width for row in frame):
+            raise ValueError(f"GIF frame {frame_index} has inconsistent dimensions")
+        try:
+            indexed_frames.append(
+                [GIF_COLOR_INDEX[pixel] for row in frame for pixel in row]
+            )
+        except KeyError as error:
+            raise ValueError(f"GIF frame uses a non-presentation color: {error.args[0]}") from error
+
+    data = bytearray(b"GIF89a")
+    data.extend(struct.pack("<HHBBB", width, height, 0xF2, 0, 0))
+    for red, green, blue, _alpha in GIF_PALETTE:
+        data.extend((red, green, blue))
+    data.extend(GIF_INFINITE_LOOP_EXTENSION)
+    for indices, delay in zip(indexed_frames, delays):
+        if not 1 <= delay <= 0xFFFF:
+            raise ValueError(f"GIF delay outside uint16 range: {delay}")
+        data.extend(b"\x21\xF9\x04\x00")
+        data.extend(struct.pack("<H", delay))
+        data.extend(b"\x00\x00\x2C")
+        data.extend(struct.pack("<HHHHB", 0, 0, width, height, 0))
+        compressed = _gif_lzw(indices)
+        data.append(3)
+        for offset in range(0, len(compressed), 255):
+            block = compressed[offset : offset + 255]
+            data.append(len(block))
+            data.extend(block)
+        data.append(0)
+    data.append(0x3B)
+    return bytes(data)
+
+
+def _gif_dimensions(data: bytes) -> tuple[int, int]:
+    if data[:6] not in (b"GIF87a", b"GIF89a") or len(data) < 10:
+        raise ValueError("invalid GIF header")
+    return struct.unpack("<HH", data[6:10])
+
+
+def _gif_delays(data: bytes) -> tuple[int, ...]:
+    """Read frame delays from the fixed full-frame GIF subset emitted above."""
+
+    _gif_dimensions(data)
+    offset = 13
+    packed = data[10]
+    if packed & 0x80:
+        offset += 3 * (2 ** ((packed & 0x07) + 1))
+    delays: list[int] = []
+    while offset < len(data):
+        marker = data[offset]
+        if marker == 0x3B:
+            break
+        if marker == 0x21:
+            if offset + 2 >= len(data):
+                raise ValueError("truncated GIF extension")
+            label = data[offset + 1]
+            if label == 0xF9:
+                if data[offset + 2] != 4 or offset + 8 > len(data):
+                    raise ValueError("invalid GIF graphic control extension")
+                delays.append(struct.unpack("<H", data[offset + 4 : offset + 6])[0])
+                offset += 8
+                continue
+            offset += 2
+            while True:
+                if offset >= len(data):
+                    raise ValueError("truncated GIF extension sub-block")
+                block_size = data[offset]
+                offset += 1
+                if block_size == 0:
+                    break
+                offset += block_size
+            continue
+        if marker != 0x2C or offset + 10 > len(data):
+            raise ValueError(f"unexpected GIF block at offset {offset}")
+        local_packed = data[offset + 9]
+        offset += 10
+        if local_packed & 0x80:
+            offset += 3 * (2 ** ((local_packed & 0x07) + 1))
+        if offset >= len(data):
+            raise ValueError("truncated GIF LZW minimum code size")
+        offset += 1
+        while True:
+            if offset >= len(data):
+                raise ValueError("truncated GIF image sub-block")
+            block_size = data[offset]
+            offset += 1
+            if block_size == 0:
+                break
+            offset += block_size
+    return tuple(delays)
+
+
+def _validate_animation_preview(data: bytes) -> None:
+    if _gif_dimensions(data) != (
+        ANIMATION_PREVIEW_WIDTH,
+        ANIMATION_PREVIEW_HEIGHT,
+    ):
+        raise ValueError("animation preview GIF dimensions drifted")
+    if _gif_delays(data) != ANIMATION_PREVIEW_DELAYS:
+        raise ValueError("animation preview GIF cadence drifted")
+    if GIF_INFINITE_LOOP_EXTENSION not in data[:128]:
+        raise ValueError("animation preview GIF is missing its presentation loop")
 
 
 def _blank(width: int, height: int, fill: RGBA = BLACK) -> PixelGrid:
@@ -298,6 +501,90 @@ def render_weather_sheet() -> PixelGrid:
     return pixels
 
 
+def render_animation_sheet() -> PixelGrid:
+    """Show every promoted weather family across its eight runtime phases."""
+
+    width = 900
+    title_height = 112
+    row_height = 84
+    height = title_height + len(WEATHER_ANIMATION_FRAMES) * row_height + 16
+    label_x = 24
+    phase_x = 244
+    phase_advance = 80
+    pixels = _blank(width, height)
+    _draw_text(pixels, "RASTER 90 WEATHER ANIMATION", x=24, y=18)
+    _draw_text(
+        pixels,
+        f"{len(WEATHER_ANIMATION_FRAMES)} FAMILIES / {FRAME_COUNT} PHASES / {FRAME_RATE} FPS / ON VISIBLE ONCE",
+        x=24,
+        y=48,
+    )
+    for phase in range(FRAME_COUNT):
+        _draw_text(pixels, f"P{phase}", x=phase_x + phase * phase_advance + 22, y=82)
+    for family_index, (weather_family, frames) in enumerate(
+        WEATHER_ANIMATION_FRAMES.items()
+    ):
+        row_y = title_height + family_index * row_height
+        _draw_text(
+            pixels,
+            weather_family.replace("_", " ").upper(),
+            x=label_x,
+            y=row_y + 20,
+            scale=2,
+        )
+        for phase, matrix in enumerate(frames):
+            _draw_icon_matrix(
+                pixels,
+                matrix,
+                x=phase_x + phase * phase_advance,
+                y=row_y,
+                pitch=4,
+                lit=4,
+                color_for=_weather_color,
+            )
+    return pixels
+
+
+def render_animation_preview_frame(phase: int) -> PixelGrid:
+    """Render one all-family phase for the compact looping presentation GIF."""
+
+    if not 0 <= phase < FRAME_COUNT:
+        raise ValueError(f"animation preview phase outside 0..{FRAME_COUNT - 1}")
+    pixels = _blank(ANIMATION_PREVIEW_WIDTH, ANIMATION_PREVIEW_HEIGHT)
+    _draw_text(pixels, "RASTER 90 WEATHER MOTION", x=ANIMATION_PREVIEW_MARGIN, y=18)
+    _draw_text(
+        pixels,
+        "8 PHASES AT 4 FPS / 1 SECOND REST / PREVIEW LOOP ONLY",
+        x=ANIMATION_PREVIEW_MARGIN,
+        y=48,
+        scale=2,
+    )
+    for family_index, (weather_family, frames) in enumerate(
+        WEATHER_ANIMATION_FRAMES.items()
+    ):
+        column = family_index % ANIMATION_PREVIEW_COLUMNS
+        row = family_index // ANIMATION_PREVIEW_COLUMNS
+        cell_x = ANIMATION_PREVIEW_MARGIN + column * ANIMATION_PREVIEW_CELL_WIDTH
+        cell_y = ANIMATION_PREVIEW_HEADER + row * ANIMATION_PREVIEW_CELL_HEIGHT
+        _draw_text(
+            pixels,
+            weather_family.replace("_", " ").upper(),
+            x=cell_x,
+            y=cell_y,
+            scale=1,
+        )
+        _draw_icon_matrix(
+            pixels,
+            frames[phase],
+            x=cell_x,
+            y=cell_y + 24,
+            pitch=9,
+            lit=9,
+            color_for=_weather_color,
+        )
+    return pixels
+
+
 def render_state_sheet() -> PixelGrid:
     """Show truthful unavailable and stale treatments without semantic drift."""
 
@@ -384,7 +671,12 @@ def _matrix_markup(rows: Sequence[str]) -> str:
 
 def _html_document(images: Mapping[str, bytes]) -> bytes:
     image_data = {
-        name: "data:image/png;base64," + base64.b64encode(data).decode("ascii")
+        name: (
+            "data:image/gif;base64,"
+            if name.endswith(".gif")
+            else "data:image/png;base64,"
+        )
+        + base64.b64encode(data).decode("ascii")
         for name, data in images.items()
     }
     matrix_data = {
@@ -402,6 +694,10 @@ def _html_document(images: Mapping[str, bytes]) -> bytes:
         "unavailable": list(UNAVAILABLE_WEATHER_ICON),
         "weather_day": {str(index): list(rows) for index, rows in WEATHER_DAY.items()},
         "weather_night": {str(index): list(rows) for index, rows in WEATHER_NIGHT.items()},
+        "weather_animation": {
+            family: [list(rows) for rows in frames]
+            for family, frames in WEATHER_ANIMATION_FRAMES.items()
+        },
     }
     matrix_json = json.dumps(matrix_data, indent=2, sort_keys=True)
     battery_contract = ", ".join(
@@ -411,6 +707,8 @@ def _html_document(images: Mapping[str, bytes]) -> bytes:
     sections = [
         (UTILITY_SHEET_NAME, "Selected utility icons", "steps and battery are the only persistent utility tiles; battery shows all four icon tint states."),
         (WEATHER_SHEET_NAME, "Complete weather resolution", "Every WFF condition ID has a day and night mapping."),
+        (ANIMATION_PREVIEW_NAME, "Weather animation preview", "All promoted families loop together for inspection only: eight phases at 4 fps followed by a one-second resting gap. Runtime playback remains one-shot."),
+        (ANIMATION_SHEET_NAME, "Promoted weather animation", "Every fresh recognized weather family gets one eight-phase, four-fps on-visible gesture and returns to its static first frame."),
         (STATE_SHEET_NAME, "Truthful weather states", "Unavailable uses the neutral icon plus --; stale keeps a marker distinct from an unavailable value."),
         (MATRIX_SHEET_NAME, "16x16 storage / 15x15 drawable / solid 3x3 inspection", "The matrix views expose project-owned storage cells, the drawable field, and their physical tile expansion."),
         (NATIVE_FACE_NAME, "Native 466x466 face", "This is the deterministic runtime preview, not fresh emulator or physical-watch evidence."),
@@ -440,8 +738,9 @@ code {{ display:block; font:13px ui-monospace,monospace; line-height:1.2; white-
 <body><main>
 <h1>Raster 90 icon family</h1>
 <p class="note">Project-owned runtime-selected matrices. The Android bundle consumes
-<code>icons/raster90/family.py</code> directly; historical calendar, 8x8/12x12,
-and rejected step alternatives remain design-only controls.</p>
+<code>icons/raster90/family.py</code> and <code>icons/raster90/animation.py</code>
+directly; historical calendar, 8x8/12x12, and rejected step alternatives remain
+design-only controls.</p>
 <p class="note">Palette: {html.escape(json.dumps(dict(PALETTE), sort_keys=True))}</p>
 <p class="note">Battery icon tint contract: {html.escape(battery_contract)}. The
 percentage remains white and every state reuses the one existing battery resource.</p>
@@ -463,9 +762,19 @@ def expected_output_bytes() -> dict[str, bytes]:
 
     native = render_native_face()
     magnified = _scale_nearest(native, 2)
+    animation_preview = [
+        render_animation_preview_frame(phase) for phase in ANIMATION_PREVIEW_PHASES
+    ]
+    animation_preview_data = encode_gif(
+        animation_preview,
+        ANIMATION_PREVIEW_DELAYS,
+    )
+    _validate_animation_preview(animation_preview_data)
     images = {
         UTILITY_SHEET_NAME: encode_png(render_utility_sheet()),
         WEATHER_SHEET_NAME: encode_png(render_weather_sheet()),
+        ANIMATION_PREVIEW_NAME: animation_preview_data,
+        ANIMATION_SHEET_NAME: encode_png(render_animation_sheet()),
         STATE_SHEET_NAME: encode_png(render_state_sheet()),
         MATRIX_SHEET_NAME: encode_png(render_matrix_sheet()),
         NATIVE_FACE_NAME: encode_png(native),

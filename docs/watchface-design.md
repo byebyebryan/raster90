@@ -22,7 +22,9 @@ available weather at `15°C` and time-only Dozing. The later physical checkpoint
 at packaged runtime `4a90116` proves the refreshed static weather art and full
 interactive composition on the watch. Sustained physical AOD, perceived AMOLED
 and wrist-distance judgment, stale weather, low-battery tint branches, battery
-impact, and any animation or transient color event remain open work.
+impact, and any transient color event remain open work. The weather animation
+is now promoted into the current source tree, but fresh emulator and physical-
+device evidence for that animated tree remains open.
 
 ## Product identity
 
@@ -230,7 +232,7 @@ fiction rather than the current visual target:
 - No alpha blending, antialiasing, gradients, or partial cell brightness as a
   design technique.
 - A preferred animation rate of 2 fps and a hard creative ceiling of 4 fps.
-- No more than four frames or two seconds for an ordinary animation.
+- No more than eight frames or two seconds for an ordinary animation.
 - One animated region at a time.
 - No continuous animation in the resting state.
 - The indexed-color plane, battery state tint, and all animation are disabled in
@@ -302,7 +304,7 @@ corrupt information.
 Preferred characteristics:
 
 - 2 fps by default, up to 4 fps only when necessary.
-- Two to four authored sprite frames.
+- Four or eight authored sprite frames, with eight as the hard ceiling.
 - Hard cuts with no easing, fading, smooth rotation, or sub-cell motion.
 - `ON_VISIBLE`, minute, or hour boundaries as plausible triggers.
 - A stable resting frame before and after playback: monochrome base plus the
@@ -313,6 +315,18 @@ Preferred characteristics:
 WFF v2 supports event-controlled animated image sequences and explicit frame
 rates, so this constraint can be implemented directly rather than by asking a
 smooth renderer to imitate low frame rate.
+
+The selected production gesture uses the full eight-frame ceiling at 4 fps for
+two seconds. All 16 recognized day/night-resolved weather families have
+contextual source-cell motion: radial sun changes, star twinkle, rigid cloud
+travel, parallax haze/wind, replenished precipitation, or a staged lightning
+strike. WFF plays the sequence once on `ON_VISIBLE`, with `FIRST_FRAME` before
+and after playback. The existing static icon remains underneath, so phase 0,
+the post-play state, and the truthful fallback all share the same canonical
+matrix. The stale branch suppresses animation; unknown, unavailable, and
+ambient states are static by construction. Sequence resources use opaque black
+for unlit cells so each phase cleanly replaces the static icon underneath
+instead of accumulating transparent ghost pixels.
 
 ## Typography and iconography
 
@@ -643,7 +657,8 @@ the unavailable branch at 466×466 and 454×454, while the 2026-08-21 checkpoint
 proves the available branch using provider weather for a simulated location.
 The 2026-08-26 exact-tree physical checkpoint proves fresh live available night
 weather with the refreshed clear-night crescent; a real stale state remains
-open. A future event or storyboard must preserve this resting layout.
+open. The promoted weather gesture preserves this resting layout and is enabled
+only by the fresh branch.
 
 ## Exploratory concept mockups
 
@@ -699,8 +714,10 @@ The current implementation uses:
   default, with an explicit Fahrenheit override); and
 - an ambient variant that hides every non-time field.
 
-WFF v2 event controllers and `SequenceImages` remain feasible post-V1 tools,
-not part of the resting-face implementation.
+WFF v2 `AnimationController` and `SequenceImages` now implement the selected
+fresh-weather gesture. They remain outside the resting state: playback is one-
+shot, the controller restores phase 0, stale/unavailable/unknown branches are
+static, and the ambient parent hides the entire information group.
 
 Do not use smooth transform animation merely because WFF supports it. Do not
 invent notification access or data that a resource-only WFF face cannot obtain;
@@ -750,15 +767,19 @@ adds exact-tree interactive proof after the static weather refresh.
 9. Canonical project-owned square and clean-chamfer primary cuts, with the
    reviewed clean chamfer selected and freshly renderer-validated in native
    466×466 interactive and confirmed Dozing states.
+10. Canonical eight-phase weather motion for all 16 recognized day/night-
+    resolved families, generated into the WFF v2 resource surface and played
+    once on visibility for fresh data. Schema, deterministic-source, resource,
+    and memory gates are complete; emulator and physical-device capture remain
+    open.
 
 Later slices remain separately gated:
 
-10. Live-test stale weather after proving fresh available and truthful,
+11. Live-test stale weather after proving fresh available and truthful,
    header-free unavailable states.
-11. Complete physical-watch wearer, sustained-AOD, and battery validation and
+12. Complete physical-watch wearer, sustained-AOD, and battery validation and
     adjustment.
-12. Clean-chamfer and icon-family optical polish driven by physical wear.
-13. One on-visible low-frame-rate animation.
+13. Clean-chamfer and icon-family optical polish driven by physical wear.
 14. One rare color event.
 15. Optional complication/configuration work only after the identity is stable.
 
@@ -788,7 +809,8 @@ Later slices remain separately gated:
   Celsius preference/setting; the capture did not literally show `20°C`. These
   are separate provider/cache surfaces; the Raster 90 setting converts and
   labels its own WFF value but does not synchronize those readings.
-- Which single animation best introduces the face's personality.
+- Emulator and physical-watch validation of the promoted on-visible weather
+  animation, including trigger behavior, frame cadence, and return to rest.
 
 ## References
 

@@ -185,6 +185,297 @@
                       <Image resource="raster_weather_stale"/>
                     </PartImage>
                   </Compare>
+                  <Default>
+                    <!-- Fresh, recognized weather gets one contextual 2-second gesture on visibility. -->
+                    <Condition>
+                      <Expressions>
+                        <Expression name="weather_anim_clear">[WEATHER.CONDITION] == 1 || [WEATHER.CONDITION] == 8</Expression>
+                        <Expression name="weather_anim_cloudy">[WEATHER.CONDITION] == 2</Expression>
+                        <Expression name="weather_anim_fog">[WEATHER.CONDITION] == 3</Expression>
+                        <Expression name="weather_anim_heavy_rain">[WEATHER.CONDITION] == 4</Expression>
+                        <Expression name="weather_anim_heavy_snow">[WEATHER.CONDITION] == 5</Expression>
+                        <Expression name="weather_anim_rain">[WEATHER.CONDITION] == 6</Expression>
+                        <Expression name="weather_anim_snow">[WEATHER.CONDITION] == 7</Expression>
+                        <Expression name="weather_anim_thunderstorm">[WEATHER.CONDITION] == 9</Expression>
+                        <Expression name="weather_anim_sleet">[WEATHER.CONDITION] == 10</Expression>
+                        <Expression name="weather_anim_light_snow">[WEATHER.CONDITION] == 11</Expression>
+                        <Expression name="weather_anim_light_rain">[WEATHER.CONDITION] == 12</Expression>
+                        <Expression name="weather_anim_mist">[WEATHER.CONDITION] == 13</Expression>
+                        <Expression name="weather_anim_partly">[WEATHER.CONDITION] == 14</Expression>
+                        <Expression name="weather_anim_windy">[WEATHER.CONDITION] == 15</Expression>
+                      </Expressions>
+                      <Compare expression="weather_anim_clear">
+                        <Condition>
+                          <Expressions>
+                            <Expression name="weather_anim_clear_is_day">[WEATHER.IS_DAY]</Expression>
+                          </Expressions>
+                          <Compare expression="weather_anim_clear_is_day">
+                            <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_clear_day">
+                              <Thumbnail resource="raster_weather_anim_clear_day_00"/>
+                              <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                              <SequenceImages loopCount="1" frameRate="4">
+                                <Image resource="raster_weather_anim_clear_day_00"/>
+                                <Image resource="raster_weather_anim_clear_day_01"/>
+                                <Image resource="raster_weather_anim_clear_day_02"/>
+                                <Image resource="raster_weather_anim_clear_day_03"/>
+                                <Image resource="raster_weather_anim_clear_day_04"/>
+                                <Image resource="raster_weather_anim_clear_day_05"/>
+                                <Image resource="raster_weather_anim_clear_day_06"/>
+                                <Image resource="raster_weather_anim_clear_day_07"/>
+                              </SequenceImages>
+                            </PartAnimatedImage>
+                          </Compare>
+                          <Default>
+                            <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_clear_night">
+                              <Thumbnail resource="raster_weather_anim_clear_night_00"/>
+                              <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                              <SequenceImages loopCount="1" frameRate="4">
+                                <Image resource="raster_weather_anim_clear_night_00"/>
+                                <Image resource="raster_weather_anim_clear_night_01"/>
+                                <Image resource="raster_weather_anim_clear_night_02"/>
+                                <Image resource="raster_weather_anim_clear_night_03"/>
+                                <Image resource="raster_weather_anim_clear_night_04"/>
+                                <Image resource="raster_weather_anim_clear_night_05"/>
+                                <Image resource="raster_weather_anim_clear_night_06"/>
+                                <Image resource="raster_weather_anim_clear_night_07"/>
+                              </SequenceImages>
+                            </PartAnimatedImage>
+                          </Default>
+                        </Condition>
+                      </Compare>
+                      <Compare expression="weather_anim_cloudy">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_cloudy">
+                          <Thumbnail resource="raster_weather_anim_cloudy_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_cloudy_00"/>
+                            <Image resource="raster_weather_anim_cloudy_01"/>
+                            <Image resource="raster_weather_anim_cloudy_02"/>
+                            <Image resource="raster_weather_anim_cloudy_03"/>
+                            <Image resource="raster_weather_anim_cloudy_04"/>
+                            <Image resource="raster_weather_anim_cloudy_05"/>
+                            <Image resource="raster_weather_anim_cloudy_06"/>
+                            <Image resource="raster_weather_anim_cloudy_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_fog">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_fog">
+                          <Thumbnail resource="raster_weather_anim_fog_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_fog_00"/>
+                            <Image resource="raster_weather_anim_fog_01"/>
+                            <Image resource="raster_weather_anim_fog_02"/>
+                            <Image resource="raster_weather_anim_fog_03"/>
+                            <Image resource="raster_weather_anim_fog_04"/>
+                            <Image resource="raster_weather_anim_fog_05"/>
+                            <Image resource="raster_weather_anim_fog_06"/>
+                            <Image resource="raster_weather_anim_fog_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_heavy_rain">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_heavy_rain">
+                          <Thumbnail resource="raster_weather_anim_heavy_rain_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_heavy_rain_00"/>
+                            <Image resource="raster_weather_anim_heavy_rain_01"/>
+                            <Image resource="raster_weather_anim_heavy_rain_02"/>
+                            <Image resource="raster_weather_anim_heavy_rain_03"/>
+                            <Image resource="raster_weather_anim_heavy_rain_04"/>
+                            <Image resource="raster_weather_anim_heavy_rain_05"/>
+                            <Image resource="raster_weather_anim_heavy_rain_06"/>
+                            <Image resource="raster_weather_anim_heavy_rain_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_heavy_snow">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_heavy_snow">
+                          <Thumbnail resource="raster_weather_anim_heavy_snow_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_heavy_snow_00"/>
+                            <Image resource="raster_weather_anim_heavy_snow_01"/>
+                            <Image resource="raster_weather_anim_heavy_snow_02"/>
+                            <Image resource="raster_weather_anim_heavy_snow_03"/>
+                            <Image resource="raster_weather_anim_heavy_snow_04"/>
+                            <Image resource="raster_weather_anim_heavy_snow_05"/>
+                            <Image resource="raster_weather_anim_heavy_snow_06"/>
+                            <Image resource="raster_weather_anim_heavy_snow_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_rain">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_rain">
+                          <Thumbnail resource="raster_weather_anim_rain_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_rain_00"/>
+                            <Image resource="raster_weather_anim_rain_01"/>
+                            <Image resource="raster_weather_anim_rain_02"/>
+                            <Image resource="raster_weather_anim_rain_03"/>
+                            <Image resource="raster_weather_anim_rain_04"/>
+                            <Image resource="raster_weather_anim_rain_05"/>
+                            <Image resource="raster_weather_anim_rain_06"/>
+                            <Image resource="raster_weather_anim_rain_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_snow">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_snow">
+                          <Thumbnail resource="raster_weather_anim_snow_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_snow_00"/>
+                            <Image resource="raster_weather_anim_snow_01"/>
+                            <Image resource="raster_weather_anim_snow_02"/>
+                            <Image resource="raster_weather_anim_snow_03"/>
+                            <Image resource="raster_weather_anim_snow_04"/>
+                            <Image resource="raster_weather_anim_snow_05"/>
+                            <Image resource="raster_weather_anim_snow_06"/>
+                            <Image resource="raster_weather_anim_snow_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_thunderstorm">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_thunderstorm">
+                          <Thumbnail resource="raster_weather_anim_thunderstorm_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_thunderstorm_00"/>
+                            <Image resource="raster_weather_anim_thunderstorm_01"/>
+                            <Image resource="raster_weather_anim_thunderstorm_02"/>
+                            <Image resource="raster_weather_anim_thunderstorm_03"/>
+                            <Image resource="raster_weather_anim_thunderstorm_04"/>
+                            <Image resource="raster_weather_anim_thunderstorm_05"/>
+                            <Image resource="raster_weather_anim_thunderstorm_06"/>
+                            <Image resource="raster_weather_anim_thunderstorm_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_sleet">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_sleet">
+                          <Thumbnail resource="raster_weather_anim_sleet_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_sleet_00"/>
+                            <Image resource="raster_weather_anim_sleet_01"/>
+                            <Image resource="raster_weather_anim_sleet_02"/>
+                            <Image resource="raster_weather_anim_sleet_03"/>
+                            <Image resource="raster_weather_anim_sleet_04"/>
+                            <Image resource="raster_weather_anim_sleet_05"/>
+                            <Image resource="raster_weather_anim_sleet_06"/>
+                            <Image resource="raster_weather_anim_sleet_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_light_snow">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_light_snow">
+                          <Thumbnail resource="raster_weather_anim_light_snow_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_light_snow_00"/>
+                            <Image resource="raster_weather_anim_light_snow_01"/>
+                            <Image resource="raster_weather_anim_light_snow_02"/>
+                            <Image resource="raster_weather_anim_light_snow_03"/>
+                            <Image resource="raster_weather_anim_light_snow_04"/>
+                            <Image resource="raster_weather_anim_light_snow_05"/>
+                            <Image resource="raster_weather_anim_light_snow_06"/>
+                            <Image resource="raster_weather_anim_light_snow_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_light_rain">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_light_rain">
+                          <Thumbnail resource="raster_weather_anim_light_rain_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_light_rain_00"/>
+                            <Image resource="raster_weather_anim_light_rain_01"/>
+                            <Image resource="raster_weather_anim_light_rain_02"/>
+                            <Image resource="raster_weather_anim_light_rain_03"/>
+                            <Image resource="raster_weather_anim_light_rain_04"/>
+                            <Image resource="raster_weather_anim_light_rain_05"/>
+                            <Image resource="raster_weather_anim_light_rain_06"/>
+                            <Image resource="raster_weather_anim_light_rain_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_mist">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_mist">
+                          <Thumbnail resource="raster_weather_anim_mist_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_mist_00"/>
+                            <Image resource="raster_weather_anim_mist_01"/>
+                            <Image resource="raster_weather_anim_mist_02"/>
+                            <Image resource="raster_weather_anim_mist_03"/>
+                            <Image resource="raster_weather_anim_mist_04"/>
+                            <Image resource="raster_weather_anim_mist_05"/>
+                            <Image resource="raster_weather_anim_mist_06"/>
+                            <Image resource="raster_weather_anim_mist_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                      <Compare expression="weather_anim_partly">
+                        <Condition>
+                          <Expressions>
+                            <Expression name="weather_anim_partly_is_day">[WEATHER.IS_DAY]</Expression>
+                          </Expressions>
+                          <Compare expression="weather_anim_partly_is_day">
+                            <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_partly_day">
+                              <Thumbnail resource="raster_weather_anim_partly_day_00"/>
+                              <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                              <SequenceImages loopCount="1" frameRate="4">
+                                <Image resource="raster_weather_anim_partly_day_00"/>
+                                <Image resource="raster_weather_anim_partly_day_01"/>
+                                <Image resource="raster_weather_anim_partly_day_02"/>
+                                <Image resource="raster_weather_anim_partly_day_03"/>
+                                <Image resource="raster_weather_anim_partly_day_04"/>
+                                <Image resource="raster_weather_anim_partly_day_05"/>
+                                <Image resource="raster_weather_anim_partly_day_06"/>
+                                <Image resource="raster_weather_anim_partly_day_07"/>
+                              </SequenceImages>
+                            </PartAnimatedImage>
+                          </Compare>
+                          <Default>
+                            <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_partly_night">
+                              <Thumbnail resource="raster_weather_anim_partly_night_00"/>
+                              <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                              <SequenceImages loopCount="1" frameRate="4">
+                                <Image resource="raster_weather_anim_partly_night_00"/>
+                                <Image resource="raster_weather_anim_partly_night_01"/>
+                                <Image resource="raster_weather_anim_partly_night_02"/>
+                                <Image resource="raster_weather_anim_partly_night_03"/>
+                                <Image resource="raster_weather_anim_partly_night_04"/>
+                                <Image resource="raster_weather_anim_partly_night_05"/>
+                                <Image resource="raster_weather_anim_partly_night_06"/>
+                                <Image resource="raster_weather_anim_partly_night_07"/>
+                              </SequenceImages>
+                            </PartAnimatedImage>
+                          </Default>
+                        </Condition>
+                      </Compare>
+                      <Compare expression="weather_anim_windy">
+                        <PartAnimatedImage x="0" y="0" width="48" height="48" name="weather_animation_windy">
+                          <Thumbnail resource="raster_weather_anim_windy_00"/>
+                          <AnimationController play="ON_VISIBLE" repeat="FALSE" loopCount="1" resumePlayBack="FALSE" beforePlaying="FIRST_FRAME" afterPlaying="FIRST_FRAME"/>
+                          <SequenceImages loopCount="1" frameRate="4">
+                            <Image resource="raster_weather_anim_windy_00"/>
+                            <Image resource="raster_weather_anim_windy_01"/>
+                            <Image resource="raster_weather_anim_windy_02"/>
+                            <Image resource="raster_weather_anim_windy_03"/>
+                            <Image resource="raster_weather_anim_windy_04"/>
+                            <Image resource="raster_weather_anim_windy_05"/>
+                            <Image resource="raster_weather_anim_windy_06"/>
+                            <Image resource="raster_weather_anim_windy_07"/>
+                          </SequenceImages>
+                        </PartAnimatedImage>
+                      </Compare>
+                    </Condition>
+                  </Default>
                 </Condition>
               </Group>
             </Compare>

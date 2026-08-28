@@ -58,6 +58,10 @@ skin. The constraints are the product.
 - **A restrained resting face.** Weather remains the indexed-color plane, while
   the battery icon gains a coarse state tint below 51%. Date, time, steps, and
   healthy battery remain white; ambient mode is time only.
+- **One localized gesture.** Fresh recognized weather plays one eight-frame,
+  four-fps contextual animation when it becomes visible, then returns exactly
+  to the static icon. Stale, unavailable, unknown, and ambient weather stay
+  still.
 
 ## Current state
 
@@ -72,6 +76,13 @@ AOD, low-battery color branches, battery impact, wearer-distance judgment, and
 a real stale-weather state remain open. See [Device Setup](docs/device-setup.md)
 for the evidence and exact limitations.
 
+The current source tree promotes the reviewed weather-animation study into the
+resource-only WFF bundle. Its exact matrices, generated frame assets, WFF v2
+controller, schema validation, and memory budget are repository-checked; this
+newer animated tree does not yet have a retained emulator or physical-device
+capture, so the `4a90116` physical checkpoint above remains historical static-
+runtime evidence.
+
 ## Authored display system
 
 The watch-face APK packages only the glyphs and sprites its WFF expressions can
@@ -85,6 +96,14 @@ emit. The complete project-owned families remain reviewable outside the module.
   <img src="icons/raster90/preview/icon-family-weather-day-night-sheet.png" width="1248" alt="Raster 90 day and night weather icon family covering all 16 WFF conditions">
 </p>
 
+<p align="center">
+  <img src="icons/raster90/preview/icon-family-weather-animation-preview.gif" width="744" alt="Looping presentation preview of all Raster 90 weather animations">
+</p>
+
+<p align="center">
+  <img src="icons/raster90/preview/icon-family-weather-animation-sheet.png" width="900" alt="Raster 90 weather animation sheet showing eight phases for every animated weather family">
+</p>
+
 The weather sheet covers all 16 WFF conditions in day and night families. The
 refreshed static family uses outlined crescents, distinct fog and mist bars,
 upward wind curls, stepped rain density, complete staggered snowflakes, and a
@@ -93,6 +112,12 @@ footprint steps tile, battery, neutral unavailable weather, and a compact stale
 marker. Every selected icon is authored in a 15×15 drawable field centered on
 cell `(7,7)` inside its 16×16 storage matrix, then rendered as solid 3×3 cells in a stable
 48×48 resource tile.
+
+The promoted motion set covers all 16 recognized day/night-resolved weather
+families. Each sequence uses eight hard-cut source-cell frames at 4 fps, starts
+from the corresponding static matrix, plays once on visibility, and restores
+that same matrix. There is no continuous resting animation, and truthful stale
+or unavailable states never animate.
 
 ## Current targets
 
@@ -108,7 +133,7 @@ cell `(7,7)` inside its 16×16 storage matrix, then rendered as solid 3×3 cells
 |---|---|
 | Packaged WFF runtime | [`watchfaces/raster90/`](watchfaces/raster90/) |
 | Bitmap type source and preview | [`fonts/raster90/`](fonts/raster90/README.md) |
-| Icon source and preview | [`icons/raster90/`](icons/raster90/README.md) |
+| Icon and weather-animation source/preview | [`icons/raster90/`](icons/raster90/README.md) |
 | Product and visual contract | [Watch Face Design Direction](docs/watchface-design.md) |
 | Devices, deployment, and validation | [Device Setup](docs/device-setup.md) |
 | Module and evidence boundaries | [Repository Layout](docs/repository-layout.md) |
@@ -158,5 +183,7 @@ rtk python3 -B tools/render_raster90_font_family.py --check
 rtk python3 -B tools/render_raster90_icon_family.py
 rtk python3 -B tools/render_raster90_icon_family.py --check
 ```
-The presentations write complete font/icon sheets, native-scale specimens, and
-self-contained local `preview/index.html` files.
+The generator checks the complete 215-PNG runtime surface, including 128
+promoted weather-animation frames. The presentations write complete font/icon
+sheets, native-scale specimens, a looping presentation GIF, the exact eight-
+phase weather sheet, and self-contained local `preview/index.html` files.

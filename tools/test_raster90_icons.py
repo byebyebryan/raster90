@@ -442,14 +442,14 @@ class Raster90IconFamilyTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual(family.WEATHER_SPRITES[name][11], expected_base)
 
-    def test_runtime_binds_canonical_sources_and_surface_is_87_pngs(self) -> None:
+    def test_runtime_binds_canonical_sources_and_complete_png_surface(self) -> None:
         self.assertIs(generator.ICONS["steps"], family.APPROVED_STEP_ICON)
         self.assertIs(generator.ICONS["battery"], family.BATTERY_ICON)
         self.assertIs(generator.ICONS["weather"], family.WEATHER_DAY[14])
         self.assertIs(generator.WEATHER_DAY, family.WEATHER_DAY)
         self.assertIs(generator.WEATHER_NIGHT, family.WEATHER_NIGHT)
         expected = generator._expected_pngs()
-        self.assertEqual(len(expected), 87)
+        self.assertEqual(len(expected), 215)
         self.assertEqual(
             expected["raster_icon_steps.png"],
             generator.encode_png(generator._utility_pixels(family.APPROVED_STEP_ICON)),
@@ -480,9 +480,14 @@ class Raster90IconFamilyTests(unittest.TestCase):
             width, height, pixels = generator.decode_png(data)
             self.assertEqual((width, height), (generator.ICON_SIZE, generator.ICON_SIZE), name)
             gutter_start = (family.LAST_DRAWABLE_CELL + 1) * generator.ICON_PITCH
+            expected_gutter = (
+                generator.OPAQUE_BLACK
+                if name.startswith("raster_weather_anim_")
+                else generator.TRANSPARENT
+            )
             self.assertTrue(
                 all(
-                    pixels[y][x] == generator.TRANSPARENT
+                    pixels[y][x] == expected_gutter
                     for y in range(height)
                     for x in range(gutter_start, width)
                 ),
@@ -490,7 +495,7 @@ class Raster90IconFamilyTests(unittest.TestCase):
             )
             self.assertTrue(
                 all(
-                    pixels[y][x] == generator.TRANSPARENT
+                    pixels[y][x] == expected_gutter
                     for y in range(gutter_start, height)
                     for x in range(width)
                 ),
@@ -509,6 +514,8 @@ class Raster90IconFamilyTests(unittest.TestCase):
             {
                 presentation.UTILITY_SHEET_NAME,
                 presentation.WEATHER_SHEET_NAME,
+                presentation.ANIMATION_PREVIEW_NAME,
+                presentation.ANIMATION_SHEET_NAME,
                 presentation.STATE_SHEET_NAME,
                 presentation.MATRIX_SHEET_NAME,
                 presentation.NATIVE_FACE_NAME,
@@ -521,9 +528,13 @@ class Raster90IconFamilyTests(unittest.TestCase):
                 width, height, _pixels = generator.decode_png(data)
                 self.assertGreater(width, 0, name)
                 self.assertGreater(height, 0, name)
+        presentation._validate_animation_preview(
+            expected[presentation.ANIMATION_PREVIEW_NAME]
+        )
         document = expected[presentation.HTML_NAME].decode("utf-8")
         self.assertIn("const ICON_FAMILY_DATA", document)
         self.assertIn("data:image/png;base64,", document)
+        self.assertIn("data:image/gif;base64,", document)
         self.assertIn("project-owned", document)
         self.assertIn("Battery icon tint contract", document)
         for state_name, _minimum, _maximum, color in family.BATTERY_COLOR_BANDS:

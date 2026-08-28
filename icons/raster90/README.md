@@ -10,6 +10,10 @@ Android resources or a replacement for the historical design studies.
   WFF condition IDs with day/night resolution maps, the selected steps and
   battery tiles, the neutral unavailable-weather icon, and the 2×2 stale
   marker.
+- `animation.py` is authoritative for the promoted eight-phase motion of all
+  16 recognized day/night-resolved weather families. Every phase stays inside
+  the same 15×15 drawable field, and phase 0 is byte-equivalent to its selected
+  static matrix.
 - The approved steps alias is `four-toe-vertical`: each footprint has a closed
   tapered sole, one 1×2 vertical big-toe mark, and three separated 1×1 toe
   marks. `SELECTED_UTILITY_ICONS` contains only `steps` and `battery`.
@@ -39,6 +43,11 @@ Android resources or a replacement for the historical design studies.
   coarse state tint (`>50%` white, `>25%` yellow, `>10%` orange, `0–10%` red).
   Stale is a monochrome marker; unavailable weather is the neutral icon plus
   the truthful `--` value in the WFF branch.
+- Fresh recognized weather alone receives one two-second, 4-fps `ON_VISIBLE`
+  gesture. The controller does not repeat and restores the first frame after
+  playback. Stale, unavailable, unknown, and ambient presentations remain
+  static. Runtime sequence PNGs use an opaque black field behind the indexed
+  pixels so moving cells replace, rather than reveal, the static icon below.
 
 Calendar art, old 8×8/12×12 controls, the historical solid Footprints B step
 matrix, and rejected outline candidates remain in `design/raster90/` as
@@ -47,14 +56,17 @@ the packaged resource surface.
 
 ## Stable API and regeneration
 
-Runtime and study code should import the stable aliases from `family.py`:
+Static runtime and study code should import the stable aliases from `family.py`:
 `PALETTE`, `BATTERY_COLOR_BANDS`, `SELECTED_UTILITY_ICONS`,
 `APPROVED_STEP_ICON`, `BATTERY_ICON`, `WEATHER_DAY`, `WEATHER_NIGHT`,
 `UNAVAILABLE_WEATHER_ICON`, and `STALE_MARKER`. The runtime asset generator
 imports these mappings directly;
 the design modules retain compatibility aliases only for historical renderers.
+Animation consumers should import `WEATHER_ANIMATION_FRAMES`, `FRAME_COUNT`,
+`FRAME_RATE`, and `animation_resource_name` from `animation.py`; the promoted
+source no longer depends on an ignored study renderer.
 
-Regenerate and byte-check both the tracked icon presentation and the 87 PNG
+Regenerate and byte-check both the tracked icon presentation and the 215 PNG
 runtime surface from the repository root:
 
 ```sh
@@ -64,11 +76,13 @@ rtk python3 -B tools/generate_raster90_assets.py
 rtk python3 -B tools/generate_raster90_assets.py --check
 ```
 
-`preview/index.html` is self-contained: it embeds the generated sheets, native
-466×466 face, 2× magnified face, source matrices, and palette without external
-URLs. Presentation-only matrix views use a visible blue-gray fill behind the
-15×15 drawable field while leaving the trailing storage row and column black;
-this tint is not packaged into runtime assets. The PNG sheets are deterministic
-and should be regenerated rather than edited by hand. Their presentation is
-review evidence; it does not claim a fresh emulator or physical-watch
-validation.
+`preview/index.html` is self-contained: it embeds the generated static sheets,
+the looping animation GIF, the exact eight-phase sheet, native 466×466 face, 2×
+magnified face, source matrices, and palette without external URLs. The GIF's
+one-second resting gap and infinite loop are presentation-only; the WFF runtime
+still plays once. Presentation-only matrix views use a visible blue-gray fill
+behind the 15×15 drawable field while leaving the trailing storage row and
+column black; this tint is not packaged into runtime assets. All outputs are
+deterministic and should be regenerated rather than edited by hand. Their
+presentation is review evidence; it does not claim a fresh emulator or
+physical-watch validation.

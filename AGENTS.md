@@ -52,8 +52,10 @@ app.
   15 are a mandatory
   trailing transparent gutter, so the visual center is cell `(7,7)` and no
   resting or animated lit cell may enter that final row or column. The generator
-  still renders solid 3×3 cells into stable 48×48 WFF tiles; the source gutter
-  becomes the final transparent three-pixel row and column. The persistent
+  still renders solid 3×3 cells into stable 48×48 WFF tiles. Static resources
+  keep a transparent final three-pixel row and column; animation resources use
+  opaque black for every unlit cell, including that source gutter, so a moving
+  frame cleanly replaces the static icon below it. The persistent
   resting icons are weather, steps, and battery. The calendar icon is intentionally
   removed; `SAT 15 AUG` is centered as text because it is already unambiguous.
   The selected step icon is the direct-authored `four-toe-vertical` pair of
@@ -68,11 +70,17 @@ app.
   straight fog/mist bars, upward wind curls, 2/4/6 identical rain strokes,
   2/3/5 complete staggered snowflakes, and alternating two-rain/two-snow sleet.
   Bare cloudy uses its own vertically centered cloud while fog and precipitation
-  retain the shared top anchor. The light/normal/heavy rain fields sit one cell
-  left of their earlier positions; normal/heavy snow sit one cell right. Sleet's
+  retain the shared closed cloud cap and top anchor. The light/normal/heavy rain
+  fields sit one cell left of their earlier positions; normal/heavy snow sit one
+  cell right. Sleet's
   upper-left rain stroke is deliberately raised one cell and pulled two cells
   left while the lower-right stroke remains low/right. WFF IDs 11–13 resolve
   distinctly to light snow, light rain, and mist.
+- The promoted weather motion uses eight exact source-cell frames at 4 fps for
+  each of the 16 recognized day/night-resolved families. Fresh recognized data
+  plays one `ON_VISIBLE` sequence and returns to `FIRST_FRAME`; stale,
+  unavailable, unknown, out-of-range, and ambient presentations remain static.
+  Do not restore the study GIF's continuous loop as runtime behavior.
 - The interactive composition omits seconds and uses a static colon. Its
   fixed information set is time, date, current weather, step count, and battery.
   The available-weather resting rows are `[weather] 21°C`, centered `SAT 15 AUG`,
@@ -517,8 +525,10 @@ rtk adb -s <phone-serial> shell wm density
   weather were separate gates at that checkpoint. The later 2026-08-26 physical
   checkpoint proves the refreshed exact tree interactively; stale weather and
   sustained physical AOD remain open.
-- [ ] Design post-V1 animation and rare color events separately from the stable
-  resting face.
+- [x] Design and integrate the post-V1 weather animation separately from the
+  stable resting face; fresh emulator and physical-device validation remain
+  open.
+- [ ] Design rare color events separately from the stable resting face.
 - [x] Pair the physical OnePlus Watch 3 over Wi-Fi and record its live OS/API.
 - [x] Pair the physical OnePlus 13 over Wi-Fi and validate the `phone16` API 36
   Google Play emulator target.

@@ -40,6 +40,10 @@ from icons.raster90.family import (  # noqa: E402  (canonical icon source)
     WEATHER_DAY,
     WEATHER_NIGHT,
 )
+from icons.raster90.animation import (  # noqa: E402  (canonical motion source)
+    WEATHER_ANIMATION_FRAMES,
+    animation_resource_name,
+)
 from fonts.raster90.family import (  # noqa: E402  (authoritative font source)
     PRIMARY_COLON,
     PRIMARY_COLON_CELLS,
@@ -372,6 +376,15 @@ def _weather_pixels(rows: Sequence[str]) -> PixelGrid:
     )
 
 
+def _weather_animation_pixels(rows: Sequence[str]) -> PixelGrid:
+    """Render an opaque replacement tile so the static icon cannot ghost through."""
+
+    return [
+        [OPAQUE_BLACK if pixel == TRANSPARENT else pixel for pixel in row]
+        for row in _weather_pixels(rows)
+    ]
+
+
 def _utility_pixels(rows: Sequence[str]) -> PixelGrid:
     _validate_rows(
         "utility icon",
@@ -459,6 +472,11 @@ def _expected_pngs() -> dict[str, bytes]:
         assets[f"{_weather_name('night', condition)}.png"] = encode_png(
             _weather_pixels(rows)
         )
+    for family, frames in WEATHER_ANIMATION_FRAMES.items():
+        for phase, rows in enumerate(frames):
+            assets[f"{animation_resource_name(family, phase)}.png"] = encode_png(
+                _weather_animation_pixels(rows)
+            )
     for name, asset_name in UTILITY_ASSETS.items():
         assets[f"{asset_name}.png"] = encode_png(_utility_pixels(ICONS[name]))
     assets["raster_weather_stale.png"] = encode_png(_stale_pixels())
@@ -595,6 +613,8 @@ def _asset_role(name: str) -> str:
         return "preview"
     if name == "raster_weather_stale.png":
         return "stale"
+    if name.startswith("raster_weather_anim_"):
+        return "weather_animation"
     if name.startswith("raster_weather_"):
         return "weather"
     if name.startswith("raster_time_"):
@@ -609,6 +629,9 @@ def _check_palette(name: str, width: int, height: int, pixels: PixelGrid) -> Non
     if role == "preview":
         allowed = {OPAQUE_BLACK, OPAQUE_WHITE, *PALETTE.values()}
         require_opaque = True
+    elif role == "weather_animation":
+        allowed = {OPAQUE_BLACK, *PALETTE.values()}
+        require_opaque = True
     elif role == "weather":
         allowed = {TRANSPARENT, *PALETTE.values()}
         require_opaque = False
@@ -620,7 +643,7 @@ def _check_palette(name: str, width: int, height: int, pixels: PixelGrid) -> Non
             if pixel[3] not in (0, 255):
                 raise ValueError(f"{name}: alpha must be binary, got {pixel[3]}")
             if require_opaque and pixel[3] != 255:
-                raise ValueError(f"{name}: preview must be fully opaque")
+                raise ValueError(f"{name}: {role} must be fully opaque")
             if pixel not in allowed:
                 rgba = "#%02X%02X%02X%02X" % pixel
                 raise ValueError(f"{name}: disallowed palette value {rgba}")
@@ -637,17 +660,19 @@ def _check_palette(name: str, width: int, height: int, pixels: PixelGrid) -> Non
         ),
         "icon": (ICON_SIZE, ICON_SIZE),
         "weather": (WEATHER_SIZE, WEATHER_SIZE),
+        "weather_animation": (WEATHER_SIZE, WEATHER_SIZE),
         "stale": (2 * ICON_PITCH, 2 * ICON_PITCH),
     }[role]
     if (width, height) != expected_size:
         raise ValueError(f"{name}: expected {expected_size[0]}x{expected_size[1]}, got {width}x{height}")
-    if role in {"icon", "weather"}:
+    if role in {"icon", "weather", "weather_animation"}:
         gutter_start = (LAST_DRAWABLE_CELL + 1) * ICON_PITCH
         gutter_pixels = (
             [pixels[y][x] for y in range(height) for x in range(gutter_start, width)]
             + [pixels[y][x] for y in range(gutter_start, height) for x in range(width)]
         )
-        if any(pixel != TRANSPARENT for pixel in gutter_pixels):
+        expected_gutter = OPAQUE_BLACK if role == "weather_animation" else TRANSPARENT
+        if any(pixel != expected_gutter for pixel in gutter_pixels):
             raise ValueError(f"{name}: trailing 3-pixel gutter is not empty")
 
 

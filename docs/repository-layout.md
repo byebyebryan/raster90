@@ -53,8 +53,9 @@ create preemptively.
 - Watch Face Format v2, `minSdk=34`, `compileSdk=35`, `targetSdk=35`.
 - Resource-only with `android:hasCode="false"` and Kotlin disabled.
 - Must not contain application services or depend on future code modules.
-- Generated bitmap-font glyphs, weather sprites, and the picker preview live in
-  `res/drawable-nodpi`; their source matrices do not live inside the module.
+- Generated bitmap-font glyphs, static weather sprites, weather-animation
+  frames, and the picker preview live in `res/drawable-nodpi`; their source
+  matrices do not live inside the module.
 
 ### `wear-apps/<name>` (future Raster 90 module)
 
@@ -96,15 +97,22 @@ module.
   retains calendar,
   resolution, and other historical controls while rebinding selected aliases
   for comparison renderers.
+- `icons/raster90/animation.py` is the authoritative source for the eight
+  reviewed source-cell phases of all 16 recognized day/night-resolved weather
+  families. Phase 0 is the selected static matrix; the 15×15 drawable boundary
+  and promoted frameset hash are validated at import and in focused tests.
 - `tools/generate_raster90_assets.py` is the sole deterministic producer and
-  checker for the 87 packaged/preview PNGs; it consumes only the secondary
-  runtime subset and the complete primary 0-9/colon surface.
+  checker for the 215 packaged/preview PNGs, including 128 opaque replacement
+  frames for the weather sequences; it consumes only promoted icon/animation
+  sources, the secondary runtime subset, and the complete primary 0-9/colon
+  surface.
 - `tools/render_raster90_font_family.py` produces and checks the tracked,
   self-contained family overview and specimen sheets under
   `fonts/raster90/preview/`.
 - `tools/render_raster90_icon_family.py` produces and checks the tracked,
-  self-contained selected icon/weather/state/matrix and native/magnified face
-  sheets under `icons/raster90/preview/`.
+  self-contained selected icon/weather/state/matrix, looping weather preview,
+  exact eight-phase animation, and native/magnified face sheets under
+  `icons/raster90/preview/`.
 - `tools/render_raster90_icon_resolution_studies.py` produces ignored,
   deterministic comparison sheets and full-face mocks; it does not change the
   watch-face module.
