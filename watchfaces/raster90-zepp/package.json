@@ -1,0 +1,20 @@
+{
+  "name": "@raster90/zepp-balance",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Raster 90 static Zepp OS watch face for Amazfit Balance",
+  "scripts": {
+    "generate": "python3 -B ../../tools/generate_raster90_zepp_assets.py",
+    "generate:check": "python3 -B ../../tools/generate_raster90_zepp_assets.py --check",
+    "test": "python3 -B tests/test_generate_raster90_zepp_assets.py",
+    "build": "npm run generate && zeus build --target \"Amazfit Balance\"",
+    "build:check": "npm run generate:check && zeus build --target \"Amazfit Balance\"",
+    "check": "npm test && npm run build:check"
+  },
+  "_moduleAliases": {
+    "zeppos-app-utils": "node_modules/@zeppos/zeus-cli/private-modules/zeppos-app-utils"
+  },
+  "devDependencies": {
+    "@zeppos/zeus-cli": "1.9.3"
+  }
+}

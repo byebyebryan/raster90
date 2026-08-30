@@ -25,6 +25,10 @@ __pycache__/
 *.idsig
 /outputs/
 
+# Zepp local tooling/build output
+watchfaces/raster90-zepp/node_modules/
+watchfaces/raster90-zepp/dist/
+
 # Local environment, logs, and diagnostics
 .env
 .env.*

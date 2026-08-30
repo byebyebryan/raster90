@@ -1,12 +1,34 @@
 # Device Setup and Verification
 
-Live verification record for the physical OnePlus 13, physical OnePlus Watch 3,
-and local phone and Wear OS emulators. Physical-device pairing and identity
-baselines were checked 2026-08-15. The tracked runtime received a simulated-
-weather emulator checkpoint on 2026-08-21 and a fresh physical interactive
-checkpoint on 2026-08-26 after the static weather-icon refresh. Sustained
-physical AOD, low-battery color branches, wearer judgment, battery impact, and
-stale-weather evidence remain separate gates.
+Live verification record for the original Amazfit Balance, physical OnePlus
+13, physical OnePlus Watch 3, and local phone and Wear OS emulators. The
+Android physical-device pairing and identity baselines were checked
+2026-08-15. The WFF runtime received a simulated-weather emulator checkpoint
+on 2026-08-21 and a fresh physical interactive checkpoint on 2026-08-26 after
+the static weather-icon refresh. The separate Zepp OS port received its first
+physical interactive checkpoint on 2026-08-29. Sustained physical AOD,
+low-battery color branches, wearer judgment, battery impact, and stale-weather
+evidence remain separate gates.
+
+## Physical Amazfit Balance
+
+| Property | Checkpoint value |
+|---|---|
+| Product | Amazfit Balance (original) |
+| Zepp API level | 307 |
+| Firmware | `3.28.8.1` |
+| Display target | Native 480×480 round canvas |
+| Raster 90 app ID | `1125469` |
+| Deployment | Zepp App developer-mode QR preview |
+| Evidence | Owner-reported device identity and owner-provided 480×480 screenshot, 2026-08-29 |
+
+The first physical checkpoint proves the static Zepp package's interactive
+resting layout: native weather with `15°C`, complete date and time, fixed-width
+`00000` steps, and `61%` battery. It does not prove AOD, long-term refresh,
+power impact, 12/24-hour behavior, or the subsequent metadata-only
+debug-disabled build. Package architecture, exact screenshot hash, build
+commands, and remaining acceptance gates are recorded in the
+[Zepp package README](../watchfaces/raster90-zepp/README.md).
 
 ## Physical OnePlus 13
 

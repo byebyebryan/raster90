@@ -3,8 +3,8 @@
 ## Decision
 
 Use the dedicated Raster 90 product repository rooted at
-`/home/bryan/code/raster90`. Separate APK/AAB packaging requirements remain
-module boundaries within this repository.
+`/home/bryan/code/raster90`. Platform-specific packaging requirements remain
+independent boundaries within this repository.
 
 This repository may later contain Raster 90-specific Wear or phone companion
 modules, but it is not an umbrella for unrelated Android products.
@@ -26,7 +26,8 @@ raster90/
 ├── settings.gradle.kts
 ├── build.gradle.kts
 ├── watchfaces/
-│   └── raster90/       # Current module: standalone resource-only WFF bundle
+│   ├── raster90/       # Standalone resource-only WFF Android module
+│   └── raster90-zepp/  # Standalone Zepp OS v3 Balance package
 ├── wear-apps/          # Future; Raster 90-specific Wear application logic
 ├── mobile-apps/        # Future; Raster 90-specific phone companion
 ├── tools/              # Deterministic asset generation; future validation helpers
@@ -40,7 +41,8 @@ raster90/
 └── third_party/        # Retained source material, licenses, and provenance
 ```
 
-Only `watchfaces/raster90` is currently an Android module. The other
+Only `watchfaces/raster90` is an Android module. `watchfaces/raster90-zepp` is
+an independent Zeus/npm package and is not included by Gradle. The other
 directories are reserved Raster 90 product architecture, not empty modules to
 create preemptively.
 
@@ -57,6 +59,18 @@ create preemptively.
   frames, and the picker preview live in `res/drawable-nodpi`; their source
   matrices do not live inside the module.
 
+### `watchfaces/raster90-zepp`
+
+- Zepp OS v3 watch-face package for the original 480×480 Amazfit Balance.
+- Registered app ID `1125469`; target API 3.7 with API 3.0 compatibility.
+- Uses a pinned, project-local `@zeppos/zeus-cli` dependency and its own ZAB
+  build/preview workflow.
+- Consumes the canonical project-owned font and icon matrices through
+  `tools/generate_raster90_zepp_assets.py`; generated assets remain separate
+  from Android resources.
+- Requests only step-data permission. Weather and temperature use native
+  watch-face bindings; the current checkpoint is static and debug-disabled.
+
 ### `wear-apps/<name>` (future Raster 90 module)
 
 - Separate application ID and APK/AAB.
@@ -72,9 +86,11 @@ create preemptively.
 
 ## Shared build policy
 
-Use one Gradle root and version catalog so module-specific SDK targets can
-differ without duplicating wrappers or repository configuration. Each Android
-application module remains independently buildable and publishable.
+Use one Gradle root and version catalog so Android module-specific SDK targets
+can differ without duplicating wrappers or repository configuration. Each
+Android application module remains independently buildable and publishable.
+Non-Android packages keep their own pinned toolchain and lockfile within their
+platform boundary.
 
 The first scaffold pins Gradle 9.2.1 and Android Gradle Plugin 9.0.0, uses
 Android Studio JBR 25, and includes only the `:watchfaces:raster90` Android
@@ -106,6 +122,9 @@ module.
   frames for the weather sequences; it consumes only promoted icon/animation
   sources, the secondary runtime subset, and the complete primary 0-9/colon
   surface.
+- `tools/generate_raster90_zepp_assets.py` adapts those canonical static font
+  and icon matrices into the exact 119-PNG Balance resource closure. It does
+  not package the WFF weather-animation frames or duplicate source art.
 - `tools/render_raster90_font_family.py` produces and checks the tracked,
   self-contained family overview and specimen sheets under
   `fonts/raster90/preview/`.

@@ -1,0 +1,50 @@
+{
+  "configVersion": "v3",
+  "app": {
+    "appId": 1125469,
+    "appName": "Raster 90",
+    "appType": "watchface",
+    "version": {
+      "code": 1,
+      "name": "0.1.0"
+    },
+    "vender": "byebyebryan",
+    "description": "Raster 90 watch face for the original Amazfit Balance",
+    "icon": "images/preview.png"
+  },
+  "permissions": [
+    "data:user.hd.step"
+  ],
+  "runtime": {
+    "apiVersion": {
+      "compatible": "3.0.0",
+      "target": "3.7.0",
+      "minVersion": "3.0.0"
+    }
+  },
+  "targets": {
+    "balance": {
+      "module": {
+        "watchface": {
+          "path": "watchface/balance/index",
+          "main": 1,
+          "editable": 0,
+          "lockscreen": 1
+        }
+      },
+      "platforms": [
+        {
+          "st": "r"
+        }
+      ],
+      "designWidth": 480
+    }
+  },
+  "i18n": {
+    "en-US": {
+      "appName": "Raster 90"
+    }
+  },
+  "defaultLanguage": "en-US",
+  "debug": false
+}

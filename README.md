@@ -1,7 +1,7 @@
 # Raster 90
 
 <p align="center">
-  <strong>A fictional 150×150 bitmap watch, built as a real Watch Face Format v2 face for Wear OS 5.</strong>
+  <strong>A fictional 150×150 bitmap watch, built for Wear OS 5 and the original Amazfit Balance.</strong>
 </p>
 
 <p align="center">
@@ -83,6 +83,16 @@ newer animated tree does not yet have a retained emulator or physical-device
 capture, so the `4a90116` physical checkpoint above remains historical static-
 runtime evidence.
 
+An isolated static Zepp OS v3 port now lives under
+`watchfaces/raster90-zepp/`. On 2026-08-29, the original Amazfit Balance at API
+level 307 / firmware `3.28.8.1` rendered its native weather condition and
+`15°C`, the complete date, time, five-digit step count, and battery row on the
+480×480 physical display. That capture predates the metadata-only switch to a
+debug-disabled package, which is now the test-drive build. Physical AOD,
+longer-term data refresh, battery tint transitions, 12/24-hour behavior, and a
+simulator state matrix remain open. The Zepp checkpoint deliberately omits
+weather animation, stale-age semantics, and a custom unit override.
+
 ## Authored display system
 
 The watch-face APK packages only the glyphs and sprites its WFF expressions can
@@ -124,6 +134,8 @@ or unavailable states never animate.
 - OnePlus Watch 3: Wear OS 5 / Android 14 / API 34
 - `wear5-opw3` emulator: primary 466×466 Wear OS 5 / Android 14 / API 34
 - `wear5` emulator: secondary official 454×454 scaling reference
+- Amazfit Balance (original): Zepp OS API level 307 / firmware `3.28.8.1`,
+  native 480×480 static-port target
 - OnePlus 13 and `phone16`: optional future companion targets, not required for
   watch-face development
 
@@ -132,6 +144,7 @@ or unavailable states never animate.
 | Area | Authority |
 |---|---|
 | Packaged WFF runtime | [`watchfaces/raster90/`](watchfaces/raster90/) |
+| Packaged Zepp OS Balance runtime | [`watchfaces/raster90-zepp/`](watchfaces/raster90-zepp/README.md) |
 | Bitmap type source and preview | [`fonts/raster90/`](fonts/raster90/README.md) |
 | Icon and weather-animation source/preview | [`icons/raster90/`](icons/raster90/README.md) |
 | Product and visual contract | [Watch Face Design Direction](docs/watchface-design.md) |
@@ -143,10 +156,14 @@ The only current Android module is `:watchfaces:raster90`, application ID
 `io.github.byebyebryan.raster90.watchface`. It is a standalone resource-only
 bundle with `android:hasCode="false"` and no Kotlin/Java logic. Any future Wear
 or phone application logic must remain in a separately packaged Raster 90
-module. Operational instructions for coding agents are in
+module. The Zepp OS package has its own registered app ID `1125469`, Zeus
+manifest, project-local npm dependency, and generated resource tree; it is not
+part of Gradle. Operational instructions for coding agents are in
 [AGENTS.md](AGENTS.md).
 
 ## Build
+
+### Wear OS
 
 Use Android Studio's bundled JBR with the committed Gradle wrapper:
 
@@ -187,3 +204,22 @@ The generator checks the complete 215-PNG runtime surface, including 128
 promoted weather-animation frames. The presentations write complete font/icon
 sheets, native-scale specimens, a looping presentation GIF, the exact eight-
 phase weather sheet, and self-contained local `preview/index.html` files.
+
+### Amazfit Balance
+
+The Zepp OS adapter consumes the same canonical font and icon matrices but
+packages them independently for the Balance's native 480×480 canvas:
+
+```sh
+cd watchfaces/raster90-zepp
+rtk npm ci
+rtk npm run check
+```
+
+`check` runs the focused source/manifest tests, verifies the exact 119-PNG
+generated closure, and builds the ZAB with the pinned project-local Zeus CLI.
+For an explicit physical preview after those gates:
+
+```sh
+rtk npm exec -- zeus preview --target "Amazfit Balance"
+```
