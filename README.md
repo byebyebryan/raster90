@@ -2,7 +2,7 @@
 
 **A fictional 150×150 bitmap watch for Wear OS 5 and the original Amazfit Balance.**
 
-[Visuals and assets](https://byebyebryan.github.io/raster90/) ·
+[Visuals and assets](https://dev.byebyebryan.com/raster90/) ·
 [Documentation](docs/README.md) · [Design](docs/watchface-design.md) ·
 [Validation](docs/validation.md)
 
@@ -25,7 +25,7 @@ hardware should be able to do. Its constraints define the product.
 - Ambient reduces the display to monochrome time only.
 
 Explore the complete type, icon, and motion families in the
-[Visuals guide](https://byebyebryan.github.io/raster90/). It presents canonical
+[Visuals guide](https://dev.byebyebryan.com/raster90/). It presents canonical
 artwork, integer-scale inspection, source data, and separately labeled runtime
 examples. The component sources remain in [fonts](fonts/raster90/README.md)
 and [icons](icons/raster90/README.md).

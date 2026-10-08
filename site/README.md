@@ -1,6 +1,6 @@
 # Raster 90 Visuals guide
 
-Public site: <https://byebyebryan.github.io/raster90/>.
+Public site: <https://dev.byebyebryan.com/raster90/>.
 
 The static guide presents design, typography, icons, source-cell motion, and
 dated runtime examples. `tools/build_asset_site.py` reads the canonical font,
