@@ -214,14 +214,8 @@ The family is small, includes proportional, monospaced, half-bold, bold, and
 8-series variants, and is released under CC0 1.0, which permits the project to
 adapt its shapes to the fictional display grid.
 
-The historical calibration specimen compared:
-
-- `PixelOperatorMonoHB` for the primary time because its fixed advances prevent
-  the clock from shifting as digits change and its intermediate weight remains
-  open at small sizes;
-- `PixelOperatorMono` for compact values and labels; and
-- `PixelOperatorMono8` and `PixelOperatorMonoHB8` as coarse-display alternatives
-  for the oversized time.
+The original font-file comparisons are retained in
+[Design Evolution](archive/design-evolution.md#starting-typography-comparison).
 
 V1 deliberately takes the project-owned bitmap path. The authoritative family
 matrices live in `fonts/raster90/family.py`; compatibility aliases and non-font
@@ -312,27 +306,11 @@ the 15×15 field remain available for optical centering; the final storage row
 and column are reserved for registration and must remain empty in resting and
 rendered animation frames.
 
-The historical 3/2 runtime exposed why this redesign was required: its weather
-art was integer-expanded from 8×8 and much of its utility geometry followed
-paired cells, so a nominal 16×16 canvas still carries roughly 8×8 effective
-detail. Fractional nearest-neighbour scaling is also forbidden because it gives
-opposing strokes different thicknesses. Canvas dimensions and effective art
-resolution must never be described as the same thing.
-
-Deterministic studies under
-`outputs/raster90/studies/icon-resolution/` compared true 8×8 solid art, true
-16×16 dot-matrix art, and the same true 16×16 art with solid cells. The selected
-solid 16×16 family was then polished for centered calendar geometry, a readable
-walking figure, a flat battery terminal, and a weather stale marker shown in
-context. Subsequent full-face mocks selected 3×3 over 2×2 cells, one text row
-over two, removal of `WX`/`STP`/`BAT`, and finally removal of the calendar icon.
-After review of the earlier walking-figure study, a focused native-size study
-selected direct-authored paired footprints. Their separated toe pads and
-vertically offset, tapered soles remain recognizable beside the count at the
-native 3×3-cell scale. The final `four-toe-vertical` asset was promoted after
-the earlier clean-chamfer emulator capture. The 2026-08-21 emulator checkpoint
-and 2026-08-26 physical checkpoint prove it in the packaged WFF; physical
-wearer review remains pending.
+The selected steps tile is the direct-authored `four-toe-vertical` pair: closed
+footprints with separated toe pads, a vertical 1×2 big toe, three 1×1 toes per
+footprint, and vertically offset tapered soles. Earlier resolution, walking-
+figure, and calendar studies belong in
+[Design Evolution](archive/design-evolution.md#icon-resolution-and-steps-evolution).
 
 The selected project-owned matrices in `icons/raster90/family.py` are consumed
 directly by the packaged generator so selected runtime and icon-family preview
@@ -342,21 +320,6 @@ lit trailing storage cell and reject 16×16 candidates that are merely duplicate
 8×8 blocks. Opposing structural
 edges must retain balanced source-cell weight before whole-face WFF scaling is
 considered.
-
-The implemented V1 8×8 weather sprites and the subsequent 8×8/12×12 studies are
-retained as evidence: they showed that the smaller grid could not express
-weather and figures consistently, while a physically larger weather-only tile
-made the composition top-heavy. They are not the selected post-V1 system.
-
-### Alternatives reviewed
-
-- Pix32 remains interesting research for a future Chinese/Japanese locale mode,
-  but it is not a baseline dependency. Its broad glyph set is unnecessary for
-  the first face, and its current license does not grant the modification and
-  redistribution freedom needed for subsetting or generated bitmap assets.
-- The Minecraft font is not part of the direction. Its highly recognizable game
-  identity would turn the design into a themed watch face rather than the
-  imagined constrained computer-watch.
 
 ## Information hierarchy
 
@@ -480,13 +443,10 @@ Current weather has explicit states:
   row or time; and
 - unknown condition: show a neutral, truthful icon rather than guessing.
 
-The available-state generated preview is deterministic. Emulator testing proves
-the unavailable branch at 466×466 and 454×454, while the 2026-08-21 checkpoint
-proves the available branch using provider weather for a simulated location.
-The 2026-08-26 exact-tree physical checkpoint proves fresh live available night
-weather with the refreshed clear-night crescent; a real stale state remains
-open. The promoted weather gesture preserves this resting layout and is enabled
-only by the fresh branch.
+The available-state generated preview is deterministic. Dated emulator and
+physical evidence for available/unavailable branches belongs in
+[Validation](validation.md); a real stale state remains open. The weather
+gesture preserves the resting layout and is enabled only by the fresh branch.
 
 ## Exploratory concept mockups
 
@@ -596,4 +556,3 @@ validation limits belong in [Validation](validation.md).
 - [WFF AnimationController](https://developer.android.com/reference/wear-os/wff/group/part/animated-image/animation-controller)
 - [Wear OS watch-face quality requirements](https://developer.android.com/docs/quality-guidelines/wear-app-quality)
 - [Pixel Operator family and CC0 license](https://www.dafont.com/pixel-operator.font)
-- [Pix32 license](https://github.com/32comic/Pix32/blob/main/LICENSE.md)

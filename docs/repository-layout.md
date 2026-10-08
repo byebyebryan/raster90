@@ -20,6 +20,9 @@ in `docs/watchface-design.md`.
 raster90/
 ├── AGENTS.md
 ├── README.md
+├── LICENSE             # MIT code/documentation
+├── LICENSES/           # CC0 original artwork
+├── .github/workflows/  # Checks and manual Pages publishing
 ├── docs/
 │   ├── checkpoints/   # Dated validation records
 │   ├── archive/       # Historical design/planning context
@@ -32,7 +35,8 @@ raster90/
 │   └── raster90-zepp/  # Standalone Zepp OS v3 Balance package
 ├── wear-apps/          # Future; Raster 90-specific Wear application logic
 ├── mobile-apps/        # Future; Raster 90-specific phone companion
-├── tools/              # Deterministic asset generation; future validation helpers
+├── tools/              # Deterministic asset generation and repository checks
+├── site/               # Static Visuals shell and pinned browser checks
 ├── fonts/
 │   └── raster90/       # Project-owned family source and tracked presentation
 ├── icons/
@@ -156,3 +160,12 @@ boundary.
 Current capabilities and evidence live in [Validation](validation.md), with
 commands in [Development](development.md). Original artwork is CC0 and code
 is MIT; see [Licensing](licensing.md) for scope and retained upstream material.
+
+## Asset site boundary
+
+`site/` owns the static HTML/CSS/JavaScript shell and browser-test package.
+`tools/build_asset_site.py` reads canonical matrices and the public-media
+manifest, exporting only the curated site under ignored `outputs/raster90/site/`.
+Its Python checks and browser tooling are independent of Gradle and Zeus.
+Neither the whole repository nor the ignored evidence tree is a deployment
+artifact. Build/preview/publish commands belong in [the site guide](../site/README.md).

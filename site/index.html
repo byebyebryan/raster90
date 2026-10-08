@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore Raster 90's original bitmap type, pixel icons, restrained weather motion, and fictional 150×150 watch display.">
+  <title>Raster 90 · Visuals</title>
+  <link rel="stylesheet" href="site.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="masthead">
+    <a class="brand" href="#design">RASTER<span>/</span>90</a>
+    <div class="masthead-links">
+      <a href="https://github.com/byebyebryan/raster90/tree/main/docs">Docs ↗</a>
+      <a href="https://github.com/byebyebryan/raster90">Source ↗</a>
+    </div>
+  </header>
+  <main id="main">
+    <div class="intro">
+      <p class="eyebrow">The visual system</p>
+      <h1>A watch built from cells.</h1>
+      <p class="lede">One small framebuffer. Authored type and icons. A little color,
+        a brief gesture, and room to read the time.</p>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Visuals sections">
+      <button id="tab-design" role="tab" aria-controls="panel-design" aria-selected="true" data-tab="design">Design</button>
+      <button id="tab-type" role="tab" aria-controls="panel-type" aria-selected="false" tabindex="-1" data-tab="type">Type</button>
+      <button id="tab-icons" role="tab" aria-controls="panel-icons" aria-selected="false" tabindex="-1" data-tab="icons">Icons</button>
+      <button id="tab-motion" role="tab" aria-controls="panel-motion" aria-selected="false" tabindex="-1" data-tab="motion">Motion</button>
+      <button id="tab-examples" role="tab" aria-controls="panel-examples" aria-selected="false" tabindex="-1" data-tab="examples">Examples</button>
+    </nav>
+    <section id="panel-design" role="tabpanel" aria-labelledby="tab-design">
+      <div class="design-layout">
+        <div>
+          <p class="eyebrow">The impossible schoolyard watch</p>
+          <h2>The constraints are the character.</h2>
+          <p>A small, earnest device trying to deliver more graphics and useful
+            information than its fictional hardware should allow.</p>
+          <dl class="specs">
+            <div><dt>Framebuffer</dt><dd>150 × 150 source cells</dd></div>
+            <div><dt>Each cell</dt><dd>One solid 3 × 3 square</dd></div>
+            <div><dt>Active frame</dt><dd>450 × 450 pixels</dd></div>
+            <div><dt>Icon artwork</dt><dd>15 × 15 inside a 16 × 16 tile</dd></div>
+          </dl>
+          <p>Time leads. Weather, date, steps, and battery stay concise. There are
+            no seconds; ambient removes every non-time field.</p>
+        </div>
+        <figure class="composition">
+          <img src="previews/composition-466.png" width="466" height="466" alt="Generated Raster 90 composition showing weather, date, time, steps, and battery">
+          <figcaption>Generated composition fixture · 466 × 466<br>Design preview; device captures are under Examples.</figcaption>
+        </figure>
+      </div>
+      <div class="section-heading"><h2>A small palette, with a purpose.</h2><p>Weather uses at most four visible colors. Battery tints are a separate status accent.</p></div>
+      <div id="palette" class="palette-grid"></div>
+      <div class="principles">
+        <article><h3>Authored pixels</h3><p>The type and art come from exact matrices. Every lit cell has the same physical scale.</p></article>
+        <article><h3>Truthful information</h3><p>Missing weather gets a neutral icon and <code>--</code>. Stale data and unit conversion have explicit contracts.</p></article>
+        <article><h3>Motion with an ending</h3><p>Fresh weather gets one short gesture on Wear OS, then returns to its resting frame.</p></article>
+      </div>
+      <p class="note">Wear OS is the baseline. The Amazfit Balance adapter shares the static artwork; animation, custom units, and stale-age semantics differ.
+        <a href="https://github.com/byebyebryan/raster90/blob/main/docs/validation.md">Platform comparison and evidence ↗</a></p>
+    </section>
+    <section id="panel-type" role="tabpanel" aria-labelledby="tab-type" hidden>
+      <div class="section-heading"><h2>Bitmap type.</h2><p>A reviewed time cut and a compact 5 × 7 vocabulary, with retained comparison cuts.</p></div>
+      <div class="controls">
+        <label>Cut<select id="font-cut"></select></label>
+        <label>Cell scale<select id="font-scale"><option value="3">3 px · native</option><option value="6">6 px</option><option value="9">9 px</option></select></label>
+        <button id="font-download">Download sample PNG</button>
+      </div>
+      <label class="sample-label" for="sample">Try your own text</label>
+      <textarea id="sample" rows="2" maxlength="160" spellcheck="false">10:42</textarea>
+      <p id="font-role" class="note"></p>
+      <p id="unsupported" class="warning" aria-live="polite"></p>
+      <div class="canvas-scroll"><canvas id="font-preview" aria-label="Bitmap text preview"></canvas></div>
+      <details class="glyph-browser"><summary id="glyph-summary">Browse glyphs</summary><div id="glyphs" class="glyph-grid"></div></details>
+    </section>
+    <section id="panel-icons" role="tabpanel" aria-labelledby="tab-icons" hidden>
+      <div class="section-heading"><h2>Icons, cell by cell.</h2><p>A 15 × 15 drawable field centered on cell (7,7). The final storage row and column stay empty.</p></div>
+      <div class="controls">
+        <label>Find weather<input id="icon-search" type="search" placeholder="Rain, snow, clear…"></label>
+        <label>Light<select id="icon-phase"><option value="both">Day + night</option><option value="day">Day</option><option value="night">Night</option></select></label>
+        <label>Cell scale<select id="icon-scale"><option value="3">3 px · native</option><option value="6" selected>6 px</option><option value="9">9 px</option></select></label>
+        <button id="icon-grid" aria-pressed="false">Cell grid</button>
+      </div>
+      <p id="icon-count" class="note" aria-live="polite"></p>
+      <div id="weather-icons" class="asset-grid"></div>
+      <div class="section-heading"><h2>Utility and state.</h2><p>White text stays consistent while the battery icon reflects its coarse state.</p></div>
+      <div id="utility-icons" class="asset-grid"></div>
+      <div id="battery-bands" class="battery-bands"></div>
+    </section>
+    <section id="panel-motion" role="tabpanel" aria-labelledby="tab-motion" hidden>
+      <div class="section-heading"><h2>A brief weather gesture.</h2><p>Eight exact frames at 4 fps. Wear OS plays once on visibility and returns to frame 1. Amazfit remains static.</p></div>
+      <div class="controls">
+        <button id="motion-play">Play once</button><button id="motion-reset">Resting frame</button>
+        <label>Frame<input id="motion-frame" type="range" min="0" max="7" value="0" step="1"></label>
+        <output id="motion-position" for="motion-frame" aria-live="polite">1 / 8</output>
+        <label>Cell scale<select id="motion-scale"><option value="3">3 px · native</option><option value="6" selected>6 px</option><option value="9">9 px</option></select></label>
+      </div>
+      <p class="note">This is a source-art inspector, not proof of device playback. Motion starts only when you choose Play once; frame stepping is always available.</p>
+      <div id="motion-icons" class="asset-grid"></div>
+    </section>
+    <section id="panel-examples" role="tabpanel" aria-labelledby="tab-examples" hidden>
+      <div class="section-heading"><h2>On the watch.</h2><p>Dated, unretouched runtime captures. Device, provider, and acceptance limits belong to each record.</p></div>
+      <div id="captures" class="capture-grid"></div>
+    </section>
+    <noscript>This guide uses JavaScript for matrix inspection. Read the <a href="https://github.com/byebyebryan/raster90">repository documentation</a> or download the <a href="assets/artwork.json">artwork data</a>.</noscript>
+  </main>
+  <footer>
+    <p>Original artwork: <a href="licenses/CC0-1.0.txt">CC0</a> · Site code: <a href="licenses/MIT.txt">MIT</a></p>
+    <p><a href="assets/artwork.json" download>Download artwork data</a> · <a href="https://github.com/byebyebryan/raster90/blob/main/docs/licensing.md">Provenance and licensing ↗</a></p>
+    <p id="source-links"></p>
+  </footer>
+  <!-- CATALOG -->
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "@raster90/visuals-checks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser checks for the static Raster 90 Visuals guide",
+  "scripts": {
+    "pretest": "python3 -B ../tools/build_asset_site.py",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

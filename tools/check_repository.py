@@ -174,6 +174,8 @@ def main() -> int:
                 run(ROOT, [f"tools/{tool}.py", "--check"])
             run(ROOT, ["-m", "unittest", "discover", "-s", "tools", "-p", "test_*.py"])
             run(ROOT, ["watchfaces/raster90-zepp/tests/test_generate_raster90_zepp_assets.py"])
+            if (ROOT / "site/index.html").is_file():
+                run(ROOT, ["tools/build_asset_site.py", "--check"])
         return 0
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"Repository check failed: {error}", file=sys.stderr)

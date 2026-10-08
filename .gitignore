@@ -30,6 +30,9 @@ __pycache__/
 watchfaces/raster90-zepp/node_modules/
 watchfaces/raster90-zepp/dist/
 
+# Asset-site browser tooling; publication output stays under outputs/raster90/site
+site/node_modules/
+
 # Local environment, logs, and diagnostics
 .env
 .env.*

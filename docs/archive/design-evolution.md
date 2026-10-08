@@ -281,3 +281,59 @@ Later slices remain separately gated:
   labels its own WFF value but does not synchronize those readings.
 - Emulator and physical-watch validation of the promoted on-visible weather
   animation, including trigger behavior, frame cadence, and return to rest.
+
+## Starting typography comparison
+
+The historical calibration specimen compared:
+
+- `PixelOperatorMonoHB` for the primary time because its fixed advances prevent
+  the clock from shifting as digits change and its intermediate weight remains
+  open at small sizes;
+- `PixelOperatorMono` for compact values and labels; and
+- `PixelOperatorMono8` and `PixelOperatorMonoHB8` as coarse-display alternatives
+  for the oversized time.
+
+## Icon resolution and steps evolution
+
+The historical 3/2 runtime exposed why this redesign was required: its weather
+art was integer-expanded from 8×8 and much of its utility geometry followed
+paired cells, so a nominal 16×16 canvas still carries roughly 8×8 effective
+detail. Fractional nearest-neighbour scaling is also forbidden because it gives
+opposing strokes different thicknesses. Canvas dimensions and effective art
+resolution must never be described as the same thing.
+
+Deterministic studies under
+`outputs/raster90/studies/icon-resolution/` compared true 8×8 solid art, true
+16×16 dot-matrix art, and the same true 16×16 art with solid cells. The selected
+solid 16×16 family was then polished for centered calendar geometry, a readable
+walking figure, a flat battery terminal, and a weather stale marker shown in
+context. Subsequent full-face mocks selected 3×3 over 2×2 cells, one text row
+over two, removal of `WX`/`STP`/`BAT`, and finally removal of the calendar icon.
+After review of the earlier walking-figure study, a focused native-size study
+selected direct-authored paired footprints. Their separated toe pads and
+vertically offset, tapered soles remain recognizable beside the count at the
+native 3×3-cell scale. The final `four-toe-vertical` asset was promoted after
+the earlier clean-chamfer emulator capture. The 2026-08-21 emulator checkpoint
+and 2026-08-26 physical checkpoint prove it in the packaged WFF; physical
+wearer review remains pending.
+
+## Retained alternatives
+
+The implemented V1 8×8 weather sprites and the subsequent 8×8/12×12 studies are
+retained as evidence: they showed that the smaller grid could not express
+weather and figures consistently, while a physically larger weather-only tile
+made the composition top-heavy. They are not the selected post-V1 system.
+
+### Alternatives reviewed
+
+- Pix32 remains interesting research for a future Chinese/Japanese locale mode,
+  but it is not a baseline dependency. Its broad glyph set is unnecessary for
+  the first face, and its license at the time of review did not grant the modification and
+  redistribution freedom needed for subsetting or generated bitmap assets.
+- The Minecraft font is not part of the direction. Its highly recognizable game
+  identity would turn the design into a themed watch face rather than the
+  imagined constrained computer-watch.
+
+The licensing judgment above is historical, not a current upstream audit.
+Recheck the [upstream terms](https://github.com/32comic/Pix32/blob/main/LICENSE.md)
+if direct reuse is ever proposed.

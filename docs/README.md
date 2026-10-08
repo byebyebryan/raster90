@@ -6,6 +6,7 @@ what was observed on a particular tree; they do not describe every later build.
 | Area | Start here |
 |---|---|
 | Product and visual language | [Watch Face Design](watchface-design.md) |
+| Browsable assets and examples | [Visuals](https://byebyebryan.github.io/raster90/) / [site workflow](../site/README.md) |
 | Platform capabilities and current evidence | [Validation](validation.md) |
 | Setup, assets, builds, and routine checks | [Development](development.md) |
 | Target identity, connection, deployment, and capture | [Device Setup](device-setup.md) |

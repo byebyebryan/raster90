@@ -34,7 +34,9 @@ rtk python3 -B tools/check_repository.py
 This entry point checks documentation links/anchors, repository boundaries,
 licensed/public media, generated asset closures, presentations, and focused
 Python tests. It does not install dependencies, mutate devices, or regenerate
-tracked files. The same portable command runs in CI without RTK.
+tracked files. The same portable command runs in CI without RTK. Asset-site
+input/output validation is included; browser checks have a separate pinned
+dependency boundary. See [the site workflow](../site/README.md).
 
 ## Generate assets
 
