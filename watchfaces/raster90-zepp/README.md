@@ -1,4 +1,4 @@
-# Raster 90 — Amazfit Balance study package
+# Raster 90 — Amazfit Balance package
 
 This directory is an isolated Zepp OS v3 watch-face package for the original
 Amazfit Balance.  It is deliberately separate from the Wear OS/WFF Gradle
@@ -19,9 +19,9 @@ size.
 From this directory:
 
 ```sh
-npm ci
-npm run generate
-npm run check
+rtk npm ci
+rtk npm run generate
+rtk npm run check
 ```
 
 The generator imports the canonical matrices from `fonts/raster90/family.py`
@@ -67,13 +67,10 @@ remain available for a future debug build.
 
 ## Tooling boundary
 
-The package pins `@zeppos/zeus-cli` 1.9.3, the current npm `latest` release as
-checked on 2026-08-29.  A clean `npm ci` reports no production dependency
-advisories with `npm audit --omit=dev`, but the CLI's local-only transitive
-development tree reports 31 advisories, including old `lodash` and `tar`
-branches.  These npm packages build the ZAB and are not included in the watch
-runtime.  Do not apply npm's proposed forced fix: it offers a downgrade to
-Zeus 1.6.7.  Recheck this boundary when Zepp publishes a newer CLI.
+The package pins `@zeppos/zeus-cli` 1.9.3. The dated registry/audit result and
+the boundary between CLI dependencies and the watch runtime live in
+[Development](../../docs/development.md). Recheck that toolchain before an
+upgrade or forced fix; build dependencies are not watch runtime dependencies.
 
 ## Physical checkpoint and open gates
 
@@ -82,19 +79,12 @@ screen-adaptation target is resolved to the current Balance device sources by
 Zeus when building or previewing with `--target "Amazfit Balance"`.  Zepp login,
 QR preview, simulator, and device actions remain separate explicit steps.
 
-The 2026-08-29 physical preview on API level 307 / firmware `3.28.8.1` rendered
-the native weather condition with `15°C`, complete `SAT 29 AUG`, unclipped
-`10:17`, fixed-width `00000` steps, and `61%` battery on the original Balance.
-The retained owner-provided 480×480 PNG is
-`outputs/references/amazfit-balance-native-weather-render.png`, SHA-256
-`600337b245a89c8cc0750d9c5cffbc16b7fbd15c778ac896ee7acf1ea536146c`.
-It proves interactive resting appearance for the then-debug-enabled package;
-it does not prove AOD, long-term refresh, power impact, or the later
-metadata-only debug-disabled rebuild.
+The package has `debug: false` for regular use. The
+[2026-08-29 checkpoint](../../docs/checkpoints/2026-08-29-zepp-balance.md)
+preserves the earlier owner-provided native screenshot and its exact limits.
+The owner subsequently reported reliable use without notable issues; AOD was
+unused. Current evidence gaps and the Wear OS comparison belong in
+[Validation](../../docs/validation.md). Animation remains a known static-port
+gap, with no implementation scheduled by this documentation pass.
 
-The current checkpoint has `debug: false` for a wearer test drive.  Remaining
-acceptance includes selecting that exact package, sustained AOD, resume and
-weather refresh over time, step changes, all battery tint thresholds,
-12/24-hour behavior, unavailable weather, and a repeatable Balance-simulator
-state matrix.  No simulator or still capture substitutes for final physical
-AMOLED and battery judgment.
+Original artwork is [CC0](../../docs/licensing.md); project code is MIT.

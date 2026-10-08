@@ -21,7 +21,9 @@ raster90/
 ├── AGENTS.md
 ├── README.md
 ├── docs/
-│   └── media/          # Small tracked public subset of verified runtime captures
+│   ├── checkpoints/   # Dated validation records
+│   ├── archive/       # Historical design/planning context
+│   └── media/         # Small tracked public subset of verified runtime captures
 ├── gradle/
 ├── settings.gradle.kts
 ├── build.gradle.kts
@@ -92,7 +94,7 @@ Android application module remains independently buildable and publishable.
 Non-Android packages keep their own pinned toolchain and lockfile within their
 platform boundary.
 
-The first scaffold pins Gradle 9.2.1 and Android Gradle Plugin 9.0.0, uses
+The build pins Gradle 9.2.1 and Android Gradle Plugin 9.0.0, uses
 Android Studio JBR 25, and includes only the `:watchfaces:raster90` Android
 module.
 
@@ -150,3 +152,7 @@ module.
 Physical-watch adjustment and post-V1 motion/color decisions remain tracked in
 `docs/watchface-design.md`; they do not change the Raster 90 repository
 boundary.
+
+Current capabilities and evidence live in [Validation](validation.md), with
+commands in [Development](development.md). Original artwork is CC0 and code
+is MIT; see [Licensing](licensing.md) for scope and retained upstream material.

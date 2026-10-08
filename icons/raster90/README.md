@@ -86,3 +86,7 @@ column black; this tint is not packaged into runtime assets. All outputs are
 deterministic and should be regenerated rather than edited by hand. Their
 presentation is review evidence; it does not claim a fresh emulator or
 physical-watch validation.
+
+Original icon and animation artwork is [CC0](../../docs/licensing.md);
+implementation code is MIT. Current device evidence and the static Amazfit
+gap are summarized in [Validation](../../docs/validation.md).

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "captures": [
+    {
+      "file": "raster90-interactive-watch3-centered-466.png",
+      "source": "outputs/raster90/captures/2026-10-07-centered-rows-physical/interactive-centered-466.png",
+      "date": "2026-10-07",
+      "target": "OnePlus Watch 3",
+      "kind": "physical",
+      "mode": "interactive",
+      "checkpoint": "docs/checkpoints/2026-10-07-centered-rows.md",
+      "claim": "Centered rows on the physical Watch 3 with live night-family weather. Still capture; motion and sustained AOD unproven.",
+      "sha256": "6b27baf5c5f916af7853a81024d0f304d9b7b3eb58058d5a70983ddf4e966939",
+      "width": 466,
+      "height": 466
+    },
+    {
+      "file": "raster90-interactive-wear5-opw3-466.png",
+      "source": "outputs/raster90/captures/current-head-simulated-weather/interactive-wear5-opw3-simulated-sf-466.png",
+      "date": "2026-08-21",
+      "target": "wear5-opw3 emulator",
+      "kind": "emulator, simulated location",
+      "mode": "interactive",
+      "checkpoint": "docs/checkpoints/2026-08-21-simulated-weather.md",
+      "claim": "Earlier tree with provider weather for a simulated location; predates weather refresh, motion, and centered rows.",
+      "sha256": "334872ff2d45075241a344e05f626b3243e0690e9742430f70b5cf5da610b143",
+      "width": 466,
+      "height": 466
+    },
+    {
+      "file": "raster90-ambient-wear5-opw3-466.png",
+      "source": "outputs/raster90/captures/current-head-simulated-weather/ambient-wear5-opw3-466.png",
+      "date": "2026-08-21",
+      "target": "wear5-opw3 emulator",
+      "kind": "emulator",
+      "mode": "confirmed Dozing",
+      "checkpoint": "docs/checkpoints/2026-08-21-simulated-weather.md",
+      "claim": "Earlier tree in confirmed Dozing, showing monochrome time only. Does not prove current physical AOD.",
+      "sha256": "e466be3525a35f6b76003f9e6d80595cc6a85e9d5a8268f6da3e630edc2ee632",
+      "width": 466,
+      "height": 466
+    },
+    {
+      "file": "raster90-interactive-amazfit-balance-480.png",
+      "source": "outputs/references/amazfit-balance-native-weather-render.png",
+      "date": "2026-08-29",
+      "target": "Amazfit Balance",
+      "kind": "owner-provided physical screenshot",
+      "mode": "interactive",
+      "checkpoint": "docs/checkpoints/2026-08-29-zepp-balance.md",
+      "claim": "Native 480\u00d7480 static port; debug-enabled package before the metadata-only debug-disabled rebuild.",
+      "sha256": "600337b245a89c8cc0750d9c5cffbc16b7fbd15c778ac896ee7acf1ea536146c",
+      "width": 480,
+      "height": 480
+    }
+  ]
+}

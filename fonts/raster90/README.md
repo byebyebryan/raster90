@@ -41,3 +41,6 @@ rtk python3 -B tools/render_raster90_font_family.py --check
 
 Do not edit files under `preview/` by hand. Update `family.py`, regenerate, and
 review both the complete sheets and the native 466×466 face specimen.
+
+Original glyph artwork is [CC0](../../docs/licensing.md); implementation code
+is MIT. Generated specimens are design previews, not device captures.
