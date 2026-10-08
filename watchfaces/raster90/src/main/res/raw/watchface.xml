@@ -133,6 +133,10 @@
 
         <!-- 45..93 active-frame band: true16 weather tile and one centered value. -->
         <Group x="162" y="45" width="162" height="48" name="weather_region">
+          <!-- Center the complete row from the converted integer's character
+               count, including its sign; degree/unit add two 18-unit glyphs.
+               Keep the already-centered unavailable branch at its base x. -->
+          <Transform target="x" value="[WEATHER.IS_AVAILABLE] ? 180 - 9 * textLength(numberFormat(&quot;#&quot;, [CONFIGURATION.temperatureUnit] == &quot;CELSIUS&quot; ? ([WEATHER.TEMPERATURE_UNIT] == 1 ? [WEATHER.TEMPERATURE] : round(([WEATHER.TEMPERATURE] - 32) * 5 / 9)) : ([WEATHER.TEMPERATURE_UNIT] == 2 ? [WEATHER.TEMPERATURE] : round([WEATHER.TEMPERATURE] * 9 / 5 + 32)))) : 162"/>
           <Condition>
             <Expressions>
               <Expression name="weather_available">[WEATHER.IS_AVAILABLE]</Expression>
@@ -512,6 +516,7 @@
 
         <!-- 291..339 active-frame band: footprint tile and centered step value. -->
         <Group x="153" y="291" width="162" height="48" name="steps_region">
+          <Transform target="x" value="[STEP_COUNT] &gt; 99999 ? 144 : 153"/>
           <PartImage x="0" y="0" width="48" height="48" name="steps_icon">
             <Image resource="raster_icon_steps"/>
           </PartImage>
@@ -546,6 +551,7 @@
 
         <!-- 357..405 active-frame band: battery tile and centered percentage. -->
         <Group x="171" y="357" width="126" height="48" name="battery_region">
+          <Transform target="x" value="198 - 9 * (1 + textLength(numberFormat(&quot;#&quot;, clamp([BATTERY_PERCENT], 0, 100))))"/>
           <!--
             Mutually-exclusive range branches keep the percentage white while
             tinting only this one existing battery resource.  The final

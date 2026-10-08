@@ -110,6 +110,8 @@ ROW_BANDS = {
     name: tuple(cell * SINGLE_GRID_PITCH for cell in band)
     for name, band in STUDY_ROW_BANDS.items()
 }
+# Nominal fixture anchors retained for source-study compatibility. Runtime
+# icon/value rows center according to their complete formatted width.
 ROW_X = {
     "weather": 162,
     "date": 147,
@@ -444,6 +446,15 @@ def _centered_fine_x(text: str) -> int:
     return (ACTIVE_SIZE - _fine_string_width(text)) // 2
 
 
+def _centered_information_x(name: str, text: str) -> int:
+    """Center a complete icon/value row, or the text-only date, on the grid."""
+
+    width = _fine_string_width(text)
+    if name != "date":
+        width += ICON_SIZE + 2 * FINE_PITCH
+    return (ACTIVE_SIZE - width) // 2
+
+
 def _time_name(character: str) -> str:
     return "raster_time_colon" if character == ":" else f"raster_time_{character}"
 
@@ -562,7 +573,7 @@ def _icon_color(name: str, symbol: str) -> RGBA:
 def _draw_information_row(pixels: PixelGrid, name: str, text: str) -> None:
     icon_width = ICON_SIZE
     row_y = ACTIVE_ORIGIN[1] + ROW_BANDS[name][0]
-    x = ACTIVE_ORIGIN[0] + ROW_X[name]
+    x = ACTIVE_ORIGIN[0] + _centered_information_x(name, text)
     if name == "date":
         text_x = x
         _draw_fine_string(

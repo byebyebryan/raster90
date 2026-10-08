@@ -529,6 +529,14 @@ The packaged available-weather layout uses the following centered stack:
   value is converted with integer rounding before formatting.
 - Each ordinary value uses one 5×7 line vertically centered inside its existing
   16-cell band.
+- The Wear OS face centers each complete icon/value row from its formatted
+  width. Weather uses the converted temperature's signed character count;
+  battery includes its percent sign, and steps account for five or six digits.
+  Horizontal positions move in whole 3×3 source cells. The available static
+  icon, animation, stale marker, and temperature share one translated group;
+  unavailable weather remains centered at its existing position. The typical
+  `21°C`, five-digit steps, and two-digit battery fixtures retain their original
+  coordinates. The separate Zepp port retains its current fixed anchors.
 - The runtime retains the established row bands and time position to
   isolate the approved content changes. Weather/date spacing may receive a
   later explicit optical pass.

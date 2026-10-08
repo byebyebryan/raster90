@@ -240,6 +240,11 @@ class Raster90AssetGeneratorTests(unittest.TestCase):
             self.assertIsNotNone(element, name)
             self.assertEqual(box(element), expected, name)
 
+        # Fixture anchors stay stable; dynamic placement belongs to the entire
+        # row so static art, motion, stale marker, and value cannot separate.
+        for name in ("weather_region", "steps_region", "battery_region"):
+            self.assertIsNotNone(root.find(f".//Group[@name='{name}']/Transform[@target='x']"))
+
         unavailable = root.find(".//Group[@name='weather_unavailable_view']")
         self.assertIsNotNone(unavailable)
         self.assertEqual(box(unavailable), (18, 0, 90, 48))
@@ -322,6 +327,58 @@ class Raster90AssetGeneratorTests(unittest.TestCase):
                 if preview[y][x] == generator.OPAQUE_WHITE
             ]
             self.assertEqual(min(lit_y), row_y + generator.COMPACT_ROW_TEXT_Y, name)
+
+    def test_dynamic_rows_center_formatted_values_on_the_source_grid(self) -> None:
+        root = ET.parse(ROOT / "watchfaces/raster90/src/main/res/raw/watchface.xml").getroot()
+        transforms = {
+            name: root.find(f".//Group[@name='{name}_region']/Transform").attrib["value"]
+            for name in ("weather", "steps", "battery")
+        }
+        temperature = root.find(
+            ".//PartText[@name='weather_temperature']/Text/BitmapFont/Template/Parameter"
+        ).attrib["expression"]
+        self.assertIn(temperature, transforms["weather"])
+
+        def evaluate(expression: str) -> float:
+            # Evaluate these simple arithmetic transforms after substituting
+            # source values; no external runtime or new dependency is needed.
+            if "?" in expression:
+                condition, branches = expression.split("?", 1)
+                yes, no = branches.split(":", 1)
+                return evaluate(yes if evaluate(condition) else no)
+            return eval(expression, {"__builtins__": {}}, {
+                "textLength": len,
+                "numberFormat": lambda _pattern, value: str(int(value)),
+                "clamp": lambda value, low, high: max(low, min(high, value)),
+            })
+
+        # Values after unit conversion exercise sign and digit boundaries in
+        # both units. Placement uses the exact same conversion as formatting.
+        for value in (-100, -99, -12, -10, -9, -1, 0, 1, 9, 10, 21, 99, 100):
+            for unit in ("C", "F"):
+                text = f"{value}°{unit}"
+                expression = transforms["weather"].replace(temperature, str(value))
+                expression = expression.replace("[WEATHER.IS_AVAILABLE]", "True")
+                x = evaluate(expression)
+                self.assertEqual(x, generator._centered_information_x("weather", text))
+                self.assertEqual(x % 3, 0)
+                width = 54 + generator._fine_string_width(text)
+                self.assertEqual(x + width / 2, 225)
+        unavailable = transforms["weather"].replace(temperature, "unavailable_temperature")
+        unavailable = unavailable.replace("[WEATHER.IS_AVAILABLE]", "False")
+        self.assertEqual(evaluate(unavailable) + 18,
+                         generator._centered_information_x("weather", "--"))
+
+        for value in (-1, 0, 9, 10, 25, 50, 99, 100, 101):
+            text = f"{max(0, min(100, value))}%"
+            x = evaluate(transforms["battery"].replace("[BATTERY_PERCENT]", str(value)))
+            self.assertEqual(x, generator._centered_information_x("battery", text))
+            self.assertEqual(x % 3, 0)
+        for value in (-1, 0, 99999, 100000, 999999, 1000000):
+            text = f"{max(0, min(999999, value)):05d}"
+            x = evaluate(transforms["steps"].replace("[STEP_COUNT]", str(value)))
+            self.assertEqual(x, generator._centered_information_x("steps", text))
+            self.assertEqual(x % 3, 0)
 
     def test_watchface_xml_keeps_time_geometry_and_ambient_boundary(self) -> None:
         path = ROOT / "watchfaces/raster90/src/main/res/raw/watchface.xml"
