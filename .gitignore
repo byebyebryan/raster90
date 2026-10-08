@@ -23,6 +23,7 @@ __pycache__/
 *.apks
 *.aar
 *.idsig
+*.zab
 /outputs/
 
 # Zepp local tooling/build output
