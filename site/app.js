@@ -6,10 +6,14 @@
   const tabs = [...document.querySelectorAll("[data-tab]")];
   const palette = { ...data.palette, "1": [255, 255, 255, 255] };
   const white = [255, 255, 255, 255];
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   let grid = false;
   let motionFrame = 0;
-  let motionRequest = null;
-  let motionStart = 0;
+  let motionTimer = null;
+  let motionMode = null;
+  let motionStep = 0;
+  let activeTab = "design";
+  let resumeLoop = false;
 
   function node(tag, text, className) {
     const element = document.createElement(tag);
@@ -75,12 +79,14 @@
   function activate(name) {
     if (!tabs.some((tab) => tab.dataset.tab === name)) name = "design";
     stopMotion();
+    activeTab = name;
     tabs.forEach((tab) => {
       const selected = tab.dataset.tab === name;
       tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1;
       byId(`panel-${tab.dataset.tab}`).hidden = !selected;
     });
-    if (name === "motion") setMotionFrame(0);
+    setMotionFrame(0);
+    if (name === "motion" && !reducedMotion.matches && !document.hidden) startMotion("loop");
   }
 
   tabs.forEach((tab, index) => {
@@ -94,6 +100,15 @@
     });
   });
   window.addEventListener("hashchange", () => activate(location.hash.slice(1)));
+
+  let heroPaused = false;
+  function renderHero() {
+    const still = heroPaused || reducedMotion.matches;
+    byId("hero-preview").src = still ? "previews/composition-466.png" : "previews/composition-466.gif";
+    byId("hero-pause").textContent = still ? "Play preview" : "Pause preview";
+    byId("hero-pause").hidden = reducedMotion.matches;
+  }
+  byId("hero-pause").addEventListener("click", () => { heroPaused = !heroPaused; renderHero(); });
 
   const paletteNames = { W: "White / base", Y: "Yellow / sun", C: "Cyan / night", B: "Blue / weather" };
   Object.entries(data.palette).forEach(([symbol, rgba]) => {
@@ -181,25 +196,53 @@
   }
 
   function stopMotion() {
-    if (motionRequest !== null) cancelAnimationFrame(motionRequest);
-    motionRequest = null; byId("motion-play").textContent = "Play once";
+    if (motionTimer !== null) clearTimeout(motionTimer);
+    motionTimer = null;
+    motionMode = null;
+    byId("motion-play").textContent = "Play loop";
   }
 
-  function tick(now) {
-    const frame = Math.floor((now - motionStart) * data.motion.fps / 1000);
-    if (frame >= data.motion.frames) { stopMotion(); setMotionFrame(0); return; }
-    if (frame !== motionFrame) setMotionFrame(frame);
-    motionRequest = requestAnimationFrame(tick);
+  function advanceMotion() {
+    motionStep += 1;
+    if (motionStep >= data.motion.frames) {
+      setMotionFrame(0);
+      if (motionMode === "loop") motionTimer = setTimeout(() => startMotion("loop"), 1000);
+      else stopMotion();
+      return;
+    }
+    setMotionFrame(motionStep);
+    motionTimer = setTimeout(advanceMotion, 1000 / data.motion.fps);
+  }
+
+  function startMotion(mode) {
+    stopMotion();
+    motionMode = mode;
+    motionStep = 0;
+    setMotionFrame(0);
+    byId("motion-play").textContent = "Pause";
+    motionTimer = setTimeout(advanceMotion, 1000 / data.motion.fps);
   }
   byId("motion-play").addEventListener("click", () => {
-    if (motionRequest !== null) { stopMotion(); return; }
-    setMotionFrame(0); motionStart = performance.now(); byId("motion-play").textContent = "Pause";
-    motionRequest = requestAnimationFrame(tick);
+    if (motionMode !== null) stopMotion();
+    else startMotion("loop");
   });
+  byId("motion-once").addEventListener("click", () => startMotion("once"));
   byId("motion-reset").addEventListener("click", () => { stopMotion(); setMotionFrame(0); });
   byId("motion-frame").addEventListener("input", () => { stopMotion(); setMotionFrame(Number(byId("motion-frame").value)); });
   byId("motion-scale").addEventListener("input", () => setMotionFrame(motionFrame));
-  document.addEventListener("visibilitychange", () => { if (document.hidden) { stopMotion(); setMotionFrame(0); } });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      resumeLoop = motionMode === "loop";
+      stopMotion(); setMotionFrame(0);
+    } else if (resumeLoop && activeTab === "motion" && !reducedMotion.matches) {
+      startMotion("loop");
+      resumeLoop = false;
+    }
+  });
+  reducedMotion.addEventListener("change", () => {
+    renderHero();
+    if (reducedMotion.matches) { stopMotion(); setMotionFrame(0); resumeLoop = false; }
+  });
 
   data.captures.forEach((capture) => {
     const card = node("article", undefined, "capture-card");
@@ -214,5 +257,5 @@
     const link = node("a", source.path.startsWith("fonts") ? "Type matrices" : source.path.endsWith("animation.py") ? "Motion matrices" : "Icon matrices");
     link.href = source.url; byId("source-links").append(link);
   });
-  renderFont(); renderIcons(); setMotionFrame(0); activate(location.hash.slice(1));
+  renderFont(); renderIcons(); renderHero(); setMotionFrame(0); activate(location.hash.slice(1));
 })();

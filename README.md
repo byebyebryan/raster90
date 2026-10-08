@@ -7,11 +7,11 @@
 [Validation](docs/validation.md)
 
 <p align="center">
-  <img src="docs/media/raster90-interactive-watch3-centered-466.png" width="466" alt="Raster 90 on the OnePlus Watch 3, with centered weather, date, time, steps, and battery rows">
+  <img src="icons/raster90/preview/icon-family-native-face-466.gif" width="466" alt="Generated Raster 90 composition with animated partly-day weather, date, time, steps, and battery">
 </p>
 
 <p align="center">
-  <sub>2026-10-07 physical OnePlus Watch 3 · live weather · unretouched interactive capture · <a href="docs/media/README.md">provenance</a></sub>
+  <sub>Generated animated preview · presentation loop · <a href="https://dev.byebyebryan.com/raster90/#examples">dated device captures</a></sub>
 </p>
 
 Raster 90 is the impossible schoolyard watch: a small, earnest device trying

@@ -54,12 +54,66 @@ test("weather filtering, integer scaling and transparent PNG exports", async ({ 
   }, bytes.toString("base64"))).toBe(true);
 });
 
-test("motion stays still, steps, plays once and returns to its resting frame", async ({ page }) => {
+async function controlledClock(page) {
+  await page.clock.install({ time: new Date("2026-10-07T12:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-07T12:00:01Z"));
+}
+
+const motionPixels = (page) => page.locator('#motion-icons canvas[aria-label="rain"]').evaluate((canvas) => canvas.toDataURL());
+
+test("native browser timers visibly animate both loop and one-shot playback", async ({ page }) => {
+  await page.goto("/#motion");
+  const resting = await motionPixels(page);
+  await expect.poll(() => motionPixels(page), { timeout: 2500 }).not.toBe(resting);
+  await page.getByRole("button", { name: "Play once", exact: true }).click();
+  const first = await motionPixels(page);
+  await expect.poll(() => motionPixels(page), { timeout: 1500 }).not.toBe(first);
+  await expect(page.getByRole("button", { name: "Play loop", exact: true })).toBeVisible({ timeout: 4000 });
+  await expect(page.locator("#motion-position")).toHaveText("1 / 8");
+});
+
+test("motion loops on entry, pauses, resumes and stops when leaving", async ({ page }) => {
+  await controlledClock(page);
   await page.goto("/#motion");
   await expect(page.locator("#motion-icons .asset-card")).toHaveCount(16);
-  const resting = await page.locator("#motion-icons canvas").first().evaluate((canvas) => canvas.toDataURL());
-  await page.waitForTimeout(400);
-  expect(await page.locator("#motion-icons canvas").first().evaluate((canvas) => canvas.toDataURL())).toBe(resting);
+  await expect(page.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
+  const resting = await motionPixels(page);
+  await page.clock.runFor(750);
+  expect(await motionPixels(page)).not.toBe(resting);
+  await page.clock.runFor(1250);
+  await expect(page.locator("#motion-position")).toHaveText("1 / 8");
+  await page.clock.runFor(750);
+  expect(await motionPixels(page)).toBe(resting);
+  await page.clock.runFor(1000);
+  expect(await motionPixels(page)).not.toBe(resting);
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  const paused = await motionPixels(page);
+  await page.clock.runFor(3000);
+  expect(await motionPixels(page)).toBe(paused);
+  await page.getByRole("button", { name: "Play loop", exact: true }).click();
+  await page.getByRole("tab", { name: "Type", exact: true }).click();
+  await page.clock.runFor(3000);
+  expect(await motionPixels(page)).toBe(resting);
+  await page.getByRole("tab", { name: "Motion", exact: true }).click();
+  await page.clock.runFor(750);
+  expect(await motionPixels(page)).not.toBe(resting);
+});
+
+test("Play once visibly advances eight phases and stays at rest afterward", async ({ page }) => {
+  await controlledClock(page);
+  await page.goto("/#motion");
+  await page.getByRole("button", { name: "Play once", exact: true }).click();
+  const phases = [];
+  for (let frame = 0; frame < 8; frame++) {
+    await expect(page.locator("#motion-position")).toHaveText(`${frame + 1} / 8`);
+    phases.push(await motionPixels(page));
+    await page.clock.runFor(250);
+  }
+  expect(new Set(phases).size).toBeGreaterThan(1);
+  await expect(page.locator("#motion-position")).toHaveText("1 / 8");
+  await expect(page.getByRole("button", { name: "Play loop", exact: true })).toBeVisible();
+  await page.clock.runFor(3000);
+  expect(await motionPixels(page)).toBe(phases[0]);
   await page.locator("#motion-frame").focus();
   for (let step = 0; step < 4; step++) await page.keyboard.press("ArrowRight");
   await expect(page.locator("#motion-position")).toHaveText("5 / 8");
@@ -71,11 +125,42 @@ test("motion stays still, steps, plays once and returns to its resting frame", a
   expect(matrix.frame_index).toBe(4);
   expect(matrix.frame_rate).toBe(4);
   expect(matrix.rows.join("\n")).toBe(cells);
+  await page.getByRole("button", { name: "Resting frame", exact: true }).click();
+  expect(await motionPixels(page)).toBe(phases[0]);
+});
+
+test("reduced motion keeps previews still while permitting explicit playback", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await controlledClock(page);
+  await page.goto("/#motion");
+  const resting = await motionPixels(page);
+  await page.clock.runFor(4000);
+  expect(await motionPixels(page)).toBe(resting);
+  await expect(page.getByRole("button", { name: "Play loop", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Play once", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Play once", exact: true })).toBeVisible({ timeout: 4000 });
-  await expect(page.locator("#motion-position")).toHaveText("1 / 8");
-  expect(await page.locator("#motion-icons canvas").first().evaluate((canvas) => canvas.toDataURL())).toBe(resting);
+  await page.clock.runFor(750);
+  expect(await motionPixels(page)).not.toBe(resting);
+  await page.clock.runFor(1250);
+  expect(await motionPixels(page)).toBe(resting);
+  await page.getByRole("tab", { name: "Design", exact: true }).click();
+  expect(await page.locator("#hero-preview").evaluate((image) => image.currentSrc)).toMatch(/composition-466\.png$/);
+  await expect(page.locator("#hero-pause")).toBeHidden();
+});
+
+test("the animated hero changes pixels and can be paused", async ({ page }) => {
+  await page.goto("/#design");
+  const hero = page.locator("#hero-preview");
+  await hero.evaluate((image) => image.decode());
+  const frames = [];
+  for (let sample = 0; sample < 5; sample++) {
+    frames.push((await hero.screenshot()).toString("base64"));
+    await page.waitForTimeout(260);
+  }
+  expect(new Set(frames).size).toBeGreaterThan(1);
+  await page.getByRole("button", { name: "Pause preview", exact: true }).click();
+  await expect.poll(() => hero.evaluate((image) => image.currentSrc)).toMatch(/composition-466\.png$/);
+  await page.getByRole("button", { name: "Play preview", exact: true }).click();
+  await expect.poll(() => hero.evaluate((image) => image.currentSrc)).toMatch(/composition-466\.gif$/);
 });
 
 test("runtime examples retain dates, limits and exact hashes", async ({ page }) => {

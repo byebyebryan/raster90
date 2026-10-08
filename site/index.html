@@ -48,8 +48,12 @@
             no seconds; ambient removes every non-time field.</p>
         </div>
         <figure class="composition">
-          <img src="previews/composition-466.png" width="466" height="466" alt="Generated Raster 90 composition showing weather, date, time, steps, and battery">
-          <figcaption>Generated composition fixture · 466 × 466<br>Design preview; device captures are under Examples.</figcaption>
+          <picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="previews/composition-466.png">
+            <img id="hero-preview" src="previews/composition-466.gif" width="466" height="466" alt="Generated Raster 90 composition with animated partly-day weather, date, time, steps, and battery">
+          </picture>
+          <figcaption>Generated animated preview · 466 × 466<br>Presentation loop; device captures are under Examples.</figcaption>
+          <button id="hero-pause" class="preview-control">Pause preview</button>
         </figure>
       </div>
       <div class="section-heading"><h2>A small palette, with a purpose.</h2><p>Weather uses at most four visible colors. Battery tints are a separate status accent.</p></div>
@@ -93,12 +97,13 @@
     <section id="panel-motion" role="tabpanel" aria-labelledby="tab-motion" hidden>
       <div class="section-heading"><h2>A brief weather gesture.</h2><p>Eight exact frames at 4 fps. Wear OS plays once on visibility and returns to frame 1. Amazfit remains static.</p></div>
       <div class="controls">
-        <button id="motion-play">Play once</button><button id="motion-reset">Resting frame</button>
+        <button id="motion-play">Pause</button><button id="motion-once">Play once</button><button id="motion-reset">Resting frame</button>
         <label>Frame<input id="motion-frame" type="range" min="0" max="7" value="0" step="1"></label>
         <output id="motion-position" for="motion-frame" aria-live="polite">1 / 8</output>
         <label>Cell scale<select id="motion-scale"><option value="3">3 px · native</option><option value="6" selected>6 px</option><option value="9">9 px</option></select></label>
       </div>
-      <p class="note">This is a source-art inspector, not proof of device playback. Motion starts only when you choose Play once; frame stepping is always available.</p>
+      <p class="note">Preview loops start automatically with a one-second resting gap. Pause or step through any frame; Play once shows a single gesture. Reduced-motion preferences start previews still.</p>
+      <p class="note">This is a source-art inspector. Wear OS playback remains one-shot; these loops are for browsing.</p>
       <div id="motion-icons" class="asset-grid"></div>
     </section>
     <section id="panel-examples" role="tabpanel" aria-labelledby="tab-examples" hidden>

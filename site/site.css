@@ -43,6 +43,7 @@ p { max-width: 76ch; }
 .composition img { width: 100%; height: auto; display: block; image-rendering: pixelated; background: black; }
 figcaption, .note, .card-meta { color: var(--muted); font-size: .85rem; }
 figcaption { padding-top: .8rem; }
+.preview-control { margin-top: .8rem; font-size: .8rem; }
 .specs { margin-block: 2rem; }
 .specs div { display: flex; flex-wrap: wrap; gap: .3rem 1rem; padding: .65rem 0; border-bottom: 1px solid var(--line); }
 dt { color: var(--muted); min-width: 140px; }

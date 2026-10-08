@@ -70,6 +70,7 @@ ANIMATION_PREVIEW_NAME = "icon-family-weather-animation-preview.gif"
 STATE_SHEET_NAME = "icon-family-unavailable-stale-sheet.png"
 MATRIX_SHEET_NAME = "icon-family-matrix-3x3-inspection.png"
 NATIVE_FACE_NAME = "icon-family-native-face-466.png"
+ANIMATED_FACE_NAME = "icon-family-native-face-466.gif"
 MAGNIFIED_FACE_NAME = "icon-family-magnified-face-932.png"
 HTML_NAME = "index.html"
 
@@ -77,6 +78,8 @@ UTILITY_LABELS = {"steps": "STEPS", "battery": "BATTERY"}
 
 ANIMATION_PREVIEW_PHASES: tuple[int, ...] = tuple(range(FRAME_COUNT)) + (0, 0, 0)
 ANIMATION_PREVIEW_DELAYS: tuple[int, ...] = (25,) * len(ANIMATION_PREVIEW_PHASES)
+FACE_PREVIEW_PHASES: tuple[int, ...] = tuple(range(FRAME_COUNT)) + (0,)
+FACE_PREVIEW_DELAYS: tuple[int, ...] = (100 // FRAME_RATE,) * FRAME_COUNT + (100,)
 ANIMATION_PREVIEW_COLUMNS = 4
 ANIMATION_PREVIEW_ROWS = (
     len(WEATHER_ANIMATION_FRAMES) + ANIMATION_PREVIEW_COLUMNS - 1
@@ -663,6 +666,20 @@ def render_native_face() -> PixelGrid:
     return runtime_assets._preview_pixels()
 
 
+def render_native_animation_frame(phase: int) -> PixelGrid:
+    """Replace only the fixture's weather tile with its canonical motion phase."""
+
+    if not 0 <= phase < FRAME_COUNT:
+        raise ValueError(f"face preview phase outside 0..{FRAME_COUNT - 1}")
+    pixels = render_native_face()
+    x = runtime_assets.ACTIVE_ORIGIN[0] + runtime_assets._centered_information_x("weather", "21°C")
+    y = runtime_assets.ACTIVE_ORIGIN[1] + runtime_assets.ROW_BANDS["weather"][0]
+    tile = runtime_assets._weather_animation_pixels(WEATHER_ANIMATION_FRAMES["partly_day"][phase])
+    for offset, row in enumerate(tile):
+        pixels[y + offset][x:x + len(row)] = row
+    return pixels
+
+
 def _matrix_markup(rows: Sequence[str]) -> str:
     return "\n".join(
         f"<code>{html.escape(row)}</code>" for row in rows
@@ -712,6 +729,7 @@ def _html_document(images: Mapping[str, bytes]) -> bytes:
         (STATE_SHEET_NAME, "Truthful weather states", "Unavailable uses the neutral icon plus --; stale keeps a marker distinct from an unavailable value."),
         (MATRIX_SHEET_NAME, "16x16 storage / 15x15 drawable / solid 3x3 inspection", "The matrix views expose project-owned storage cells, the drawable field, and their physical tile expansion."),
         (NATIVE_FACE_NAME, "Native 466x466 face", "This is the deterministic runtime preview, not fresh emulator or physical-watch evidence."),
+        (ANIMATED_FACE_NAME, "Animated 466x466 face", "Canonical partly-day weather motion in the generated composition; two seconds at 4 fps followed by a one-second resting gap. The loop is presentation-only."),
         (MAGNIFIED_FACE_NAME, "Magnified face", "A 2x nearest-neighbour view for inspecting cell edges and placement."),
     ]
     cards = "\n".join(
@@ -778,6 +796,10 @@ def expected_output_bytes() -> dict[str, bytes]:
         STATE_SHEET_NAME: encode_png(render_state_sheet()),
         MATRIX_SHEET_NAME: encode_png(render_matrix_sheet()),
         NATIVE_FACE_NAME: encode_png(native),
+        ANIMATED_FACE_NAME: encode_gif(
+            [render_native_animation_frame(phase) for phase in FACE_PREVIEW_PHASES],
+            FACE_PREVIEW_DELAYS,
+        ),
         MAGNIFIED_FACE_NAME: encode_png(magnified),
     }
     return {**images, HTML_NAME: _html_document(images)}

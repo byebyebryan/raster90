@@ -85,10 +85,13 @@ def expected_outputs(root: Path = ROOT) -> dict[str, bytes]:
     output = {"index.html": template.replace("<!-- CATALOG -->", f'<script type="application/json" id="catalog">{json_text}</script>').encode(), ".nojekyll": b""}
     for name in ("site.css", "app.js"):
         output[name] = (root / "site" / name).read_bytes()
+        digest = hashlib.sha256(output[name]).hexdigest()[:12]
+        output["index.html"] = output["index.html"].replace(f'"{name}"'.encode(), f'"{name}?v={digest}"'.encode())
     output["assets/artwork.json"] = encoded({key: value for key, value in data.items() if key != "captures"})
     output["licenses/MIT.txt"] = (root / "LICENSE").read_bytes()
     output["licenses/CC0-1.0.txt"] = (root / "LICENSES/CC0-1.0.txt").read_bytes()
     output["previews/composition-466.png"] = (root / "fonts/raster90/preview/family-native-face-466.png").read_bytes()
+    output["previews/composition-466.gif"] = (root / "icons/raster90/preview/icon-family-native-face-466.gif").read_bytes()
     for capture in data["captures"]:
         output[capture["url"]] = (root / "docs/media" / capture["file"]).read_bytes()
     parser = LocalReferences()

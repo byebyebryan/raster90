@@ -77,7 +77,8 @@ rtk python3 -B tools/generate_raster90_assets.py --check
 ```
 
 `preview/index.html` is self-contained: it embeds the generated static sheets,
-the looping animation GIF, the exact eight-phase sheet, native 466×466 face, 2×
+the looping animation GIF, the exact eight-phase sheet, static and animated
+native 466×466 faces, 2×
 magnified face, source matrices, and palette without external URLs. The GIF's
 one-second resting gap and infinite loop are presentation-only; the WFF runtime
 still plays once. Presentation-only matrix views use a visible blue-gray fill

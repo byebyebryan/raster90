@@ -507,6 +507,26 @@ class Raster90IconFamilyTests(unittest.TestCase):
         self.assertIs(FOUR_TOE_VERTICAL_BIG_OUTLINE, family.APPROVED_STEP_ICON)
         self.assertNotEqual(SOLID_CONTROL, family.APPROVED_STEP_ICON)
 
+    def test_native_animation_preserves_composition_and_exact_weather_frames(self) -> None:
+        base = presentation.render_native_face()
+        self.assertEqual(presentation.render_native_animation_frame(0), base)
+        x = generator.ACTIVE_ORIGIN[0] + generator._centered_information_x("weather", "21°C")
+        y = generator.ACTIVE_ORIGIN[1] + generator.ROW_BANDS["weather"][0]
+        changed = False
+        for phase in range(1, 8):
+            frame = presentation.render_native_animation_frame(phase)
+            tile = generator._weather_animation_pixels(presentation.WEATHER_ANIMATION_FRAMES["partly_day"][phase])
+            self.assertEqual(frame[:y], base[:y])
+            self.assertEqual(frame[y + 48:], base[y + 48:])
+            for offset, row in enumerate(tile):
+                self.assertEqual(frame[y + offset][x:x + 48], row)
+                self.assertEqual(frame[y + offset][:x], base[y + offset][:x])
+                self.assertEqual(frame[y + offset][x + 48:], base[y + offset][x + 48:])
+            changed |= frame != base
+        self.assertTrue(changed)
+        with self.assertRaises(ValueError):
+            presentation.render_native_animation_frame(8)
+
     def test_presentation_outputs_are_exact_self_contained_and_stale_detected(self) -> None:
         expected = presentation.expected_output_bytes()
         self.assertEqual(
@@ -518,7 +538,8 @@ class Raster90IconFamilyTests(unittest.TestCase):
                 presentation.ANIMATION_SHEET_NAME,
                 presentation.STATE_SHEET_NAME,
                 presentation.MATRIX_SHEET_NAME,
-                presentation.NATIVE_FACE_NAME,
+            presentation.NATIVE_FACE_NAME,
+            presentation.ANIMATED_FACE_NAME,
                 presentation.MAGNIFIED_FACE_NAME,
                 presentation.HTML_NAME,
             },
@@ -531,6 +552,10 @@ class Raster90IconFamilyTests(unittest.TestCase):
         presentation._validate_animation_preview(
             expected[presentation.ANIMATION_PREVIEW_NAME]
         )
+        hero = expected[presentation.ANIMATED_FACE_NAME]
+        self.assertEqual(presentation._gif_dimensions(hero), (466, 466))
+        self.assertEqual(presentation._gif_delays(hero), (25,) * 8 + (100,))
+        self.assertIn(presentation.GIF_INFINITE_LOOP_EXTENSION, hero[:128])
         document = expected[presentation.HTML_NAME].decode("utf-8")
         self.assertIn("const ICON_FAMILY_DATA", document)
         self.assertIn("data:image/png;base64,", document)
