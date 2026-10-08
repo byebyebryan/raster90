@@ -503,6 +503,12 @@ Use short, period-plausible values and fixed-width alignment. Do not add a text
 header where the selected icon already communicates the field. The face may be
 information-dense in small regions, but black space is part of the design.
 
+Sunrise/sunset display is deferred after the 2026-10-07 physical Wear OS spike.
+Native solar-time text and bitmap-font rendering worked, but event identification,
+near-event timing, accuracy/freshness, and unavailable behavior remain unresolved.
+The owner chose to park the feature because its added value does not justify
+further work now. See the [spike findings and decision](sunrise-sunset-spike.md).
+
 ## Resting composition
 
 ### Packaged solid-grid composition

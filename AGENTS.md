@@ -90,6 +90,11 @@ app.
   entries; ordinary text and steps remain white, while the battery icon uses
   its separate coarse state tint contract. Ambient mode reduces this to
   monochrome time only.
+- Sunrise/sunset display is deferred by owner decision after the 2026-10-07
+  physical Wear OS spike. Native time text and bitmap-font rendering worked;
+  contextual timing, event identification, accuracy/freshness, and unavailable
+  behavior remain unresolved. Further work is not scheduled; preserve the
+  [findings and decision](docs/sunrise-sunset-spike.md) if the idea is revisited.
 - The packaged face uses active-frame bands 45–93, 111–159, 177–273, 291–339,
   and 357–405. The solid
   3×3 time remains vertically centered in one 342×96 `TimeText`, using the
